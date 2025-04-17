@@ -1,3 +1,5 @@
 numpy>=2.2.0
+npTDMS>=1.10.0
 pandas>=2.2.3
 pytest>=8.3.5
+pytest-cov>=6.1.1
