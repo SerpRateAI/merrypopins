@@ -12,11 +12,11 @@
 ## Installation
 
 ```bash
-# From PyPI (forthcoming release)
+# From PyPI (⚠️ This will not work because package not published yet.)
 pip install indenter
 
 # For development
-git clone https://github.com/yourusername/indenter.git
+git clone https://github.com/SerpRateAI/indenter.git
 cd indenter
 pip install -e .
 ```
