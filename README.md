@@ -37,12 +37,12 @@ These are installed automatically via `pip`.
 from pathlib import Path
 from indenter.load_datasets import load_txt, load_tdm, merge_metadata
 
-# 1) Load your indentation data:
+# 1) Load indentation data:
 data_file = Path("data/experiment1.txt")
 df = load_txt(data_file)
 print(df.head())
 print("Timestamp:", df.attrs['timestamp'])
-print("Points:", df.attrs['num_points'])
+print("Number of Points:", df.attrs['num_points'])
 
 # 2) Load metadata:
 meta_file = Path("data/experiment1.tdm")

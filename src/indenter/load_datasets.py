@@ -55,50 +55,58 @@ def load_txt(filepath: Path) -> pd.DataFrame:
         raw = filepath.read_text(encoding='latin1')
     text = raw.splitlines()
 
-    # extract timestamp and num_points
+    # Extract timestamp and num_points
     timestamp = None
     num_points = None
     for line in text:
-        if not timestamp and line.strip():
+        if timestamp is None and line.strip():
             timestamp = line.strip()
         if 'Number of Points' in line and '=' in line:
             try:
                 num_points = int(line.split('=', 1)[1])
             except ValueError:
-                continue
+                pass
         if timestamp and num_points is not None:
             break
 
-    # find start of numeric block (first all-numeric row)
+    # Find start of numeric block: first row where every tab-split token is a number
     start_idx = None
+    num_re = re.compile(r'^[-+]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?$')
     for i, line in enumerate(text):
-        tokens = re.split(r"\s+|\t", line.strip())
-        if tokens and all(re.match(r"^-?\d+(?:\.\d+)?$", tok) for tok in tokens):
+        tokens = line.strip().split('\t')
+        if tokens and all(num_re.match(tok) for tok in tokens):
             start_idx = i
             break
     if start_idx is None:
         raise ValueError(f"No numeric data found in {filepath}")
 
-    # header is the last non-empty line before start_idx
+    # Header is the last non-empty line before the numeric block
     header_idx = start_idx - 1
     while header_idx >= 0 and not text[header_idx].strip():
         header_idx -= 1
-    col_names = re.split(r"\s+|\t", text[header_idx].strip()) if header_idx >= 0 else []
+    if header_idx >= 0:
+        col_names = text[header_idx].split('\t')
+    else:
+        col_names = []
 
-    # load numeric data
+    # Load the numeric block with tab delimiter
     data_str = "\n".join(text[start_idx:])
-    arr = np.loadtxt(StringIO(data_str))
-    # ensure 2D array: scalar->(1,1), 1D->(n,1)
+    arr = np.loadtxt(StringIO(data_str), delimiter='\t')
+
+    # Force 2D array
     if arr.ndim == 0:
         arr = arr.reshape(1, 1)
     elif arr.ndim == 1:
         arr = arr.reshape(-1, 1)
 
+    # If header didn’t match, generate generic names
+    if not col_names or len(col_names) != arr.shape[1]:
+        col_names = [f"col_{i}" for i in range(arr.shape[1])]
+
     df = pd.DataFrame(arr, columns=col_names)
-    # store metadata
     df.attrs['timestamp'] = timestamp
     df.attrs['num_points'] = num_points
-    logger.info(f"Loaded TXT data {filepath.name}: {df.shape[0]} rows, {df.shape[1]} cols")
+    logger.info(f"Loaded TXT data {filepath.name}: {df.shape[0]} × {df.shape[1]}")
     return df
 
 
