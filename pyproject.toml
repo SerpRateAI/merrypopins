@@ -14,9 +14,7 @@ authors = [
 ]
 dependencies = [
   "numpy>=2.2.0",
-  "pandas>=2.2.3",
-  "nptdms>=1.10.0",
-  "tdm-loader>=1.2.7"
+  "pandas>=2.2.3"
 ]
 classifiers = [
   "Programming Language :: Python :: 3",
