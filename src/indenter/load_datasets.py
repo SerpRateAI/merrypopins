@@ -5,13 +5,12 @@ load_datasets.py
 Read indentation experiment TXT data and metadata files into pandas DataFrames.
 Provides:
   - load_txt: load a .txt data file (auto-detect columns) into a DataFrame, with header attrs
-  - load_tdm: load a .tdm/.tdx metadata file (full channel list) into a DataFrame
-  - merge_metadata: attach units and dtypes from metadata to the data DataFrame
+  - load_tdm: load a .tdm/.tdx metadata file (full channel list) into two DataFrames (root info and channel list)
 
 Usage:
-    from indenter.load_datasets import load_txt, load_tdm, merge_metadata
-
+    from indenter.load_datasets import load_txt, load_tdm
 """
+
 import logging
 from pathlib import Path
 import re

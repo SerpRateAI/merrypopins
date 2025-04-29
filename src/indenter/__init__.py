@@ -6,6 +6,7 @@ Indenter
 
 Tools for:
  - loading indentation datasets (`load_datasets`)
+ - preprocessing indentation data (`transform`)
  - locating pop-ins (`locate`)
  - exploring statistical models (`statistics`)
  - constructing enriched datasets (`make_dataset`)
@@ -19,6 +20,7 @@ from . import load_datasets, locate, statistics, make_dataset
 # define what "from indenter import *" pulls in
 __all__ = [
     "load_datasets",
+    "transform",
     "locate",
     "statistics",
     "make_dataset",
