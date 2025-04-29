@@ -19,7 +19,7 @@ from io import StringIO
 
 import numpy as np
 import pandas as pd
-from nptdms import TdmsFile
+import xml.etree.ElementTree as ET
 
 # Module logger
 logger = logging.getLogger(__name__)
@@ -112,77 +112,53 @@ def load_txt(filepath: Path) -> pd.DataFrame:
 
 def load_tdm(filepath: Path) -> pd.DataFrame:
     """
-    Load a full TDM/TDX metadata file via nptdms into a DataFrame.
-    Each row corresponds to one channel, including its data array and properties.
-
-    Args:
-        filepath: Path to the .tdm/.tdx file.
-    Returns:
-        DataFrame with one row per channel, columns:
-          ['group','channel','unit','description','dtype','data', ...other props]
+    Load a .tdm metadata file into a DataFrame (name, unit, description, dtype).
+    Only metadata is parsed.
     """
     if not filepath.is_file():
         raise FileNotFoundError(f"TDM file not found: {filepath}")
 
-    tdms = TdmsFile.read(str(filepath))
+    # Parse the XML file
+    tree = ET.parse(str(filepath))
+    root = tree.getroot()
+
+    # map channelgroup id -> name
+    group_map = {}
+    for g in root.findall('.//tdm_channelgroup'):
+        gid = g.get('id')
+        grp_name = g.findtext('name')
+        group_map[gid] = grp_name
+
     records = []
-    for group in tdms.groups():
-        for chan_name in tdms[group].channels():
-            ch = tdms[group][chan_name]
-            props = dict(ch.properties)
-            unit = props.pop('unit_string', None)
-            desc = props.pop('description', None)
-            rec = {
-                'group': group,
-                'channel': chan_name,
-                'unit': unit,
-                'description': desc,
-                'dtype': str(ch.dtype),
-                'data': ch[:],
-            }
-            rec.update(props)
-            records.append(rec)
+    for c in root.findall('.//tdm_channel'):
+        cid = c.get('id')
+        name = c.findtext('name')
+        unit = c.findtext('unit_string')
+        dtype_val = c.findtext('datatype')
+        desc = c.findtext('description')
+        # extract group id
+        grp_name = None
+        grp_elem = c.find('group')
+        if grp_elem is not None and grp_elem.text:
+            m = re.search(r"id\(\"([^\"]+)\"\)", grp_elem.text)
+            if m:
+                grp_name = group_map.get(m.group(1))
+        records.append({
+            'group': grp_name,
+            'channel_id': cid,
+            'name': name,
+            'unit': unit,
+            'description': desc,
+            'dtype': dtype_val,
+            'data': None # Check why I added this line
+        })
 
     df_meta = pd.DataFrame.from_records(records)
     logger.info(f"Loaded TDM metadata {filepath.name}: {len(df_meta)} channels")
     return df_meta
 
-
-def merge_metadata(df: pd.DataFrame, df_meta: pd.DataFrame) -> pd.DataFrame:
-    """
-    Attach units and dtypes from metadata to a data DataFrame.
-    Matches by column name (case-insensitive, alphanumeric only).
-
-    Args:
-        df: DataFrame with columns matching df_meta['channel'] (or ['name']).
-        df_meta: metadata DataFrame from load_tdm.
-    Returns:
-        The same df, with attrs['units'] and attrs['dtypes'] as dicts.
-    """
-    # canonicalize names
-    def canon(s):
-        return re.sub(r"[^0-9a-z]", "", s.lower())
-
-    key_col = 'channel' if 'channel' in df_meta.columns else 'name'
-    meta_map = { canon(str(r[key_col])): r for _, r in df_meta.iterrows() }
-
-    units = {}
-    dtypes = {}
-    for col in df.columns:
-        c = canon(col)
-        if c in meta_map:
-            units[col] = meta_map[c].get('unit')
-            dtypes[col] = meta_map[c].get('dtype')
-        else:
-            logger.warning(f"No metadata for column '{col}'")
-    df.attrs['units'] = units
-    df.attrs['dtypes'] = dtypes
-    return df
-
-
 # package exports
 __all__ = [
     'load_txt',
-    'load_tdm',
-    'merge_metadata',
+    'load_tdm'
 ]

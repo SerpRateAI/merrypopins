@@ -3,6 +3,7 @@
 **Indenter** is a library to streamline the workflow of nano‑indentation experiment data processing. It provides four core modules:
 
 - **`load_datasets`**: Read and parse `.txt` measurement files and `.tdm`/`.tdx` metadata files into pandas DataFrames, auto‑detecting columns and channels.
+- **`transform`**: Transform raw indentation data into a more usable format, including filtering, smoothing, and normalizing.
 - **`locate`**: Identify and extract pop‑in events within indentation curves.
 - **`statistics`**: Perform statistical analysis and model fitting on pop‑in data.
 - **`make_dataset`**: Enrich raw measurements by combining metadata, located events, and predictive features into cohesive datasets.
@@ -25,7 +26,6 @@ Indenter supports Python 3.9+ and depends on:
 
 - `numpy`
 - `pandas`
-- `nptdms`
 
 These are installed automatically via `pip`.
 
@@ -35,7 +35,7 @@ These are installed automatically via `pip`.
 
 ```python
 from pathlib import Path
-from indenter.load_datasets import load_txt, load_tdm, merge_metadata
+from indenter.load_datasets import load_txt, load_tdm, load_tdx, merge_metadata
 
 # 1) Load indentation data:
 data_file = Path("data/experiment1.txt")
@@ -44,15 +44,10 @@ print(df.head())
 print("Timestamp:", df.attrs['timestamp'])
 print("Number of Points:", df.attrs['num_points'])
 
-# 2) Load metadata:
-meta_file = Path("data/experiment1.tdm")
-df_meta = load_tdm(meta_file)
-print(df_meta[['channel','unit','description']])
-
-# 3) Merge metadata into data:
-df_full = merge_metadata(df, df_meta)
-print(df_full.attrs['units'])
-print(df_full.attrs['dtypes'])
+# 2) Load tdm metadata:
+tdm_meta_file = Path("data/experiment1.tdm")
+df_tdm_meta = load_tdm(tdm_meta_file)
+print(df_tdm_meta[['channel_id','unit','description']])
 ```
 
 ---

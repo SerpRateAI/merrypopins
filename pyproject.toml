@@ -10,17 +10,18 @@ readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
 authors = [
-  { name = "Cahit Acar", email = "c.acar.business@gmail.com" },
+  { name = "Cahit Acar", email = "c.acar.business@gmail.com" }
 ]
 dependencies = [
   "numpy>=2.2.0",
   "pandas>=2.2.3",
   "nptdms>=1.10.0",
+  "tdm-loader>=1.2.7"
 ]
 classifiers = [
   "Programming Language :: Python :: 3",
   "License :: OSI Approved :: MIT License",
-  "Operating System :: OS Independent",
+  "Operating System :: OS Independent"
 ]
 
 [project.urls]
@@ -31,7 +32,7 @@ Source   = "https://github.com/SerpRateAI/indenter"
 dev = [
   "pytest>=8.3.5",
   "pytest-cov>=6.1.1",
-  "coverage",
+  "coverage"
 ]
 
 [tool.setuptools]

@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 import indenter.load_datasets as ld
-from indenter.load_datasets import load_txt, load_tdm, merge_metadata
+from indenter.load_datasets import load_txt, load_tdm
 
 # ==========================
 # Fixtures for test inputs
@@ -68,26 +68,6 @@ def sample_onecol_many(tmp_path):
     file.write_text(content)
     return file
 
-# Dummy classes to simulate nptdms behavior
-class DummyCh:
-    def __init__(self):
-        self.dtype = 'DT_DOUBLE'
-        self.properties = {'unit_string': 'u', 'description': 'desc'}
-    def __getitem__(self, idx):
-        return np.array([1, 2, 3])
-
-class DummyTDMS:
-    def groups(self): return ['G1']
-    def channels(self): return ['C1']
-    def __getitem__(self, key):
-        if key == 'G1': return self
-        return DummyCh()
-
-@pytest.fixture(autouse=True)
-def patch_tdms(monkeypatch):
-    # Patch TdmsFile.read for load_tdm tests
-    monkeypatch.setattr(ld.TdmsFile, 'read', staticmethod(lambda path: DummyTDMS()))
-
 # ==========================
 # Tests for load_txt
 # ==========================
@@ -110,6 +90,7 @@ def test_load_txt_basic(sample_txt):
     assert df.shape == (3, 3)
     assert df.attrs['timestamp'] == "Mon Apr 14 16:00:13 2025"
     assert df.attrs['num_points'] == 3
+    # the second row, second column "Load"
     assert np.isclose(df.iloc[1, 1], 2100.0)
 
 
@@ -123,7 +104,7 @@ def test_load_txt_encoding_fallback(sample_txt_latin, caplog):
 
 def test_load_txt_invalid_num(sample_txt_invalid_num):
     df = load_txt(sample_txt_invalid_num)
-    # Should skip invalid, then parse 2
+    # Should skip the bad "abc" then parse 2
     assert df.attrs['num_points'] == 2
     assert list(df.columns) == ['X']
 
@@ -136,7 +117,7 @@ def test_load_txt_ndim1(sample_onecol_many):
 
 
 def test_load_txt_missing_header(tmp_path):
-    # Numeric block without any header line: start_idx=0, header_idx=-1
+    # Numeric block without any header line triggers error
     content = "1.0 2.0\n3.0 4.0\n"
     file = tmp_path / "noheader.txt"
     file.write_text(content)
@@ -153,33 +134,33 @@ def test_load_tdm_file_not_found():
 
 
 def test_load_tdm_success(tmp_path):
-    f = tmp_path / 'file.tdm'
-    f.write_text('')
+    # Create a minimal .tdm XML with one channel in one group
+    xml = """<?xml version="1.0"?>
+            <usi:tdm xmlns:usi="http://www.ni.com/Schemas/USI/1_0">
+            <tdm_channelgroup id="G1">
+                <name>Test Group</name>
+            </tdm_channelgroup>
+            <tdm_channel id="C1">
+                <name>Channel1</name>
+                <unit_string>u</unit_string>
+                <datatype>DT_DOUBLE</datatype>
+                <description>desc</description>
+                <group>#xpointer(id("G1"))</group>
+            </tdm_channel>
+            </usi:tdm>
+        """
+    f = tmp_path / "file.tdm"
+    f.write_text(xml)
     df_meta = load_tdm(f)
+
+    # Should load exactly one channel
     assert df_meta.shape[0] == 1
+
     row = df_meta.iloc[0]
-    assert row['channel'] == 'C1'
-
-# ==========================
-# Tests for merge_metadata
-# ==========================
-
-def test_merge_metadata():
-    df = pd.DataFrame({'A': [1], 'b': [2]})
-    df_meta = pd.DataFrame([
-        {'channel': 'A', 'unit': 'uA', 'dtype': 'int'},
-        {'channel': 'b', 'unit': 'uB', 'dtype': 'int'}
-    ])
-    df2 = merge_metadata(df, df_meta)
-    assert df2.attrs['units'] == {'A': 'uA', 'b': 'uB'}
-    assert df2.attrs['dtypes'] == {'A': 'int', 'b': 'int'}
-
-
-def test_merge_metadata_missing(caplog):
-    caplog.set_level(logging.WARNING)
-    df = pd.DataFrame({'Z': [0]})
-    df_meta = pd.DataFrame([{'channel': 'Y', 'unit': 'u', 'dtype': 'float'}])
-    df2 = merge_metadata(df, df_meta)
-    assert df2.attrs['units'] == {}
-    assert df2.attrs['dtypes'] == {}
-    assert "No metadata for column 'Z'" in caplog.text
+    # New columns are 'channel_id' not 'channel'
+    assert row['channel_id'] == 'C1'
+    assert row['name'] == 'Channel1'
+    assert row['unit'] == 'u'
+    assert row['description'] == 'desc'
+    assert row['dtype'] == 'DT_DOUBLE'
+    assert row['group'] == 'Test Group'
