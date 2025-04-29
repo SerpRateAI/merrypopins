@@ -109,53 +109,96 @@ def load_txt(filepath: Path) -> pd.DataFrame:
     logger.info(f"Loaded TXT data {filepath.name}: {df.shape[0]} × {df.shape[1]}")
     return df
 
-
-def load_tdm(filepath: Path) -> pd.DataFrame:
+def load_tdm(filepath: Path):
     """
-    Load a .tdm metadata file into a DataFrame (name, unit, description, dtype).
-    Only metadata is parsed.
+    Load a .tdm metadata file into two DataFrames:
+      - df_root: one row containing
+          * name, description, title, author
+          * every instance‐attribute under <instance_attributes>
+      - df_channels: one row per <tdm_channel> with:
+          group, channel_id, name, unit, description, datatype,
+          sequence_id, block_id, block_length, value_type
     """
     if not filepath.is_file():
         raise FileNotFoundError(f"TDM file not found: {filepath}")
-
-    # Parse the XML file
     tree = ET.parse(str(filepath))
     root = tree.getroot()
+    ns = {"usi": "http://www.ni.com/Schemas/USI/1_0"}
 
-    # map channelgroup id -> name
-    group_map = {}
-    for g in root.findall('.//tdm_channelgroup'):
-        gid = g.get('id')
-        grp_name = g.findtext('name')
-        group_map[gid] = grp_name
+    # --- extract tdm_root info ---
+    tr = root.find(".//tdm_root")
+    root_info = {
+        "root_name":        tr.findtext("name"),
+        "root_description": tr.findtext("description"),
+        "root_title":       tr.findtext("title"),
+        "root_author":      tr.findtext("author"),
+    }
+    inst = tr.find("instance_attributes")
+    for attr in inst:
+        # double_attribute, string_attribute, long_attribute, time_attribute...
+        key = attr.get("name")
+        # string_attribute has <s> contents, others have .text
+        if attr.tag.endswith("string_attribute"):
+            val = attr.findtext("s")
+        else:
+            val = attr.text
+        # strip leading/trailing whitespace (incl. newlines and tabs)
+        val = val.strip() if isinstance(val, str) else val
+        root_info[key] = val
+    df_root = pd.DataFrame([root_info])
 
+    # --- build helper maps for channels ---
+    # 1) group id → group name
+    group_map = {
+        g.get("id"): g.findtext("name")
+        for g in root.findall(".//tdm_channelgroup")
+    }
+    # 2) blocks: inc0, inc1, … → length & valueType
+    block_map = {
+        blk.get("id"): {
+            "block_length": int(blk.get("length")),
+            "value_type":   blk.get("valueType")
+        }
+        for blk in root.findall(".//usi:include/file/block", ns)
+    }
+    # 3) sequence → block: usi1 → inc0, etc.
+    seq2blk = {
+        seq.get("id"): seq.find("values").get("external")
+        for seq in root.findall(".//usi:data/*_sequence", ns)
+    }
+    # 4) channel → sequence via localcolumn
+    chan2seq = {}
+    for lc in root.findall(".//localcolumn"):
+        m1 = re.search(r'id\("([^"]+)"\)', (lc.findtext("measurement_quantity") or ""))
+        m2 = re.search(r'id\("([^"]+)"\)', (lc.findtext("values") or ""))
+        if m1 and m2:
+            chan2seq[m1.group(1)] = m2.group(1)
+
+    # --- now build per‐channel rows ---
     records = []
-    for c in root.findall('.//tdm_channel'):
-        cid = c.get('id')
-        name = c.findtext('name')
-        unit = c.findtext('unit_string')
-        dtype_val = c.findtext('datatype')
-        desc = c.findtext('description')
-        # extract group id
-        grp_name = None
-        grp_elem = c.find('group')
-        if grp_elem is not None and grp_elem.text:
-            m = re.search(r"id\(\"([^\"]+)\"\)", grp_elem.text)
-            if m:
-                grp_name = group_map.get(m.group(1))
-        records.append({
-            'group': grp_name,
-            'channel_id': cid,
-            'name': name,
-            'unit': unit,
-            'description': desc,
-            'dtype': dtype_val,
-            'data': None # Check why I added this line
-        })
+    for c in root.findall(".//tdm_channel"):
+        cid = c.get("id")
+        grp_txt = c.findtext("group") or ""
+        m = re.search(r'id\("([^"]+)"\)', grp_txt)
+        group = group_map.get(m.group(1)) if m else None
 
-    df_meta = pd.DataFrame.from_records(records)
-    logger.info(f"Loaded TDM metadata {filepath.name}: {len(df_meta)} channels")
-    return df_meta
+        seq = chan2seq.get(cid)
+        blk = seq2blk.get(seq)
+        rec = {
+            "group":        group,
+            "channel_id":   cid,
+            "name":         c.findtext("name"),
+            "unit":         c.findtext("unit_string"),
+            "description":  c.findtext("description"),
+            "datatype":     c.findtext("datatype"),
+            "sequence_id":  seq
+        }
+        records.append(rec)
+
+    df_channels = pd.DataFrame.from_records(records)
+    logger.info(f"Loaded TDM metadata {filepath.name}: {len(df_channels)} channels")
+
+    return df_root, df_channels
 
 # package exports
 __all__ = [

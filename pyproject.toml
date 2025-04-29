@@ -10,7 +10,8 @@ readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
 authors = [
-  { name = "Cahit Acar", email = "c.acar.business@gmail.com" }
+  { name = "Cahit Acar", email = "c.acar.business@gmail.com" },
+  { name = "Anna Marcelissen", email = "a.t.w.marcelissen@students.uu.nl" }
 ]
 dependencies = [
   "numpy>=2.2.0",
