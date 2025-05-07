@@ -1,5 +1,7 @@
 # Indenter
 
+[![codecov](https://codecov.io/gh/SerpRateAI/indenter/branch/main/graph/badge.svg)](https://codecov.io/gh/SerpRateAI/indenter)
+
 **Indenter** is a library to streamline the workflow of nano‑indentation experiment data processing. It provides four core modules:
 
 - **`load_datasets`**: Read and parse `.txt` measurement files and `.tdm`/`.tdx` metadata files into pandas DataFrames, auto‑detecting columns and channels.
