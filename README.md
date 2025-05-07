@@ -1,6 +1,6 @@
 # Indenter
 
-[![CI](https://github.com/SerpRateAI/indenter/actions/workflows/ci.yml/badge.svg)](https://github.com/SerpRateAI/indenter/actions)
+[![Indenter CI Tests](https://github.com/SerpRateAI/indenter/actions/workflows/python-app.yml/badge.svg)](https://github.com/SerpRateAI/indenter/actions/workflows/python-app.yml)
 [![PyPI](https://img.shields.io/pypi/v/indenter.svg)](https://pypi.org/project/indenter/)
 [![Python](https://img.shields.io/pypi/pyversions/indenter.svg)](https://pypi.org/project/indenter/)
 [![codecov](https://codecov.io/gh/SerpRateAI/indenter/branch/main/graph/badge.svg)](https://codecov.io/gh/SerpRateAI/indenter)
