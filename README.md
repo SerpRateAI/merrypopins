@@ -1,14 +1,16 @@
 # Indenter
 
 [![CI](https://github.com/SerpRateAI/indenter/actions/workflows/ci.yml/badge.svg)](https://github.com/SerpRateAI/indenter/actions)
-[![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)]
-[![codecov](https://codecov.io/gh/SerpRateAI/indenter/branch/main/graph/badge.svg)](https://codecov.io/gh/SerpRateAI/indenter)
-[![Dependencies](https://img.shields.io/librariesio/github/SerpRateAI/indenter)](https://github.com/SerpRateAI/indenter/network/dependencies)
-[![License](https://img.shields.io/github/license/SerpRateAI/indenter)][![Downloads](https://img.shields.io/pypi/dm/indenter.svg)](https://pypi.org/project/indenter/)
 [![PyPI](https://img.shields.io/pypi/v/indenter.svg)](https://pypi.org/project/indenter/)
-[![Python Version](https://img.shields.io/pypi/pyversions/indenter.svg)](https://pypi.org/project/indenter/)
-[![GitHub Issues](https://img.shields.io/github/issues/SerpRateAI/indenter.svg)]
-[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/SerpRateAI/indenter.svg)]
+[![Python](https://img.shields.io/pypi/pyversions/indenter.svg)](https://pypi.org/project/indenter/)
+[![codecov](https://codecov.io/gh/SerpRateAI/indenter/branch/main/graph/badge.svg)](https://codecov.io/gh/SerpRateAI/indenter)
+[![License](https://img.shields.io/github/license/SerpRateAI/indenter.svg)](LICENSE)
+[![Downloads](https://img.shields.io/pypi/dm/indenter.svg)](https://pypi.org/project/indenter/)
+[![Issues](https://img.shields.io/github/issues/SerpRateAI/indenter.svg)](https://github.com/SerpRateAI/indenter/issues)
+[![Dependencies](https://img.shields.io/librariesio/github/SerpRateAI/indenter)](https://github.com/SerpRateAI/indenter/network/dependencies)
+[![Last commit](https://img.shields.io/github/last-commit/SerpRateAI/indenter.svg)](https://github.com/SerpRateAI/indenter/commits/main)
+[![Release](https://img.shields.io/github/release-date/SerpRateAI/indenter.svg)](https://github.com/SerpRateAI/indenter/releases)
+[![Contributors](https://img.shields.io/github/contributors/SerpRateAI/indenter.svg)](https://github.com/SerpRateAI/indenter/graphs/contributors)
 
 **Indenter** is a library to streamline the workflow of nano‑indentation experiment data processing. It provides four core modules:
 
