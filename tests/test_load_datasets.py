@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import patch
 import logging
 from pathlib import Path
 import numpy as np
@@ -75,6 +76,26 @@ def test_load_txt_file_not_found():
     # Should raise FileNotFoundError if the path does not exist
     with pytest.raises(FileNotFoundError):
         load_txt(Path("no_such.txt"))
+
+def test_load_txt_encoding_fallback_failure(tmp_path, caplog):
+    # Create a dummy file with invalid UTF-8 encoding and patch the read_text method to simulate encoding errors.
+    # This will raise a UnicodeDecodeError when trying to read the file.
+    # The second read_text call will raise a generic Exception to simulate a failure in Latin-1 decoding.
+    # The test will check that the correct error messages are logged.
+    dummy_path = tmp_path / "bad_encoding.txt"
+    dummy_path.write_bytes(b"\xff") # Invalid UTF-8 byte sequence
+
+    with patch.object(Path, "read_text", side_effect=[
+        UnicodeDecodeError("utf-8", b"", 0, 1, "invalid start byte"),
+        Exception("Latin-1 also failed")
+    ]):
+        caplog.set_level(logging.DEBUG)
+        with pytest.raises(Exception, match="Latin-1 also failed"):
+            load_txt(dummy_path)
+
+        messages = [r.message for r in caplog.records]
+        assert any("UTF-8 decode failed" in m for m in messages)
+        assert any("Latin-1 decode also failed" in m for m in messages)
 
 def test_load_txt_no_numeric(tmp_path):
     # Should raise ValueError when no numeric rows are found

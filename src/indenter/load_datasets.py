@@ -51,7 +51,11 @@ def load_txt(filepath: Path) -> pd.DataFrame:
         raw = filepath.read_text(encoding='utf-8')
     except UnicodeDecodeError:
         logger.warning(f"UTF-8 decode failed for {filepath}, falling back to Latin-1")
-        raw = filepath.read_text(encoding='latin1')
+        try:
+            raw = filepath.read_text(encoding='latin1')
+        except Exception as e:
+            logger.error(f"Latin-1 decode also failed for {filepath}.")
+            raise e
     text = raw.splitlines()
 
     # Extract timestamp and num_points
