@@ -43,8 +43,13 @@ def load_txt(filepath: Path) -> pd.DataFrame:
           - timestamp: first non-empty line
           - num_points: parsed from 'Number of Points = N'
     """
+    # Check if the file exists
     if not filepath.is_file():
         raise FileNotFoundError(f"Data file not found: {filepath}")
+    
+    # Check file extension if it is a .txt file if not raise NotImplementedError
+    if filepath.suffix.lower() != ".txt":
+        raise NotImplementedError(f"File type '{filepath.suffix}' is not supported yet. Only '.txt' files are currently implemented.")
 
     # Read lines with encoding fallback
     try:

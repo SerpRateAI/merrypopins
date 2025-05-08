@@ -77,6 +77,13 @@ def test_load_txt_file_not_found():
     with pytest.raises(FileNotFoundError):
         load_txt(Path("no_such.txt"))
 
+def test_load_txt_not_implemented_for_other_types(tmp_path):
+    # Should raise NotImplementedError if the file type is not .txt
+    p = tmp_path / "file.csv"
+    p.write_text("some,data\n1,2")
+    with pytest.raises(NotImplementedError, match=r"File type '.csv' is not supported yet"):
+        load_txt(p)
+
 def test_load_txt_encoding_fallback_failure(tmp_path, caplog):
     # Create a dummy file with invalid UTF-8 encoding and patch the read_text method to simulate encoding errors.
     # This will raise a UnicodeDecodeError when trying to read the file.
