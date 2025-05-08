@@ -60,4 +60,4 @@ jobs:
           files: ./coverage.xml
           # if your repo is public you don’t need a token,
           # otherwise add a CODECOV_TOKEN secret in your repo settings
-          token: ${{ secrets.CODECOV_TOKEN }}
+          # token: ${{ secrets.CODECOV_TOKEN }}
