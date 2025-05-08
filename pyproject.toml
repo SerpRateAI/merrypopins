@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "indenter"
 version = "0.1.0"
-description = "Indentation‐experiment tooling: load_datasets, transform, locate, statistics & make_dataset"
+description = "Indentation‐experiment tooling: load_datasets, preprocess, locate, statistics & make_dataset"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
