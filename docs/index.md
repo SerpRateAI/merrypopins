@@ -6,7 +6,7 @@
 [![PyPI](https://img.shields.io/pypi/v/indenter.svg)](https://pypi.org/project/indenter/)
 [![Python](https://img.shields.io/pypi/pyversions/indenter.svg)](https://pypi.org/project/indenter/)
 [![codecov](https://codecov.io/gh/SerpRateAI/indenter/branch/main/graph/badge.svg)](https://codecov.io/gh/SerpRateAI/indenter)
-[![License](https://img.shields.io/github/license/SerpRateAI/indenter.svg)](LICENSE)
+[![License](https://img.shields.io/github/license/SerpRateAI/indenter.svg)](../LICENSE)
 [![Downloads](https://img.shields.io/pypi/dm/indenter.svg)](https://pypi.org/project/indenter/)
 [![Issues](https://img.shields.io/github/issues/SerpRateAI/indenter.svg)](https://github.com/SerpRateAI/indenter/issues)
 [![Dependencies](https://img.shields.io/librariesio/github/SerpRateAI/indenter)](https://github.com/SerpRateAI/indenter/network/dependencies)
