@@ -26,24 +26,29 @@ jobs:
 
       - name: Upgrade pip
         run: |
+          # install pip=>20.1 to use "pip cache dir"
           python3 -m pip install --upgrade pip
+
+      - name: Get pip cache dir
+        id: pip-cache
+        run: echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
 
       - name: Cache dependencies
         uses: actions/cache@v3
         with:
-          path: ~/.cache/pip
+          path: ${{ steps.pip-cache.outputs.dir }}
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
       - name: Install dependencies
-        run: python3 -m pip install mkdocs mkdocs-material mkdocstrings-python
+        run: python3 -m pip install mkdocs mkdocs-material mkdocstrings-python Sphinx pelican
 
-      - name: Build site
-        run: mkdocs build
+      - run: mkdocs build
 
-      - name: Deploy with Jekyll Build Pages
-        uses: jekyll-build-pages@v1
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ github.ref == 'refs/heads/main' }}
         with:
-          build_dir: public
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
