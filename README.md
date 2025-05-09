@@ -34,7 +34,7 @@ cd indenter
 pip install -e .
 ```
 
-Indenter supports Python 3.9+ and depends on:
+Indenter supports Python 3.10+ and depends on:
 
 - `numpy`
 - `pandas`
