@@ -45,6 +45,5 @@ jobs:
       - name: Deploy with Jekyll Build Pages
         uses: jekyll-build-pages@v1
         with:
-          build_dir: site
-          destination_branch: gh-pages
+          build_dir: public
           github_token: ${{ secrets.GITHUB_TOKEN }}
