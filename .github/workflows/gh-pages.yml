@@ -1,12 +1,12 @@
-name: GitHub Pages
+name: Deploy GitHub Pages
 
 on:
   push:
     branches:
-      - main  # Set a branch name to trigger deployment
+      - main
   pull_request:
     branches:
-      - main  # Set a branch name to trigger deployment
+      - main
       - dev
 
 jobs:
@@ -18,24 +18,33 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}
     steps:
       - uses: actions/checkout@v3
-        with:
-          submodules: true  # Fetch Hugo themes (true OR recursive)
-          fetch-depth: 0    # Fetch all history for .GitInfo and .Lastmod
 
-      - name: Setup Hugo
-        uses: peaceiris/actions-hugo@v2
+      - name: Setup Python
+        uses: actions/setup-python@v3
         with:
-          hugo-version: '0.110.0'
+          python-version: '3.10'
 
-      - name: Build
-        run: hugo --minify
+      - name: Upgrade pip
+        run: |
+          python3 -m pip install --upgrade pip
 
-      - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
-        # If you're changing the branch from main,
-        # also change the `main` in `refs/heads/main`
-        # below accordingly.
-        if: ${{ github.ref == 'refs/heads/main' }}
+      - name: Cache dependencies
+        uses: actions/cache@v3
         with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: python3 -m pip install mkdocs mkdocs-material mkdocstrings-python
+
+      - name: Build site
+        run: mkdocs build
+
+      - name: Deploy with Jekyll Build Pages
+        uses: jekyll-build-pages@v1
+        with:
+          build_dir: site
+          destination_branch: gh-pages
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
