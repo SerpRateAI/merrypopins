@@ -25,9 +25,8 @@ plugins:
         python:
           paths:
             - src
-      options:
-        rendering:
-          show_root_toc_entry: false
+          options:
+            show_root_toc_entry: false
 
 markdown_extensions:
   - admonition
