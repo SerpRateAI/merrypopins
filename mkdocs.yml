@@ -2,6 +2,7 @@ site_name: Indenter
 site_url: https://serprateai.github.io/indenter/
 repo_url: https://github.com/SerpRateAI/indenter
 repo_name: GitHub
+
 nav:
   - Home: index.md
   - Installation: installation.md
@@ -22,9 +23,8 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          setup_commands:
-            - import sys
-            - sys.path.insert(0, 'src')
+          paths:
+            - src
           rendering:
             show_root_toc_entry: false
 
