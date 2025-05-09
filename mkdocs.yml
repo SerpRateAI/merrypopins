@@ -21,12 +21,13 @@ theme:
 plugins:
   - search
   - mkdocstrings:
-      rendering:
-        show_root_toc_entry: false
       handlers:
         python:
           paths:
             - src
+      options:
+        rendering:
+          show_root_toc_entry: false
 
 markdown_extensions:
   - admonition
