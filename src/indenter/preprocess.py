@@ -1,16 +1,16 @@
 """
-transform.py
+preprocess.py
 ------------
 
-Provides transformation functions for indentation datasets.
+Provides pre-processing functions for indentation datasets.
 
 Functions:
     - remove_initial_data: remove all points up to minimum Load point.
     - rescale_data: automatically detect contact point and rescale Depth.
-    - transform_data_pipeline: apply both steps in sequence.
+    - preprocess_pipeline: apply both steps in sequence.
 
 Usage:
-    from indenter.transform import remove_initial_data, rescale_data, transform_data_pipeline
+    from indenter.preprocess import remove_initial_data, rescale_data, preprocess_pipeline
 """
 
 import pandas as pd
@@ -92,7 +92,7 @@ def rescale_data(
     logger.info(f"Auto-rescaled at index {idx}, load={smooth_loads[idx]:.2f} > {threshold:.2f}, shift={shift:.1f} nm")
     return df2
 
-def transform_data_pipeline(
+def preprocess_pipeline(
     df: pd.DataFrame,
     depth_col="Depth (nm)",
     load_col="Load (µN)",
@@ -102,7 +102,7 @@ def transform_data_pipeline(
     polyorder=2
 ) -> pd.DataFrame:
     """
-    Full transformation pipeline for indentation data:
+    Full pre-processing pipeline for indentation data:
     1. Remove all points up to and including the minimum Load point.
     2. Rescale Depth so that the detected contact point is zero.
 
@@ -116,7 +116,7 @@ def transform_data_pipeline(
         polyorder (int): Smoothing polynomial order.
 
     Returns:
-        pd.DataFrame: Transformed DataFrame.
+        pd.DataFrame: pre-processed DataFrame.
     """
     df_cleaned = remove_initial_data(df, load_col=load_col)
     df_rescaled = rescale_data(
@@ -134,5 +134,5 @@ def transform_data_pipeline(
 __all__ = [
     'remove_initial_data',
     'rescale_data',
-    'transform_data_pipeline'
+    'preprocess_pipeline'
 ]
