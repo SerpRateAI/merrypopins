@@ -44,12 +44,12 @@ jobs:
       - name: Install dependencies
         run: python3 -m pip install mkdocs mkdocs-material mkdocstrings-python Sphinx pelican
 
-      - run: mkdocs build
-      - run: mkdocs gh-deploy --force
-
+      - name: Build docs into /docs
+        run: mkdocs build --site-dir docs
+      
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ github.ref == 'refs/heads/main' }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./public
+          publish_dir: ./_site
