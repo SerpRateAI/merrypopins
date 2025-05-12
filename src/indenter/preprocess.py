@@ -54,7 +54,7 @@ def rescale_data(
     depth_col="Depth (nm)",
     load_col="Load (µN)",
     N_baseline=50,
-    k=3,
+    k=5,
     window_length=11,
     polyorder=2
 ) -> pd.DataFrame:
@@ -97,7 +97,7 @@ def preprocess_pipeline(
     depth_col="Depth (nm)",
     load_col="Load (µN)",
     N_baseline=50,
-    k=3,
+    k=5,
     window_length=11,
     polyorder=2
 ) -> pd.DataFrame:
