@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "indenter"
+version = "0.1.0"
+description = "Indentation‐experiment tooling: load_datasets, preprocess, locate, statistics & make_dataset"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "Cahit Acar", email = "c.acar.business@gmail.com" },
+  { name = "Anna Marcelissen", email = "a.t.w.marcelissen@students.uu.nl" }
+]
+dependencies = [
+  "numpy>=2.2.0",
+  "pandas>=2.2.3"
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent"
+]
+
+[project.urls]
+Homepage = "https://github.com/SerpRateAI/indenter"
+Source   = "https://github.com/SerpRateAI/indenter"
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3.5",
+  "pytest-cov>=6.1.1",
+  "coverage"
+]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["indenter*"]
