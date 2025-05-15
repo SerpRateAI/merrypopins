@@ -15,7 +15,7 @@
 **Indenter** is a library to streamline the workflow of nano‑indentation experiment data processing. It provides four core modules:
 
 - **`load_datasets`**: Read and parse `.txt` measurement files and `.tdm`/`.tdx` metadata files into pandas DataFrames, auto‑detecting columns and channels.
-- **`transform`**: Transform raw indentation data into a more usable format, including filtering, smoothing, and normalizing.
+- **`preprocess`**: Preprocess raw indentation data into a more usable format, including filtering, smoothing, and normalizing.
 - **`locate`**: Identify and extract pop‑in events within indentation curves.
 - **`statistics`**: Perform statistical analysis and model fitting on pop‑in data.
 - **`make_dataset`**: Enrich raw measurements by combining metadata, located events, and predictive features into cohesive datasets.
@@ -34,7 +34,7 @@ cd indenter
 pip install -e .
 ```
 
-Indenter supports Python 3.9+ and depends on:
+Indenter supports Python 3.10+ and depends on:
 
 - `numpy`
 - `pandas`

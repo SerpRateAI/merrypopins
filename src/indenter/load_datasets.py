@@ -42,16 +42,33 @@ def load_txt(filepath: Path) -> pd.DataFrame:
         DataFrame with columns from the file, and attrs:
           - timestamp: first non-empty line
           - num_points: parsed from 'Number of Points = N'
+          - Depth (nm): parsed from the first column with the name "Depth (nm)" 
+          - Load (µN): parsed from the second column with the name "Load (uN)"
+          - Time (s): parsed from the third column with the name "Time (s)"
+    Raises:
+        FileNotFoundError: If the file does not exist.
+        NotImplementedError: If the file type is not supported.
+        UnicodeDecodeError: If the file cannot be decoded with UTF-8 or Latin-1.
+        ValueError: If no numeric data is found in the file.
     """
+    # Check if the file exists
     if not filepath.is_file():
         raise FileNotFoundError(f"Data file not found: {filepath}")
+    
+    # Check file extension if it is a .txt file if not raise NotImplementedError
+    if filepath.suffix.lower() != ".txt":
+        raise NotImplementedError(f"File type '{filepath.suffix}' is not supported yet. Only '.txt' files are currently implemented.")
 
     # Read lines with encoding fallback
     try:
         raw = filepath.read_text(encoding='utf-8')
     except UnicodeDecodeError:
         logger.warning(f"UTF-8 decode failed for {filepath}, falling back to Latin-1")
-        raw = filepath.read_text(encoding='latin1')
+        try:
+            raw = filepath.read_text(encoding='latin1')
+        except Exception as e:
+            logger.error(f"Latin-1 decode also failed for {filepath}.")
+            raise e
     text = raw.splitlines()
 
     # Extract timestamp and num_points
@@ -110,13 +127,18 @@ def load_txt(filepath: Path) -> pd.DataFrame:
 
 def load_tdm(filepath: Path):
     """
-    Load a .tdm metadata file into two DataFrames:
+    Load a .tdm metadata file into two DataFrames.
+    Args:
+        filepath: Path to the .tdm/.tdx file.
+    Returns:
       - df_root: one row containing
           * name, description, title, author
           * every instance‐attribute under <instance_attributes>
       - df_channels: one row per <tdm_channel> with:
           group, channel_id, name, unit, description, datatype,
           sequence_id, block_id, block_length, value_type
+    Raises:
+        FileNotFoundError: If the file does not exist.
     """
     if not filepath.is_file():
         raise FileNotFoundError(f"TDM file not found: {filepath}")
