@@ -38,6 +38,7 @@ Indenter supports Python 3.10+ and depends on:
 
 - `numpy`
 - `pandas`
+- `scipy`
 
 These are installed automatically via `pip`.
 
