@@ -85,8 +85,14 @@ def rescale_data(
     noise_mean, noise_std = baseline.mean(), baseline.std()
     threshold = noise_mean + k * noise_std
 
+    # Safely calculate smoothing window
     wl = min(window_length, len(loads) // 2 * 2 - 1)
-    smooth_loads = savgol_filter(loads, window_length=wl, polyorder=polyorder)
+
+    if wl <= polyorder:
+        logger.warning("Not enough data to smooth: skipping smoothing.")
+        smooth_loads = loads
+    else:
+        smooth_loads = savgol_filter(loads, window_length=wl, polyorder=polyorder)
 
     idx = np.argmax(smooth_loads > threshold)
     if smooth_loads[idx] <= threshold:
@@ -111,9 +117,9 @@ def finalise_contact_index(
     Args:
         df (pd.DataFrame): Rescaled DataFrame.
         depth_col (str): Depth column name.
-        remove_pre_contact (bool): If True, remove rows with Depth < 0.
-        add_flag_column (bool): If True, add a column marking the contact index.
-        flag_column (str): Name of the column used to flag the contact point.
+        remove_pre_contact (bool): If True, remove rows with Depth < 0. Default is True.
+        add_flag_column (bool): If True, add a column marking the contact index. Default is True.
+        flag_column (str): Name of the column used to flag the contact point. Default column name is "contact_point".
 
     Returns:
         pd.DataFrame: DataFrame after trimming/flagging contact point.

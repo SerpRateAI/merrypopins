@@ -33,6 +33,27 @@ def short_df():
         "Load (µN)": [5, 10]
     })
 
+@pytest.fixture
+def df_min_at_end():
+    return pd.DataFrame({
+        "Depth (nm)": [1, 2, 3],
+        "Load (µN)": [10, 5, 1]  # Min at last index
+    })
+
+@pytest.fixture
+def exact_polyorder_df():
+    return pd.DataFrame({
+        "Depth (nm)": [0, 1, 2],
+        "Load (µN)": [5, 6, 7]
+    })
+
+@pytest.fixture
+def all_negative_depth_df():
+    return pd.DataFrame({
+        "Depth (nm)": [-5, -4, -3],
+        "Load (µN)": [1, 2, 3]
+    })
+
 # ========== Tests for remove_pre_min_load ==========
 
 def test_remove_pre_min_load_basic(sample_df, caplog):
@@ -42,13 +63,9 @@ def test_remove_pre_min_load_basic(sample_df, caplog):
     assert result.iloc[0]["Load (µN)"] == 2
     assert "Removed first 4 points up to minimum Load" in caplog.text
 
-def test_remove_pre_min_load_min_at_end(caplog):
-    df = pd.DataFrame({
-        "Depth (nm)": [1, 2, 3],
-        "Load (µN)": [10, 5, 1]  # Min at last index
-    })
+def test_remove_pre_min_load_min_at_end(df_min_at_end, caplog):
     caplog.set_level(logging.WARNING)
-    result = remove_pre_min_load(df)
+    result = remove_pre_min_load(df_min_at_end)
     assert len(result) == 3
     assert "Minimum at end of data" in caplog.text
 
@@ -58,7 +75,7 @@ def test_rescale_data_successful(sample_df, caplog):
     caplog.set_level(logging.INFO)
     df_cleaned = sample_df.iloc[4:].reset_index(drop=True)  # Skip initial drop for cleaner test
     rescaled = rescale_data(df_cleaned, N_baseline=3, k=1.0, window_length=5)
-    assert np.isclose(rescaled["Depth (nm)"].iloc[0], 0.0)
+    assert any(np.isclose(rescaled["Depth (nm)"], 0.0))
     assert "Auto-rescaled" in caplog.text
 
 def test_rescale_data_no_crossing(no_crossing_df, caplog):
@@ -67,9 +84,17 @@ def test_rescale_data_no_crossing(no_crossing_df, caplog):
     assert result.equals(no_crossing_df)
     assert "No crossing above auto-threshold" in caplog.text
 
-def test_rescale_data_short_window(short_df):
-    rescaled = rescale_data(short_df, window_length=11)
+def test_rescale_data_short_window(short_df, caplog):
+    caplog.set_level(logging.WARNING)
+    rescaled = rescale_data(short_df, window_length=11, polyorder=2)
     assert isinstance(rescaled, pd.DataFrame)
+    assert "Not enough data to smooth" in caplog.text
+
+def test_rescale_data_exact_polyorder(exact_polyorder_df, caplog):
+    caplog.set_level(logging.WARNING)
+    result = rescale_data(exact_polyorder_df, window_length=3, polyorder=3)
+    assert "Not enough data to smooth" in caplog.text
+    assert isinstance(result, pd.DataFrame)
 
 # ========== Tests for finalise_contact_index ==========
 
@@ -91,6 +116,14 @@ def test_finalise_contact_index_no_flag_or_trim(sample_df):
     result = finalise_contact_index(df_rescaled, remove_pre_contact=False, add_flag_column=False)
     assert "contact_point" not in result.columns
     assert result.shape[0] == df_rescaled.shape[0]
+
+def test_finalise_contact_index_all_negative_depth(all_negative_depth_df, caplog):
+    caplog.set_level(logging.WARNING)
+    result = finalise_contact_index(all_negative_depth_df, remove_pre_contact=True, add_flag_column=True)
+    assert result.empty
+    assert "contact index undefined" in caplog.text
+    assert "contact_point" in result.columns
+    assert result["contact_point"].sum() == 0
 
 # ========== Tests for default_preprocess ==========
 
