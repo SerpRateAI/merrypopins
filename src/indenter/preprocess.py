@@ -26,7 +26,7 @@ if not logger.handlers:
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
 
-def remove_initial_data(df: pd.DataFrame, load_col="Load (µN)") -> pd.DataFrame:
+def remove_pre_min_load(df: pd.DataFrame, load_col="Load (µN)") -> pd.DataFrame:
     """
     Remove all points up to and including the minimum Load point.
 
