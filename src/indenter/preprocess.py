@@ -65,7 +65,7 @@ def rescale_data(
     polyorder=2
 ) -> pd.DataFrame:
     """
-    Automatically detect contact point by noise threshold and rescale Depth to zero.
+    Automatically detect contact point by noise threshold and rescale Depth so contact = 0.
 
     Args:
         df (pd.DataFrame): Input DataFrame.
