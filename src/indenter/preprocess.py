@@ -176,7 +176,8 @@ def default_preprocess(df: pd.DataFrame) -> pd.DataFrame:
 
 # package exports
 __all__ = [
-    'remove_initial_data',
+    'remove_pre_min_load',
     'rescale_data',
-    'preprocess_pipeline'
+    'finalise_contact_index',
+    'default_preprocess'
 ]
