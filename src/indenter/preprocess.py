@@ -1,16 +1,22 @@
 """
 preprocess.py
-------------
+-------------
 
 Provides pre-processing functions for indentation datasets.
 
 Functions:
-    - remove_initial_data: remove all points up to minimum Load point.
-    - rescale_data: automatically detect contact point and rescale Depth.
-    - preprocess_pipeline: apply both steps in sequence.
+    - remove_pre_min_load: Remove all points up to the minimum Load point.
+    - rescale_data: Automatically detect contact point and rescale Depth.
+    - finalise_contact_index: Optionally trim and/or flag the contact point.
+    - default_preprocess: Recommended preprocessing pipeline.
 
 Usage:
-    from indenter.preprocess import remove_initial_data, rescale_data, preprocess_pipeline
+    from indenter.preprocess import (
+        remove_pre_min_load,
+        rescale_data,
+        finalise_contact_index,
+        default_preprocess
+    )
 """
 
 import pandas as pd
