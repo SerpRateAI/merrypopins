@@ -134,43 +134,39 @@ def finalise_contact_index(
 
     return df2
 
-def preprocess_pipeline(
-    df: pd.DataFrame,
-    depth_col="Depth (nm)",
-    load_col="Load (µN)",
-    N_baseline=50,
-    k=5,
-    window_length=11,
-    polyorder=2
-) -> pd.DataFrame:
+def default_preprocess(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Full pre-processing pipeline for indentation data:
-    1. Remove all points up to and including the minimum Load point.
-    2. Rescale Depth so that the detected contact point is zero.
+    Default preprocessing pipeline using recommended settings.
+
+    Steps:
+        - Remove early data up to the minimum Load point
+        - Automatically detect contact and rescale Depth
+        - Remove Depth < 0 rows and flag the contact point
 
     Args:
-        df (pd.DataFrame): Input DataFrame.
-        depth_col (str): Depth column name.
-        load_col (str): Load column name.
-        N_baseline (int): Baseline points for rescaling.
-        k (float): Threshold multiplier.
-        window_length (int): Smoothing window.
-        polyorder (int): Smoothing polynomial order.
+        df (pd.DataFrame): Raw indentation data.
 
     Returns:
-        pd.DataFrame: pre-processed DataFrame.
+        pd.DataFrame: Preprocessed DataFrame.
     """
-    df_cleaned = remove_initial_data(df, load_col=load_col)
-    df_rescaled = rescale_data(
-        df_cleaned,
-        depth_col=depth_col,
-        load_col=load_col,
-        N_baseline=N_baseline,
-        k=k,
-        window_length=window_length,
-        polyorder=polyorder
+    df = remove_pre_min_load(df, load_col="Load (µN)")
+    df = rescale_data(
+        df,
+        depth_col="Depth (nm)",
+        load_col="Load (µN)",
+        N_baseline=50,
+        k=5,
+        window_length=11,
+        polyorder=2
     )
-    return df_rescaled
+    df = finalise_contact_index(
+        df,
+        depth_col="Depth (nm)",
+        remove_pre_contact=True,
+        add_flag_column=True,
+        flag_column="contact_point"
+    )
+    return df
 
 # package exports
 __all__ = [
