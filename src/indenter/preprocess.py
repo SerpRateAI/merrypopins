@@ -92,6 +92,48 @@ def rescale_data(
     logger.info(f"Auto-rescaled at index {idx}, load={smooth_loads[idx]:.2f} > {threshold:.2f}, shift={shift:.1f} nm")
     return df2
 
+def finalise_contact_index(
+    df: pd.DataFrame,
+    depth_col: str = "Depth (nm)",
+    remove_pre_contact: bool = True,
+    add_flag_column: bool = True,
+    flag_column: str = "contact_point"
+) -> pd.DataFrame:
+    """
+    Optionally remove all rows before contact (Depth < 0) and/or flag the first contact point.
+
+    Args:
+        df (pd.DataFrame): Rescaled DataFrame.
+        depth_col (str): Depth column name.
+        remove_pre_contact (bool): If True, remove rows with Depth < 0.
+        add_flag_column (bool): If True, add a column marking the contact index.
+        flag_column (str): Name of the column used to flag the contact point.
+
+    Returns:
+        pd.DataFrame: DataFrame after trimming/flagging contact point.
+    """
+    df2 = df.copy()
+    contact_idx = df2[df2[depth_col] >= 0].index.min()
+
+    if pd.isna(contact_idx):
+        if add_flag_column:
+            df2[flag_column] = False
+        if remove_pre_contact:
+            df2 = df2.iloc[0:0]
+        logger.warning("No Depth >= 0 found; contact index undefined.")
+        return df2
+
+    if add_flag_column:
+        df2[flag_column] = False
+        df2.loc[contact_idx, flag_column] = True
+        logger.info(f"Flagged contact point at index {contact_idx}")
+
+    if remove_pre_contact:
+        df2 = df2.loc[contact_idx:].reset_index(drop=True)
+        logger.info(f"Removed {contact_idx} rows before contact point (Depth < 0)")
+
+    return df2
+
 def preprocess_pipeline(
     df: pd.DataFrame,
     depth_col="Depth (nm)",
