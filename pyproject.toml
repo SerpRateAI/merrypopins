@@ -15,7 +15,8 @@ authors = [
 ]
 dependencies = [
   "numpy>=2.2.0",
-  "pandas>=2.2.3"
+  "pandas>=2.2.3",
+  "scipy>=1.15.3"
 ]
 classifiers = [
   "Programming Language :: Python :: 3",
