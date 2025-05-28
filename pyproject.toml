@@ -14,9 +14,11 @@ authors = [
   { name = "Anna Marcelissen", email = "a.t.w.marcelissen@students.uu.nl" }
 ]
 dependencies = [
-  "numpy>=2.2.0",
+  "numpy>=1.23,<2.5",
   "pandas>=2.2.3",
-  "scipy>=1.15.3"
+  "scipy>=1.15.3",
+  "scikit-learn>=1.6.1",
+  "tensorflow>=2.16.2"
 ]
 classifiers = [
   "Programming Language :: Python :: 3",
