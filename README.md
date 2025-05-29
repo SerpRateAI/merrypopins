@@ -206,6 +206,33 @@ plt.legend(); plt.grid(True); plt.tight_layout(); plt.show()
    pip install -e '.[dev]'
    ```
 
+### 🔧 Pre-commit Hooks
+
+We use [pre-commit](https://pre-commit.com/) to automatically check code formatting and linting before each commit. This helps ensure consistent code quality across the project.
+
+#### Setup (Run Once)
+
+```bash
+# After installing the development dependencies, set up pre-commit hooks:
+# This will install the hooks defined in .pre-commit-config.yaml
+pre-commit install
+```
+
+This sets up a Git hook that will run ruff and black automatically before each commit.
+
+Run Manually
+
+To run all checks on all files:
+
+```bash
+pre-commit run --all-files
+```
+
+Notes:
+- Hooks are defined in .pre-commit-config.yaml.
+- You can exclude specific files or directories (e.g., tutorials/) by modifying that config file.
+
+### 🧪 Running Tests
 2. Run tests with coverage:
    ```bash
    pytest --cov=indenter --cov-report=term-missing
