@@ -35,7 +35,7 @@ if not logger.handlers:
     logger.setLevel(logging.INFO)
 
 def compute_stiffness(df, depth_col="Depth (nm)", load_col="Load (µN)", window=5):
-    """
+    r"""
     Compute local stiffness (dLoad/dDepth) using sliding-window linear regression:
 
     \[
@@ -79,19 +79,24 @@ def compute_features(df, depth_col="Depth (nm)", load_col="Load (µN)", window=5
     df2["curvature"] = df2["stiff_diff"].diff()
     return df2
 
-def detect_popins_iforest(df, contamination=0.001):
+def detect_popins_iforest(df, contamination=0.001, random_state=None):
     """
     Detect pop-ins using Isolation Forest based on stiffness difference and curvature.
+
+    This method applies scikit-learn's IsolationForest to identify anomalies
+    in a 2D feature space composed of local stiffness changes and curvature.
 
     Args:
         df (DataFrame): Indentation data.
         contamination (float): Expected fraction of anomalies.
+        random_state (int or None): Seed for reproducibility.
 
     Returns:
-        DataFrame: Data with "popin_iforest" flags.
+        DataFrame: Original DataFrame with an added 'popin_iforest' boolean column
+                   marking detected anomalies.
     """
     df2 = compute_features(df)
-    iso = IsolationForest(contamination=contamination)
+    iso = IsolationForest(contamination=contamination, random_state=random_state)
     features = df2[["stiff_diff", "curvature"]].fillna(0)
     df2["popin_iforest"] = iso.fit_predict(features) == -1
     logger.info(f"IsolationForest flagged {df2['popin_iforest'].sum()} anomalies")
@@ -152,7 +157,7 @@ def detect_popins_cnn(df, window_size=64, epochs=10, threshold_multiplier=5.0):
     return df2
 
 def detect_popins_fd_fourier(df, threshold=3.0):
-    """
+    r"""
     Detect pop-ins by estimating the derivative of Load using a Fourier spectral method.
 
     This method computes the first derivative in the frequency domain via FFT:
