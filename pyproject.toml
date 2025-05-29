@@ -32,8 +32,11 @@ Source   = "https://github.com/SerpRateAI/indenter"
 
 [project.optional-dependencies]
 dev = [
+  "black>=25.1.0",
+  "pre-commit>=4.2.0",
   "pytest>=8.3.5",
   "pytest-cov>=6.1.1",
+  "ruff>=0.11.12",
   "coverage"
 ]
 

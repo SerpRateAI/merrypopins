@@ -48,6 +48,11 @@ jobs:
           # also install pytest if not in requirements
           pip install pytest
 
+      
+      # 5) Run pre-commit hooks
+      - name: Run pre-commit checks
+        uses: pre-commit/action@v3.0.0
+      
       # 5) Run tests with coverage
       - name: Run tests with coverage
         run: |
