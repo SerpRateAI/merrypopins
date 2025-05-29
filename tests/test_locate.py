@@ -46,6 +46,19 @@ def test_compute_features_adds_columns(simple_curve):
     assert np.allclose(interior["curvature"], 0, atol=1e-6)
 
 # ----------------------------------------------------------------------
+# Validation: error handling
+# ----------------------------------------------------------------------
+def test_stiffness_missing_columns():
+    df = pd.DataFrame({"Depth (nm)": [1, 2, 3]})
+    with pytest.raises(ValueError, match="Required columns.*Load.*not found"):
+        compute_stiffness(df, depth_col="Depth (nm)", load_col="Load (µN)", window=3)
+
+def test_stiffness_too_few_points():
+    df = pd.DataFrame({"Depth (nm)": [0.0, 1.0], "Load (µN)": [0.0, 2.0]})
+    with pytest.raises(ValueError, match="Not enough data points.*for window size"):
+        compute_stiffness(df, window=5)
+
+# ----------------------------------------------------------------------
 # detect_popins_fd_fourier
 # ----------------------------------------------------------------------
 def test_detect_popins_fd_fourier_no_jump(simple_curve):
