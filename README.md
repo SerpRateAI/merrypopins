@@ -12,12 +12,17 @@
 [![Release](https://img.shields.io/github/release-date/SerpRateAI/indenter.svg)](https://github.com/SerpRateAI/indenter/releases)
 [![Contributors](https://img.shields.io/github/contributors/SerpRateAI/indenter.svg)](https://github.com/SerpRateAI/indenter/graphs/contributors)
 
-**Indenter** is a library to streamline the workflow of nano‑indentation experiment data processing. It provides five core modules:
+**Indenter** is a Python library to streamline the workflow of nano‑indentation experiment data processing and anomaly detection. It provides five core modules:
 
 - **`load_datasets`**: Load and parse `.txt` measurement files and `.tdm`/`.tdx` metadata files into structured pandas DataFrames. Automatically detects headers, timestamps, and measurement channels.
 - **`preprocess`**: Clean and normalize indentation data with filtering, baseline correction, and contact point detection.
-- **`locate`**: Identify and extract pop‑in events within indentation curves using event detection algorithms.
-- **`statistics`**: Perform statistical analysis and model fitting on located pop‑in events (e.g. frequency, magnitude, distribution).
+- **`locate`**: Identify and extract pop‑in events within indentation curves using advanced detection algorithms, including:
+  - Isolation Forest anomaly detection
+  - CNN Autoencoder reconstruction error
+  - Fourier-based derivative outlier detection
+  - Savitzky-Golay smoothed gradient thresholds
+  - Majority-vote fusion with confidence scoring
+- **`statistics`**: Perform statistical analysis and model fitting on located pop‑in events (e.g., frequency, magnitude, distribution).
 - **`make_dataset`**: Combine raw measurements, metadata, and analysis outputs into a machine‑learning‑ready dataset.
 
 ---
@@ -39,6 +44,8 @@ Indenter supports Python 3.10+ and depends on:
 - `numpy`
 - `pandas`
 - `scipy`
+- `scikit-learn`
+- `tensorflow`
 
 These are installed automatically via `pip`.
 
@@ -129,6 +136,66 @@ You can omit or modify any step depending on your data:
 - Skip remove_pre_min_load() if your data is already clean.
 - Set remove_pre_contact=False if you want to retain all data.
 - Customize flag_column to integrate with your own schema.
+
+### Locate Pop-in Events
+
+#### Detect Pop-ins using Default Method
+
+```python
+from indenter.locate import default_locate
+
+# Detect pop-ins using all methods
+results = default_locate(df_processed)
+print(results[results.popin])
+```
+
+### Customize Detection Thresholds
+
+```python
+results_tuned = default_locate(
+    df_processed,
+    iforest_contamination=0.002,
+    cnn_threshold_multiplier=4.0,
+    fd_threshold=2.5,
+    savgol_threshold=2.0
+)
+```
+
+### Visualize Detections
+
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(8,6))
+plt.plot(results_tuned["Depth (nm)"], results_tuned["Load (µN)"], label="Preprocessed", alpha=0.4, color='orange')
+
+colors = {
+    "popin_iforest": 'red',
+    "popin_cnn": 'purple',
+    "popin_fd": 'darkorange',
+    "popin_savgol": 'green'
+}
+markers = {
+    "popin_iforest": '^',
+    "popin_cnn": 'v',
+    "popin_fd": 'x',
+    "popin_savgol": 'D'
+}
+
+for method, color in colors.items():
+    mdf = results_tuned[results_tuned[method]]
+    plt.scatter(mdf["Depth (nm)"], mdf["Load (µN)"],
+                c=color, label=method.replace("popin_", "").capitalize(),
+                marker=markers[method], alpha=0.7)
+
+confident = results_tuned[results_tuned["popin_confident"]]
+plt.scatter(confident["Depth (nm)"], confident["Load (µN)"],
+            edgecolors='k', facecolors='none', label="Majority Vote (2+)", s=100, linewidths=1.5)
+
+plt.xlabel("Depth (nm)"); plt.ylabel("Load (µN)")
+plt.title("Pop-in Detections by All Methods")
+plt.legend(); plt.grid(True); plt.tight_layout(); plt.show()
+```
 
 ---
 
