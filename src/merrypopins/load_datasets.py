@@ -8,7 +8,7 @@ Provides:
   - load_tdm: load a .tdm/.tdx metadata file (full channel list) into two DataFrames (root info and channel list)
 
 Usage:
-    from indenter.load_datasets import load_txt, load_tdm
+    from merrypopins.load_datasets import load_txt, load_tdm
 """
 
 import logging

@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from indenter.load_datasets import load_txt, load_tdm
+from merrypopins.load_datasets import load_txt, load_tdm
 
 # ==========================
 # Fixtures for test inputs

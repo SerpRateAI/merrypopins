@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from indenter.locate import (
+from merrypopins.locate import (
     compute_stiffness,
     compute_features,
     detect_popins_iforest,

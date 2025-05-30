@@ -1,18 +1,18 @@
-# Indenter
+# Merrypopins
 
-[![Indenter CI Tests](https://github.com/SerpRateAI/indenter/actions/workflows/python-app.yml/badge.svg)](https://github.com/SerpRateAI/indenter/actions/workflows/python-app.yml)
-[![PyPI](https://img.shields.io/pypi/v/indenter.svg)](https://pypi.org/project/indenter/)
-[![Python](https://img.shields.io/pypi/pyversions/indenter.svg)](https://pypi.org/project/indenter/)
-[![codecov](https://codecov.io/gh/SerpRateAI/indenter/branch/main/graph/badge.svg)](https://codecov.io/gh/SerpRateAI/indenter)
-[![License](https://img.shields.io/github/license/SerpRateAI/indenter.svg)](LICENSE)
-[![Downloads](https://img.shields.io/pypi/dm/indenter.svg)](https://pypi.org/project/indenter/)
-[![Issues](https://img.shields.io/github/issues/SerpRateAI/indenter.svg)](https://github.com/SerpRateAI/indenter/issues)
-[![Dependencies](https://img.shields.io/librariesio/github/SerpRateAI/indenter)](https://github.com/SerpRateAI/indenter/network/dependencies)
-[![Last commit](https://img.shields.io/github/last-commit/SerpRateAI/indenter.svg)](https://github.com/SerpRateAI/indenter/commits/main)
-[![Release](https://img.shields.io/github/release-date/SerpRateAI/indenter.svg)](https://github.com/SerpRateAI/indenter/releases)
-[![Contributors](https://img.shields.io/github/contributors/SerpRateAI/indenter.svg)](https://github.com/SerpRateAI/indenter/graphs/contributors)
+[![merrypopins CI Tests](https://github.com/SerpRateAI/merrypopins/actions/workflows/python-app.yml/badge.svg)](https://github.com/SerpRateAI/merrypopins/actions/workflows/python-app.yml)
+[![PyPI](https://img.shields.io/pypi/v/merrypopins.svg)](https://pypi.org/project/merrypopins/)
+[![Python](https://img.shields.io/pypi/pyversions/merrypopins.svg)](https://pypi.org/project/merrypopins/)
+[![codecov](https://codecov.io/gh/SerpRateAI/merrypopins/branch/main/graph/badge.svg)](https://codecov.io/gh/SerpRateAI/merrypopins)
+[![License](https://img.shields.io/github/license/SerpRateAI/merrypopins.svg)](LICENSE)
+[![Downloads](https://img.shields.io/pypi/dm/merrypopins.svg)](https://pypi.org/project/merrypopins/)
+[![Issues](https://img.shields.io/github/issues/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/issues)
+[![Dependencies](https://img.shields.io/librariesio/github/SerpRateAI/merrypopins)](https://github.com/SerpRateAI/merrypopins/network/dependencies)
+[![Last commit](https://img.shields.io/github/last-commit/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/commits/main)
+[![Release](https://img.shields.io/github/release-date/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/releases)
+[![Contributors](https://img.shields.io/github/contributors/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/graphs/contributors)
 
-**Indenter** is a Python library to streamline the workflow of nano‑indentation experiment data processing and anomaly detection. It provides five core modules:
+**merrypopins** is a Python library to streamline the workflow of nano‑indentation experiment data processing, automated pop-in detection and analysis. It provides five core modules:
 
 - **`load_datasets`**: Load and parse `.txt` measurement files and `.tdm`/`.tdx` metadata files into structured pandas DataFrames. Automatically detects headers, timestamps, and measurement channels.
 - **`preprocess`**: Clean and normalize indentation data with filtering, baseline correction, and contact point detection.
@@ -31,15 +31,15 @@
 
 ```bash
 # From PyPI (⚠️ This will not work because package not published yet.)
-pip install indenter
+pip install merrypopins
 
 # For development
-git clone https://github.com/SerpRateAI/indenter.git
-cd indenter
+git clone https://github.com/SerpRateAI/merrypopins.git
+cd merrypopins
 pip install -e .
 ```
 
-Indenter supports Python 3.10+ and depends on:
+merrypopins supports Python 3.10+ and depends on:
 
 - `numpy`
 - `pandas`
@@ -53,12 +53,12 @@ These are installed automatically via `pip`.
 
 ## Quickstart
 
-### Importing Indenter Modules
+### Importing merrypopins Modules
 
 ```python
 from pathlib import Path
-from indenter.load_datasets import load_txt, load_tdm
-from indenter.preprocess import default_preprocess, remove_pre_min_load, rescale_data, finalise_contact_index
+from merrypopins.load_datasets import load_txt, load_tdm
+from merrypopins.preprocess import default_preprocess, remove_pre_min_load, rescale_data, finalise_contact_index
 ```
 
 ### Load Indentation Data and Metadata
@@ -142,7 +142,7 @@ You can omit or modify any step depending on your data:
 #### Detect Pop-ins using Default Method
 
 ```python
-from indenter.locate import default_locate
+from merrypopins.locate import default_locate
 
 # Detect pop-ins using all methods
 results = default_locate(df_processed)
@@ -235,12 +235,12 @@ Notes:
 ### 🧪 Running Tests
 2. Run tests with coverage:
    ```bash
-   pytest --cov=indenter --cov-report=term-missing
+   pytest --cov=merrypopins --cov-report=term-missing
    ```
 
 3. Generate HTML coverage report:
    ```bash
-   pytest --cov=indenter --cov-report=html
+   pytest --cov=merrypopins --cov-report=html
    # open htmlcov/index.html in browser
    ```
 
@@ -248,7 +248,7 @@ Notes:
 
 ## Contributing
 
-Contributions are welcome! Please file issues and submit pull requests on [GitHub](https://github.com/SerpRateAI/indenter).
+Contributions are welcome! Please file issues and submit pull requests on [GitHub](https://github.com/SerpRateAI/merrypopins).
 
 ---
 

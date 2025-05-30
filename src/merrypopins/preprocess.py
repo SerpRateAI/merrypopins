@@ -11,7 +11,7 @@ Functions:
     - default_preprocess: Recommended preprocessing pipeline.
 
 Usage:
-    from indenter.preprocess import (
+    from merrypopins.preprocess import (
         remove_pre_min_load,
         rescale_data,
         finalise_contact_index,
