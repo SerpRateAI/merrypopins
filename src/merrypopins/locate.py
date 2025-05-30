@@ -111,6 +111,23 @@ def compute_features(
     return df2 if return_derivatives else df
 
 
+def trim_edges(series, margin):
+    """
+    Trim the first and last `margin` elements of a pandas Series.
+    This is useful for removing edge effects in time-series data where
+    the first and last few points may not be reliable.
+    Args:
+        series (pd.Series): Input time-series data.
+        margin (int): Number of elements to trim from each end.
+    Returns:
+        pd.Series: A copy of the input series with the first and last `margin` elements set to False.
+    """
+    trimmed = series.copy()
+    trimmed[:margin] = False
+    trimmed[-margin:] = False
+    return trimmed
+
+
 def detect_popins_iforest(
     df,
     contamination=0.001,
@@ -118,6 +135,8 @@ def detect_popins_iforest(
     depth_col="Depth (nm)",
     load_col="Load (µN)",
     window=5,
+    trim_edges_enabled=True,
+    trim_margin=None,
 ):
     """
     Detect pop-ins using Isolation Forest based on local stiffness and curvature.
@@ -137,15 +156,21 @@ def detect_popins_iforest(
         depth_col (str): Name of the depth column.
         load_col (str): Name of the load column.
         window (int): Size of the sliding window used to compute stiffness.
+        trim_edges_enabled (bool): If True, trims the first and last `window` elements
+        trim_margin (int or None): Number of elements to trim from each end.
 
     Returns:
         DataFrame: A copy of the original DataFrame with a new boolean column:
             - "popin_iforest": True for detected pop-ins (anomalies), False otherwise.
     """
-    df2 = compute_features(df, depth_col=depth_col, load_col=load_col, window=window)
+    df2 = compute_features(df, depth_col, load_col, window)
     iso = IsolationForest(contamination=contamination, random_state=random_state)
     features = df2[["stiff_diff", "curvature"]].fillna(0)
-    df2["popin_iforest"] = iso.fit_predict(features) == -1
+    preds = iso.fit_predict(features) == -1
+    if trim_edges_enabled:
+        margin = trim_margin if trim_margin is not None else max(10, window)
+        preds = trim_edges(preds, margin=margin)
+    df2["popin_iforest"] = preds
     logger.info(f"IsolationForest flagged {df2['popin_iforest'].sum()} anomalies")
     return df2
 
@@ -198,6 +223,8 @@ def detect_popins_cnn(
     depth_col="Depth (nm)",
     load_col="Load (µN)",
     window=5,
+    trim_edges_enabled=True,
+    trim_margin=None,
 ):
     """
     Detect pop-ins using a Convolutional Autoencoder trained on stiffness features.
@@ -225,28 +252,31 @@ def detect_popins_cnn(
         depth_col (str): Column name for depth measurements.
         load_col (str): Column name for load measurements.
         window (int): Size of the moving window used for stiffness calculation.
+        trim_edges_enabled (bool): If True, trims the first and last `window_size` elements.
+        trim_margin (int or None): Number of elements to trim from each end.
 
     Returns:
         DataFrame: Original DataFrame with a new boolean column:
             - "popin_cnn": True for detected anomalies, False otherwise.
     """
-    df2 = compute_features(df, depth_col=depth_col, load_col=load_col, window=window)
+    df2 = compute_features(df, depth_col, load_col, window)
     X = df2[["stiff_diff", "curvature"]].fillna(0).values
     W = np.array([X[i : i + window_size] for i in range(len(X) - window_size)])
 
     ae = build_cnn_autoencoder(window_size, 2)
     ae.compile(optimizer="adam", loss="mse")
-    early_stopping = EarlyStopping(
-        monitor="val_loss", patience=3, restore_best_weights=True
-    )
     ae.fit(
         W,
         W,
         epochs=epochs,
         batch_size=batch_size,
         validation_split=validation_split,
-        callbacks=[early_stopping] if validation_split > 0 else None,
         verbose=0,
+        callbacks=(
+            [EarlyStopping(patience=3, restore_best_weights=True)]
+            if validation_split > 0
+            else None
+        ),
     )
 
     W_pred = ae.predict(W, verbose=0)
@@ -255,12 +285,18 @@ def detect_popins_cnn(
 
     flags = np.zeros(len(X), dtype=bool)
     flags[window_size // 2 : -window_size // 2] = errors > threshold
+    if trim_edges_enabled:
+        margin = trim_margin if trim_margin is not None else max(10, window)
+        flags = trim_edges(flags, margin=margin)
+
     df2["popin_cnn"] = flags
-    logger.info(f"CNN flagged {flags.sum()} anomalies")
+    logger.info(f"CNN flagged {df2['popin_cnn'].sum()} anomalies")
     return df2
 
 
-def detect_popins_fd_fourier(df, threshold=3.0, spacing=1.0):
+def detect_popins_fd_fourier(
+    df, threshold=3.0, spacing=1.0, trim_edges_enabled=True, trim_margin=None
+):
     """
     Detect pop-ins by estimating the derivative of Load using a Fourier spectral method.
 
@@ -280,18 +316,22 @@ def detect_popins_fd_fourier(df, threshold=3.0, spacing=1.0):
         df (DataFrame): Input indentation data.
         threshold (float): Std deviation multiplier to flag anomalies in derivative.
         spacing (float): Spacing between data points (in nm or similar units).
+        trim_edges_enabled (bool): If True, trims the first and last 10 points to avoid edge effects.
+        trim_margin (int or None): Number of elements to trim from each end.
 
     Returns:
         DataFrame: Copy of input with "popin_fd" flag column.
     """
     load = df["Load (µN)"].values
-    n = len(load)
     fft_load = np.fft.fft(load)
-    freqs = np.fft.fftfreq(n, d=spacing)
-    fft_derivative = 1j * 2 * np.pi * freqs * fft_load
-    derivative = np.real(np.fft.ifft(fft_derivative))
-    mean, std = np.mean(derivative), np.std(derivative)
-    anomalies = np.abs(derivative - mean) > threshold * std
+    freqs = np.fft.fftfreq(len(load), d=spacing)
+    derivative = np.real(np.fft.ifft(1j * 2 * np.pi * freqs * fft_load))
+    anomalies = np.abs(derivative - np.mean(derivative)) > threshold * np.std(
+        derivative
+    )
+    if trim_edges_enabled:
+        margin = trim_margin if trim_margin is not None else 10
+        anomalies = trim_edges(anomalies, margin=margin)
     df2 = df.copy()
     df2["popin_fd"] = anomalies
     logger.info(f"Fourier spectral method flagged {anomalies.sum()} anomalies")
@@ -299,7 +339,14 @@ def detect_popins_fd_fourier(df, threshold=3.0, spacing=1.0):
 
 
 def detect_popins_savgol(
-    df, window_length=11, polyorder=2, threshold=3.0, deriv=1, load_col="Load (µN)"
+    df,
+    window_length=11,
+    polyorder=2,
+    threshold=3.0,
+    deriv=1,
+    load_col="Load (µN)",
+    trim_edges_enabled=True,
+    trim_margin=None,
 ):
     """
     Detect pop-ins using Savitzky-Golay filtered derivatives.
@@ -320,13 +367,19 @@ def detect_popins_savgol(
         threshold (float): Threshold in standard deviations for detecting anomalies.
         deriv (int): Order of derivative to compute (default is 1 for first derivative).
         load_col (str): Column name for load data.
+        trim_edges_enabled (bool): If True, trims the first and last 10 points to avoid edge effects.
+        trim_margin (int or None): Number of elements to trim from each end.
 
     Returns:
         DataFrame: Original data with popin_savgol column.
     """
     derivative = savgol_filter(df[load_col], window_length, polyorder, deriv=deriv)
-    mean, std = np.mean(derivative), np.std(derivative)
-    anomalies = np.abs(derivative - mean) > threshold * std
+    anomalies = np.abs(derivative - np.mean(derivative)) > threshold * np.std(
+        derivative
+    )
+    if trim_edges_enabled:
+        margin = trim_margin if trim_margin is not None else max(10, window_length)
+        anomalies = trim_edges(anomalies, margin=margin)
     df2 = df.copy()
     df2["popin_savgol"] = anomalies
     logger.info(f"Savitzky-Golay flagged {anomalies.sum()} anomalies")
@@ -353,6 +406,8 @@ def default_locate(
     savgol_threshold=3.0,
     sg_deriv_order=1,
     stiffness_window=5,
+    trim_edges_enabled=True,
+    trim_margin=None,
     use_iforest=True,
     use_cnn=True,
     use_fd=True,
@@ -379,6 +434,7 @@ def default_locate(
         savgol_threshold (float): Std deviation threshold for Savitzky-Golay.
         sg_deriv_order (int): Derivative order for Savitzky-Golay.
         stiffness_window (int): Sliding window size for stiffness computation.
+        trim_edges_enabled (bool): Whether to trim edges in the data.
         use_iforest (bool): Whether to use IsolationForest method.
         use_cnn (bool): Whether to use CNN method.
         use_fd (bool): Whether to use finite difference method.
@@ -400,6 +456,8 @@ def default_locate(
             depth_col=depth_col,
             load_col=load_col,
             window=stiffness_window,
+            trim_edges_enabled=trim_edges_enabled,
+            trim_margin=trim_margin,
         )
         df_combined["popin_iforest"] = df_iforest["popin_iforest"]
         method_flags.append("popin_iforest")
@@ -415,12 +473,20 @@ def default_locate(
             depth_col=depth_col,
             load_col=load_col,
             window=stiffness_window,
+            trim_edges_enabled=trim_edges_enabled,
+            trim_margin=trim_margin,
         )
         df_combined["popin_cnn"] = df_cnn["popin_cnn"]
         method_flags.append("popin_cnn")
 
     if use_fd:
-        df_fd = detect_popins_fd_fourier(df, threshold=fd_threshold, spacing=fd_spacing)
+        df_fd = detect_popins_fd_fourier(
+            df,
+            threshold=fd_threshold,
+            spacing=fd_spacing,
+            trim_edges_enabled=trim_edges_enabled,
+            trim_margin=trim_margin,
+        )
         df_combined["popin_fd"] = df_fd["popin_fd"]
         method_flags.append("popin_fd")
 
@@ -432,6 +498,8 @@ def default_locate(
             threshold=savgol_threshold,
             deriv=sg_deriv_order,
             load_col=load_col,
+            trim_edges_enabled=trim_edges_enabled,
+            trim_margin=trim_margin,
         )
         df_combined["popin_savgol"] = df_savgol["popin_savgol"]
         method_flags.append("popin_savgol")
