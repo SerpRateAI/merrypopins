@@ -37,12 +37,16 @@ if not logger.handlers:
 
 
 def compute_stiffness(df, depth_col="Depth (nm)", load_col="Load (µN)", window=5):
-    r"""
-    Compute local stiffness (dLoad/dDepth) using sliding-window linear regression:
+    """
+    Compute local stiffness (dLoad/dDepth) using sliding-window linear regression.
 
-    \[
-    \text{stiffness} = \frac{\Delta \text{Load}}{\Delta \text{Depth}}
-    \]
+    In nano-indentation, 'stiffness' is the local slope of the load–depth curve and
+    reflects how resistant the material is to deformation. It is computed as:
+
+        stiffness = change in Load / change in Depth
+                  = ΔLoad / ΔDepth
+
+    This is estimated using linear regression over a moving window centered on each point.
 
     Args:
         df (DataFrame): Input indentation data.
@@ -79,17 +83,26 @@ def compute_features(
     df, depth_col="Depth (nm)", load_col="Load (µN)", window=5, return_derivatives=True
 ):
     """
-    Compute stiffness, stiffness difference, and curvature features.
+    Compute derived indentation features for anomaly detection.
+
+    This function calculates three features:
+      1. Stiffness: local slope of load vs. depth (ΔLoad/ΔDepth)
+      2. Stiffness difference: the rate of change in stiffness (first derivative)
+      3. Curvature: the rate of change in stiffness difference (second derivative)
+
+    These features help detect sudden shifts in indentation behavior, often indicative
+    of pop-in events.
 
     Args:
         df (DataFrame): Input indentation data.
         depth_col (str): Column name for depth.
         load_col (str): Column name for load.
         window (int): Sliding window size for stiffness calculation.
-        return_derivatives (bool): If True (default), return derivatives; otherwise, return original DataFrame.
+        return_derivatives (bool): If True (default), return DataFrame with added features.
+                                   If False, return original DataFrame without added columns.
 
     Returns:
-        DataFrame: Enhanced DataFrame with stiffness, stiff_diff, and curvature.
+        DataFrame: Enhanced DataFrame with 'stiffness', 'stiff_diff', and 'curvature' columns.
     """
     df2 = df.copy()
     df2["stiffness"] = compute_stiffness(df, depth_col, load_col, window)
@@ -107,22 +120,27 @@ def detect_popins_iforest(
     window=5,
 ):
     """
-    Detect pop-ins using Isolation Forest based on stiffness difference and curvature.
+    Detect pop-ins using Isolation Forest based on local stiffness and curvature.
 
-    This method applies scikit-learn's IsolationForest to identify anomalies
-    in a 2D feature space composed of local stiffness changes and curvature.
+    This method computes two time-series features:
+      - Stiffness difference: the rate of change in the slope of the load–depth curve
+      - Curvature: the second derivative of the load curve (change in stiffness difference)
+
+    It then applies the Isolation Forest algorithm from scikit-learn, which isolates
+    anomalies by recursively partitioning the feature space. Points that require fewer
+    partitions to isolate are more likely to be outliers.
 
     Args:
-        df (DataFrame): Indentation data.
-        contamination (float): Expected fraction of anomalies.
-        random_state (int or None): Seed for reproducibility.
-        depth_col (str): Column name for depth.
-        load_col (str): Column name for load.
-        window (int): Sliding window size for stiffness calculation.
+        df (DataFrame): Indentation dataset containing load and depth columns.
+        contamination (float): Proportion of expected anomalies in the dataset.
+        random_state (int or None): Random seed for reproducibility.
+        depth_col (str): Name of the depth column.
+        load_col (str): Name of the load column.
+        window (int): Size of the sliding window used to compute stiffness.
 
     Returns:
-        DataFrame: Original DataFrame with an added 'popin_iforest' boolean column
-                   marking detected anomalies.
+        DataFrame: A copy of the original DataFrame with a new boolean column:
+            - "popin_iforest": True for detected pop-ins (anomalies), False otherwise.
     """
     df2 = compute_features(df, depth_col=depth_col, load_col=load_col, window=window)
     iso = IsolationForest(contamination=contamination, random_state=random_state)
@@ -134,17 +152,28 @@ def detect_popins_iforest(
 
 def build_cnn_autoencoder(window_size, n_features):
     """
-    Build a 1D Convolutional Autoencoder model for anomaly detection.
+    Build a 1D Convolutional Autoencoder for time-series anomaly detection.
 
-    The model compresses and reconstructs time-series features using the architecture:
-    Conv1D → MaxPooling → Conv1D → MaxPooling → Conv1D → UpSampling → Conv1D → UpSampling → Conv1D
+    This model learns to reconstruct input sequences composed of features like
+    stiffness difference and curvature. During inference, reconstruction error
+    is used to detect anomalies—samples with high error are likely pop-ins.
+
+    Architecture overview:
+      - Encoder:
+          Conv1D -> MaxPooling -> Conv1D -> MaxPooling -> Conv1D
+      - Decoder:
+          UpSampling -> Conv1D -> UpSampling -> Conv1D
+
+    The model operates on fixed-size input windows and uses symmetric encoding
+    and decoding layers. The final layer has linear activation to match the
+    original feature values.
 
     Args:
-        window_size (int): Length of the input time window.
-        n_features (int): Number of input features (e.g., 2 for [stiff_diff, curvature]).
+        window_size (int): Number of time steps per sequence.
+        n_features (int): Number of input features per time step.
 
     Returns:
-        Model: Compiled Keras model for training and inference.
+        keras.Model: Keras autoencoder model (uncompiled).
     """
     inp = Input(shape=(window_size, n_features))
     x = Conv1D(32, 3, activation="relu", padding="same")(inp)
@@ -171,23 +200,35 @@ def detect_popins_cnn(
     window=5,
 ):
     """
-    Detect pop-ins using a CNN autoencoder based on local stiffness and curvature.
-    This method trains a convolutional autoencoder to reconstruct sliding windows of
-    stiffness difference and curvature features, then flags anomalies based on reconstruction error.
+    Detect pop-ins using a Convolutional Autoencoder trained on stiffness features.
+
+    This method uses an unsupervised CNN-based autoencoder to learn a compressed
+    representation of local indentation behavior. It reconstructs short time windows
+    of two features:
+      - Stiffness difference: rate of change of the slope (d²Load/dDepth²)
+      - Curvature: second derivative of load (d³Load/dDepth³)
+
+    The reconstruction error (mean squared error) is computed between input and output.
+    High reconstruction errors indicate patterns that the model considers unusual—
+    these are flagged as potential pop-in events.
+
+    The method uses a sliding window to extract overlapping sequences from the full curve,
+    trains the model on all windows, and flags windows whose error exceeds a dynamic threshold.
 
     Args:
-        df (DataFrame): Input indentation data.
-        window_size (int): Size of the sliding window for CNN input.
-        epochs (int): Number of training epochs.
-        threshold_multiplier (float): Multiplier for setting anomaly detection threshold.
-        batch_size (int): Batch size for training.
-        validation_split (float): Fraction of data to use for validation.
-        depth_col (str): Column name for depth.
-        load_col (str): Column name for load.
-        window (int): Sliding window size for stiffness calculation.
+        df (DataFrame): Input indentation data containing load and depth columns.
+        window_size (int): Number of time steps per CNN input window.
+        epochs (int): Number of training epochs for the autoencoder.
+        threshold_multiplier (float): Multiplier for anomaly detection threshold based on std dev.
+        batch_size (int): Mini-batch size during training.
+        validation_split (float): Proportion of data used for validation (0.0 disables validation).
+        depth_col (str): Column name for depth measurements.
+        load_col (str): Column name for load measurements.
+        window (int): Size of the moving window used for stiffness calculation.
 
     Returns:
-        DataFrame: Original DataFrame with an added 'popin_cnn' boolean column marking detected anomalies.
+        DataFrame: Original DataFrame with a new boolean column:
+            - "popin_cnn": True for detected anomalies, False otherwise.
     """
     df2 = compute_features(df, depth_col=depth_col, load_col=load_col, window=window)
     X = df2[["stiff_diff", "curvature"]].fillna(0).values
@@ -220,11 +261,20 @@ def detect_popins_cnn(
 
 
 def detect_popins_fd_fourier(df, threshold=3.0, spacing=1.0):
-    r"""
+    """
     Detect pop-ins by estimating the derivative of Load using a Fourier spectral method.
 
-    This method computes the first derivative in the frequency domain via FFT:
-        \[ \frac{df}{dx} \approx \mathcal{F}^{-1}\left( i 2 \pi f \cdot \mathcal{F}(f) \right) \]
+    This method computes the first derivative in the frequency domain using the Fourier Transform.
+    The basic idea is that differentiation in the time domain corresponds to multiplying by a frequency
+    component in the Fourier domain:
+
+        dLoad/dDepth ≈ IFFT( i * 2π * frequency * FFT(Load) )
+
+    The inverse FFT (IFFT) is then used to convert the differentiated signal back into the spatial domain.
+    IFFT takes frequency-domain data and reconstructs the original time-domain (or spatial) signal.
+
+    Anomalies are flagged where the resulting derivative deviates from the mean by more than a
+    given number of standard deviations.
 
     Args:
         df (DataFrame): Input indentation data.
@@ -254,8 +304,18 @@ def detect_popins_savgol(
     """
     Detect pop-ins using Savitzky-Golay filtered derivatives.
 
+    This method smooths the load data using a polynomial filter and computes its derivative.
+    Anomalies are flagged where the derivative differs significantly from its mean value.
+
+    The steps are:
+      1. Apply Savitzky-Golay filter to compute the derivative (e.g., velocity or acceleration)
+      2. Flag points where |derivative - mean| > threshold * std deviation
+
+    The Savitzky-Golay filter works by fitting successive subsets of adjacent data points
+    with a low-degree polynomial using linear least squares.
+
     Args:
-        window_length (int): Length of the filter window.
+        window_length (int): Length of the filter window (must be odd).
         polyorder (int): Order of polynomial for smoothing.
         threshold (float): Threshold in standard deviations for detecting anomalies.
         deriv (int): Order of derivative to compute (default is 1 for first derivative).
