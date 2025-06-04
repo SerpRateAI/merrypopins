@@ -2,9 +2,13 @@ name: Execute and Export Merrypopins Tutorial
 
 on:
   push:
-    paths:
-      - "tutorials/merrypopins-tutorial.ipynb"
-      - ".github/workflows/run-notebook.yml"
+    branches:
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
 
 jobs:
   run-notebook:
@@ -26,9 +30,16 @@ jobs:
       - name: Execute and export notebook
         uses: yaananth/run-notebook@v2
         with:
-          notebook: tutorials/merrypopins-tutorial.ipynb
+          notebook: "tutorials/merrypopins-tutorial.ipynb"
           isReport: true
           poll: true
+
+      - name: Upload executed notebook
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: executed-notebook
+          path: ${{ runner.temp }}/nb-runner
 
       - name: Copy HTML to tutorials/html
         run: |
