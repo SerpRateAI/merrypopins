@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "merrypopins"
-version = "0.1.0"
+version = "0.1.1"
 description = "Merrypopins: Automated pop-in detection for nano-indentation experiments tooling: load_datasets, preprocess, locate, statistics & make_dataset"
 readme = "README.md"
 requires-python = ">=3.10 ,<3.13"
 license = { text = "MIT" }
 authors = [
-  { name = "Anna Marcelissen", email = "anna.marcelissen@live.nl" },
   { name = "Cahit Acar", email = "c.acar.business@gmail.com" },
+  { name = "Anna Marcelissen", email = "anna.marcelissen@live.nl" },
   { name = "Hugo van Schrojenstein Lantman", email = "h.w.vanschrojensteinlantman@uu.nl" },
   { name = "John M. Aiken", email = "johnm.aiken@gmail.com" }
 ]
