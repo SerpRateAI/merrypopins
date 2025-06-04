@@ -33,6 +33,7 @@ jobs:
           notebook: "tutorials/merrypopins-tutorial.ipynb"
           isReport: true
           poll: true
+          params: '{"output_dir": "${{ runner.temp }}/nb-runner", "html_exporter_template_file": "tutorials/merrypopins-tutorial.tpl"}'
 
       - name: Upload executed notebook
         uses: actions/upload-artifact@v4
