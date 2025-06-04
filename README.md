@@ -21,7 +21,6 @@
   - CNN Autoencoder reconstruction error
   - Fourier-based derivative outlier detection
   - Savitzky-Golay smoothed gradient thresholds
-  - Majority-vote fusion with confidence scoring
 - **`statistics`**: Perform statistical analysis and model fitting on located pop‑in events (e.g., frequency, magnitude, distribution).
 - **`make_dataset`**: Combine raw measurements, metadata, and analysis outputs into a machine‑learning‑ready dataset.
 
