@@ -1,0 +1,44 @@
+name: Execute and Export Merrypopins Tutorial
+
+on:
+  push:
+    paths:
+      - "tutorials/merrypopins-tutorial.ipynb"
+      - ".github/workflows/run-notebook.yml"
+
+jobs:
+  run-notebook:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          pip install -e .[dev] jupyter nbconvert
+
+      - name: Execute and export notebook
+        uses: yaananth/run-notebook@v2
+        with:
+          notebook: tutorials/merrypopins-tutorial.ipynb
+          isReport: true
+          poll: true
+
+      - name: Copy HTML to tutorials/html
+        run: |
+          mkdir -p tutorials/html
+          find ${{ runner.temp }}/nb-runner -name "*.html" -exec cp {} tutorials/html/ \;
+
+      - name: Commit HTML output
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add tutorials/html/*.html
+          git commit -m "Auto-update tutorial HTML from notebook" || echo "No changes to commit"
+          git push
