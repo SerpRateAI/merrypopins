@@ -60,6 +60,7 @@ These are installed automatically via `pip`.
 from pathlib import Path
 from merrypopins.load_datasets import load_txt, load_tdm
 from merrypopins.preprocess import default_preprocess, remove_pre_min_load, rescale_data, finalise_contact_index
+from merrypopins.locate import default_locate
 ```
 
 ### Load Indentation Data and Metadata
@@ -143,8 +144,6 @@ You can omit or modify any step depending on your data:
 #### Detect Pop-ins using Default Method
 
 ```python
-from merrypopins.locate import default_locate
-
 # Detect pop-ins using all methods
 results = default_locate(df_processed)
 print(results[results.popin])
