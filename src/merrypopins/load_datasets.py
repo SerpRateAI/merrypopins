@@ -8,7 +8,7 @@ Provides:
   - load_tdm: load a .tdm/.tdx metadata file (full channel list) into two DataFrames (root info and channel list)
 
 Usage:
-    from indenter.load_datasets import load_txt, load_tdm
+    from merrypopins.load_datasets import load_txt, load_tdm
 """
 
 import logging
@@ -42,7 +42,7 @@ def load_txt(filepath: Path) -> pd.DataFrame:
         DataFrame with columns from the file, and attrs:
           - timestamp: first non-empty line
           - num_points: parsed from 'Number of Points = N'
-          - Depth (nm): parsed from the first column with the name "Depth (nm)" 
+          - Depth (nm): parsed from the first column with the name "Depth (nm)"
           - Load (µN): parsed from the second column with the name "Load (uN)"
           - Time (s): parsed from the third column with the name "Time (s)"
     Raises:
@@ -54,18 +54,20 @@ def load_txt(filepath: Path) -> pd.DataFrame:
     # Check if the file exists
     if not filepath.is_file():
         raise FileNotFoundError(f"Data file not found: {filepath}")
-    
+
     # Check file extension if it is a .txt file if not raise NotImplementedError
     if filepath.suffix.lower() != ".txt":
-        raise NotImplementedError(f"File type '{filepath.suffix}' is not supported yet. Only '.txt' files are currently implemented.")
+        raise NotImplementedError(
+            f"File type '{filepath.suffix}' is not supported yet. Only '.txt' files are currently implemented."
+        )
 
     # Read lines with encoding fallback
     try:
-        raw = filepath.read_text(encoding='utf-8')
+        raw = filepath.read_text(encoding="utf-8")
     except UnicodeDecodeError:
         logger.warning(f"UTF-8 decode failed for {filepath}, falling back to Latin-1")
         try:
-            raw = filepath.read_text(encoding='latin1')
+            raw = filepath.read_text(encoding="latin1")
         except Exception as e:
             logger.error(f"Latin-1 decode also failed for {filepath}.")
             raise e
@@ -77,9 +79,9 @@ def load_txt(filepath: Path) -> pd.DataFrame:
     for line in text:
         if timestamp is None and line.strip():
             timestamp = line.strip()
-        if 'Number of Points' in line and '=' in line:
+        if "Number of Points" in line and "=" in line:
             try:
-                num_points = int(line.split('=', 1)[1])
+                num_points = int(line.split("=", 1)[1])
             except ValueError:
                 pass
         if timestamp and num_points is not None:
@@ -87,9 +89,9 @@ def load_txt(filepath: Path) -> pd.DataFrame:
 
     # Find start of numeric block: first row where every tab-split token is a number
     start_idx = None
-    num_re = re.compile(r'^[-+]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?$')
+    num_re = re.compile(r"^[-+]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?$")
     for i, line in enumerate(text):
-        tokens = line.strip().split('\t')
+        tokens = line.strip().split("\t")
         if tokens and all(num_re.match(tok) for tok in tokens):
             start_idx = i
             break
@@ -101,13 +103,13 @@ def load_txt(filepath: Path) -> pd.DataFrame:
     while header_idx >= 0 and not text[header_idx].strip():
         header_idx -= 1
     if header_idx >= 0:
-        col_names = text[header_idx].split('\t')
+        col_names = text[header_idx].split("\t")
     else:
         col_names = []
 
     # Load the numeric block with tab delimiter
     data_str = "\n".join(text[start_idx:])
-    arr = np.loadtxt(StringIO(data_str), delimiter='\t')
+    arr = np.loadtxt(StringIO(data_str), delimiter="\t")
 
     # Force 2D array
     if arr.ndim == 0:
@@ -120,10 +122,11 @@ def load_txt(filepath: Path) -> pd.DataFrame:
         col_names = [f"col_{i}" for i in range(arr.shape[1])]
 
     df = pd.DataFrame(arr, columns=col_names)
-    df.attrs['timestamp'] = timestamp
-    df.attrs['num_points'] = num_points
+    df.attrs["timestamp"] = timestamp
+    df.attrs["num_points"] = num_points
     logger.info(f"Loaded TXT data {filepath.name}: {df.shape[0]} × {df.shape[1]}")
     return df
+
 
 def load_tdm(filepath: Path):
     """
@@ -144,15 +147,14 @@ def load_tdm(filepath: Path):
         raise FileNotFoundError(f"TDM file not found: {filepath}")
     tree = ET.parse(str(filepath))
     root = tree.getroot()
-    ns = {"usi": "http://www.ni.com/Schemas/USI/1_0"}
 
     # --- extract tdm_root info ---
     tr = root.find(".//tdm_root")
     root_info = {
-        "root_name":        tr.findtext("name"),
+        "root_name": tr.findtext("name"),
         "root_description": tr.findtext("description"),
-        "root_title":       tr.findtext("title"),
-        "root_author":      tr.findtext("author"),
+        "root_title": tr.findtext("title"),
+        "root_author": tr.findtext("author"),
     }
     inst = tr.find("instance_attributes")
     for attr in inst:
@@ -171,23 +173,10 @@ def load_tdm(filepath: Path):
     # --- build helper maps for channels ---
     # 1) group id → group name
     group_map = {
-        g.get("id"): g.findtext("name")
-        for g in root.findall(".//tdm_channelgroup")
+        g.get("id"): g.findtext("name") for g in root.findall(".//tdm_channelgroup")
     }
-    # 2) blocks: inc0, inc1, … → length & valueType
-    block_map = {
-        blk.get("id"): {
-            "block_length": int(blk.get("length")),
-            "value_type":   blk.get("valueType")
-        }
-        for blk in root.findall(".//usi:include/file/block", ns)
-    }
-    # 3) sequence → block: usi1 → inc0, etc.
-    seq2blk = {
-        seq.get("id"): seq.find("values").get("external")
-        for seq in root.findall(".//usi:data/*_sequence", ns)
-    }
-    # 4) channel → sequence via localcolumn
+
+    # 2) channel → sequence via localcolumn
     chan2seq = {}
     for lc in root.findall(".//localcolumn"):
         m1 = re.search(r'id\("([^"]+)"\)', (lc.findtext("measurement_quantity") or ""))
@@ -204,15 +193,15 @@ def load_tdm(filepath: Path):
         group = group_map.get(m.group(1)) if m else None
 
         seq = chan2seq.get(cid)
-        blk = seq2blk.get(seq)
+        # blk = seq2blk.get(seq)  # unused → removed
         rec = {
-            "group":        group,
-            "channel_id":   cid,
-            "name":         c.findtext("name"),
-            "unit":         c.findtext("unit_string"),
-            "description":  c.findtext("description"),
-            "datatype":     c.findtext("datatype"),
-            "sequence_id":  seq
+            "group": group,
+            "channel_id": cid,
+            "name": c.findtext("name"),
+            "unit": c.findtext("unit_string"),
+            "description": c.findtext("description"),
+            "datatype": c.findtext("datatype"),
+            "sequence_id": seq,
         }
         records.append(rec)
 
@@ -221,8 +210,6 @@ def load_tdm(filepath: Path):
 
     return df_root, df_channels
 
+
 # package exports
-__all__ = [
-    'load_txt',
-    'load_tdm'
-]
+__all__ = ["load_txt", "load_tdm"]

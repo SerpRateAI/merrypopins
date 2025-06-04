@@ -5,11 +5,12 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from indenter.load_datasets import load_txt, load_tdm
+from merrypopins.load_datasets import load_txt, load_tdm
 
 # ==========================
 # Fixtures for test inputs
 # ==========================
+
 
 @pytest.fixture
 def sample_txt(tmp_path):
@@ -28,6 +29,7 @@ def sample_txt(tmp_path):
     p.write_text(content)
     return p
 
+
 @pytest.fixture
 def sample_txt_latin(tmp_path):
     # A TXT file encoded in Latin-1 (with a special character) to force the UTF-8 fallback path.
@@ -35,6 +37,7 @@ def sample_txt_latin(tmp_path):
     p = tmp_path / "latin.txt"
     p.write_text(content, encoding="latin1")
     return p
+
 
 @pytest.fixture
 def sample_txt_invalid_num(tmp_path):
@@ -52,37 +55,36 @@ def sample_txt_invalid_num(tmp_path):
     p.write_text(content)
     return p
 
+
 @pytest.fixture
 def sample_onecol_many(tmp_path):
     # A 1-column file to trigger the arr.ndim == 1 reshaping branch.
-    content = (
-        "TS\n\n"
-        "Number of Points = 3\n"
-        "\n"
-        "Val\n"
-        "10.0\n"
-        "20.0\n"
-        "30.0\n"
-    )
+    content = "TS\n\n" "Number of Points = 3\n" "\n" "Val\n" "10.0\n" "20.0\n" "30.0\n"
     p = tmp_path / "onecolmany.txt"
     p.write_text(content)
     return p
 
+
 # ==========================
 # Tests for load_txt
 # ==========================
+
 
 def test_load_txt_file_not_found():
     # Should raise FileNotFoundError if the path does not exist
     with pytest.raises(FileNotFoundError):
         load_txt(Path("no_such.txt"))
 
+
 def test_load_txt_not_implemented_for_other_types(tmp_path):
     # Should raise NotImplementedError if the file type is not .txt
     p = tmp_path / "file.csv"
     p.write_text("some,data\n1,2")
-    with pytest.raises(NotImplementedError, match=r"File type '.csv' is not supported yet"):
+    with pytest.raises(
+        NotImplementedError, match=r"File type '.csv' is not supported yet"
+    ):
         load_txt(p)
+
 
 def test_load_txt_encoding_fallback_failure(tmp_path, caplog):
     # Create a dummy file with invalid UTF-8 encoding and patch the read_text method to simulate encoding errors.
@@ -90,12 +92,16 @@ def test_load_txt_encoding_fallback_failure(tmp_path, caplog):
     # The second read_text call will raise a generic Exception to simulate a failure in Latin-1 decoding.
     # The test will check that the correct error messages are logged.
     dummy_path = tmp_path / "bad_encoding.txt"
-    dummy_path.write_bytes(b"\xff") # Invalid UTF-8 byte sequence
+    dummy_path.write_bytes(b"\xff")  # Invalid UTF-8 byte sequence
 
-    with patch.object(Path, "read_text", side_effect=[
-        UnicodeDecodeError("utf-8", b"", 0, 1, "invalid start byte"),
-        Exception("Latin-1 also failed")
-    ]):
+    with patch.object(
+        Path,
+        "read_text",
+        side_effect=[
+            UnicodeDecodeError("utf-8", b"", 0, 1, "invalid start byte"),
+            Exception("Latin-1 also failed"),
+        ],
+    ):
         caplog.set_level(logging.DEBUG)
         with pytest.raises(Exception, match="Latin-1 also failed"):
             load_txt(dummy_path)
@@ -104,12 +110,14 @@ def test_load_txt_encoding_fallback_failure(tmp_path, caplog):
         assert any("UTF-8 decode failed" in m for m in messages)
         assert any("Latin-1 decode also failed" in m for m in messages)
 
+
 def test_load_txt_no_numeric(tmp_path):
     # Should raise ValueError when no numeric rows are found
     p = tmp_path / "bad.txt"
     p.write_text("no numbers at all\njust text\n")
     with pytest.raises(ValueError):
         load_txt(p)
+
 
 def test_load_txt_basic(sample_txt):
     # The basic successful case: DataFrame shape, timestamp, num_points, and a sample value check
@@ -121,6 +129,7 @@ def test_load_txt_basic(sample_txt):
     # second row, second column ("Load")
     assert np.isclose(df.iloc[1, 1], 2100.0)
 
+
 def test_load_txt_encoding_fallback(sample_txt_latin, caplog):
     # Should log a warning and succeed via Latin-1 fallback
     caplog.set_level(logging.WARNING)
@@ -129,11 +138,13 @@ def test_load_txt_encoding_fallback(sample_txt_latin, caplog):
     assert df.attrs["num_points"] == 1
     assert "falling back to Latin-1" in caplog.text
 
+
 def test_load_txt_invalid_num(sample_txt_invalid_num):
     # First non‐numeric 'abc' should be skipped, then parse 2 correctly
     df = load_txt(sample_txt_invalid_num)
     assert df.attrs["num_points"] == 2
     assert list(df.columns) == ["X"]
+
 
 def test_load_txt_ndim1(sample_onecol_many):
     # One-column file should be reshaped to shape (N,1) with correct header
@@ -141,6 +152,7 @@ def test_load_txt_ndim1(sample_onecol_many):
     assert df.shape == (3, 1)
     assert list(df.columns) == ["Val"]
     assert np.isclose(df.iloc[2, 0], 30.0)
+
 
 def test_load_txt_numeric_first_row(tmp_path):
     # If the first non‐blank line is numeric, header_idx < 0 → fallback to col_ names
@@ -151,6 +163,7 @@ def test_load_txt_numeric_first_row(tmp_path):
     assert list(df.columns) == ["col_0", "col_1", "col_2"]
     assert df.shape == (2, 3)
     assert np.allclose(df.values, np.array([[1, 2, 3], [4, 5, 6]]))
+
 
 def test_load_txt_header_skip_blank(tmp_path):
     # This file has the header line, then two blank lines, then the numeric data.
@@ -183,10 +196,12 @@ def test_load_txt_header_skip_blank(tmp_path):
 # Tests for load_tdm
 # ==========================
 
+
 def test_load_tdm_file_not_found():
     # Should raise FileNotFoundError if the .tdm path does not exist
     with pytest.raises(FileNotFoundError):
         load_tdm(Path("missing.tdm"))
+
 
 def test_load_tdm_basic(tmp_path):
     # A minimal TDM XML: root metadata + one channel + one group, no sequence mapping
@@ -218,7 +233,10 @@ def test_load_tdm_basic(tmp_path):
     df_root, df_ch = load_tdm(f)
 
     # Check root metadata DataFrame
-    assert df_root.shape == (1, 7)  # root_name, root_description, root_title, root_author + 3 attrs
+    assert df_root.shape == (
+        1,
+        7,
+    )  # root_name, root_description, root_title, root_author + 3 attrs
     r = df_root.iloc[0]
     assert r["root_name"] == "RootName"
     assert r["root_description"] == "RootDesc"
@@ -229,7 +247,10 @@ def test_load_tdm_basic(tmp_path):
     assert r["LA"] == "0"
 
     # Check channel DataFrame
-    assert df_ch.shape == (1, 7)  # group, channel_id, name, unit, description, datatype, sequence_id
+    assert df_ch.shape == (
+        1,
+        7,
+    )  # group, channel_id, name, unit, description, datatype, sequence_id
     c = df_ch.iloc[0]
     assert c["channel_id"] == "C1"
     assert c["name"] == "Ch1"
@@ -239,6 +260,7 @@ def test_load_tdm_basic(tmp_path):
     assert c["group"] == "Grp1"
     # No <localcolumn> mapping present → sequence_id remains NaN
     assert pd.isna(c["sequence_id"])
+
 
 def test_load_tdm_sequence_mapping(tmp_path):
     # Now include a <usi:include> block, a <double_sequence>, and a <localcolumn> mapping C1 → s1

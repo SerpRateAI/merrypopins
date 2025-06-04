@@ -11,7 +11,7 @@ Functions:
     - default_preprocess: Recommended preprocessing pipeline.
 
 Usage:
-    from indenter.preprocess import (
+    from merrypopins.preprocess import (
         remove_pre_min_load,
         rescale_data,
         finalise_contact_index,
@@ -32,6 +32,7 @@ if not logger.handlers:
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
 
+
 def remove_pre_min_load(df: pd.DataFrame, load_col="Load (µN)") -> pd.DataFrame:
     """
     Remove all points up to and including the minimum Load point.
@@ -51,9 +52,12 @@ def remove_pre_min_load(df: pd.DataFrame, load_col="Load (µN)") -> pd.DataFrame
         logger.warning("Minimum at end of data; skipping initial data removal.")
         return df2
 
-    df_clean = df2.iloc[min_idx + 1:].reset_index(drop=True)
-    logger.info(f"Removed first {min_idx + 1} points up to minimum Load ({loads[min_idx]:.2f})")
+    df_clean = df2.iloc[min_idx + 1 :].reset_index(drop=True)
+    logger.info(
+        f"Removed first {min_idx + 1} points up to minimum Load ({loads[min_idx]:.2f})"
+    )
     return df_clean
+
 
 def rescale_data(
     df: pd.DataFrame,
@@ -62,7 +66,7 @@ def rescale_data(
     N_baseline=50,
     k=5,
     window_length=11,
-    polyorder=2
+    polyorder=2,
 ) -> pd.DataFrame:
     """
     Automatically detect contact point by noise threshold and rescale Depth so contact = 0.
@@ -96,20 +100,25 @@ def rescale_data(
 
     idx = np.argmax(smooth_loads > threshold)
     if smooth_loads[idx] <= threshold:
-        logger.warning(f"No crossing above auto-threshold ({threshold:.2f}); skipping rescale.")
+        logger.warning(
+            f"No crossing above auto-threshold ({threshold:.2f}); skipping rescale."
+        )
         return df2
 
     shift = df2[depth_col].iloc[idx]
     df2[depth_col] = df2[depth_col] - shift
-    logger.info(f"Auto-rescaled at index {idx}, load={smooth_loads[idx]:.2f} > {threshold:.2f}, shift={shift:.1f} nm")
+    logger.info(
+        f"Auto-rescaled at index {idx}, load={smooth_loads[idx]:.2f} > {threshold:.2f}, shift={shift:.1f} nm"
+    )
     return df2
+
 
 def finalise_contact_index(
     df: pd.DataFrame,
     depth_col: str = "Depth (nm)",
     remove_pre_contact: bool = True,
     add_flag_column: bool = True,
-    flag_column: str = "contact_point"
+    flag_column: str = "contact_point",
 ) -> pd.DataFrame:
     """
     Optionally remove all rows before contact (Depth < 0) and/or flag the first contact point.
@@ -146,6 +155,7 @@ def finalise_contact_index(
 
     return df2
 
+
 def default_preprocess(df: pd.DataFrame) -> pd.DataFrame:
     """
     Default preprocessing pipeline using recommended settings.
@@ -169,21 +179,22 @@ def default_preprocess(df: pd.DataFrame) -> pd.DataFrame:
         N_baseline=50,
         k=5,
         window_length=11,
-        polyorder=2
+        polyorder=2,
     )
     df = finalise_contact_index(
         df,
         depth_col="Depth (nm)",
         remove_pre_contact=True,
         add_flag_column=True,
-        flag_column="contact_point"
+        flag_column="contact_point",
     )
     return df
 
+
 # package exports
 __all__ = [
-    'remove_pre_min_load',
-    'rescale_data',
-    'finalise_contact_index',
-    'default_preprocess'
+    "remove_pre_min_load",
+    "rescale_data",
+    "finalise_contact_index",
+    "default_preprocess",
 ]
