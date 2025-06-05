@@ -44,7 +44,7 @@ def merrypopins_pipeline(
     use_savgol=True,
     depth_col="Depth (nm)",
     load_col="Load (µN)",
-    save_plot_dir=Path("outputs"),
+    save_plot_dir=Path("visualisations"),
 ):
     """
     Executes the full Merrypopins pipeline: load -> preprocess -> locate -> visualize.

@@ -42,6 +42,7 @@ pip install -e .
 
 merrypopins supports Python 3.10+ and depends on:
 
+- `matplotlib`
 - `numpy`
 - `pandas`
 - `scipy`
@@ -207,7 +208,7 @@ This function runs the entire merrypopins workflow, from loading data to locatin
 ```python
 # Define the text file that will be processed and output directory that will contain the visualization
 text_file = Path("datasets/6microntip_slowloading/grain9_6um_indent03_HL_QS_LC.txt")
-output_dir = Path("outputs/6microntip_slowloading/grain9_6um_indent03_HL_QS_LC")
+output_dir = Path("visualisations/6microntip_slowloading/grain9_6um_indent03_HL_QS_LC")
 
 # Make sure output directory exists
 output_dir.mkdir(parents=True, exist_ok=True)
