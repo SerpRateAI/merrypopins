@@ -22,7 +22,7 @@
   - Fourier-based derivative outlier detection
   - Savitzky-Golay smoothed gradient thresholds
 - **`statistics`**: Perform statistical analysis and model fitting on located pop‑in events (e.g., frequency, magnitude, distribution).
-- **`make_dataset`**: Combine raw measurements, metadata, and analysis outputs into a machine‑learning‑ready dataset.
+- **`make_dataset`**: Construct enriched datasets by running the full merrypopins pipeline and exporting annotated results and visualizations.
 
 Merrypopins is developed by [Cahit Acar](mailto:c.acar.business@gmail.com), [Anna Marcelissen](mailto:anna.marcelissen@live.nl), [Hugo van Schrojenstein Lantman](mailto:h.w.vanschrojensteinlantman@uu.nl), and [John M. Aiken](mailto:johnm.aiken@gmail.com).
 
@@ -61,6 +61,7 @@ from pathlib import Path
 from merrypopins.load_datasets import load_txt, load_tdm
 from merrypopins.preprocess import default_preprocess, remove_pre_min_load, rescale_data, finalise_contact_index
 from merrypopins.locate import default_locate
+from merrypopins.make_dataset import merrypopins_pipeline
 ```
 
 ### Load Indentation Data and Metadata
@@ -195,6 +196,59 @@ plt.scatter(confident["Depth (nm)"], confident["Load (µN)"],
 plt.xlabel("Depth (nm)"); plt.ylabel("Load (µN)")
 plt.title("Pop-in Detections by All Methods")
 plt.legend(); plt.grid(True); plt.tight_layout(); plt.show()
+```
+
+### Run Full Pipeline with merrypopins_pipeline
+
+This function runs the entire merrypopins workflow, from loading data to locating pop-ins and generating visualizations.
+
+#### Define Input and Output Paths
+
+```python
+# Define the text file that will be processed and output directory that will contain the visualization
+text_file = Path("datasets/6microntip_slowloading/grain9_6um_indent03_HL_QS_LC.txt")
+output_dir = Path("outputs/6microntip_slowloading/grain9_6um_indent03_HL_QS_LC")
+
+# Make sure output directory exists
+output_dir.mkdir(parents=True, exist_ok=True)
+```
+
+#### Run The merrypopins Pipeline
+
+```python
+df_pipeline = merrypopins_pipeline(
+    text_file,
+    save_plot_dir=output_dir,
+    trim_margin=30
+)
+```
+
+#### View Result DataFrame
+
+```python
+df_pipeline.head()
+```
+
+#### View Result Visualizations
+
+```python
+# The pipeline generates plot in the specified output directory for the provided text file.
+from PIL import Image
+import matplotlib.pyplot as plt
+
+# Load all PNGs from output folder
+image_paths = sorted(output_dir.glob("*.png"))
+
+# Only proceed if there are images
+if image_paths:
+    img = Image.open(image_paths[0])
+    plt.figure(figsize=(12, 6))
+    plt.imshow(img)
+    plt.title(image_paths[0].stem)
+    plt.axis('off')
+    plt.show()
+else:
+    print("No plots found in output folder.")
 ```
 
 ---
