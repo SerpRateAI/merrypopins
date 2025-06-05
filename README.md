@@ -31,7 +31,7 @@ Merrypopins is developed by [Cahit Acar](mailto:c.acar.business@gmail.com), [Ann
 ## Installation
 
 ```bash
-# From PyPI (⚠️ This will not work because package not published yet.)
+# From PyPI
 pip install merrypopins
 
 # For development
