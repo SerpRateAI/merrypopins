@@ -26,7 +26,7 @@ jobs:
     - name: Extract versions
       id: extract
       run: |
-        py_version=$(python -c "import tomli; print(tomli.load(open('pyproject.toml'))['project']['version'])")
+        py_version=$(python -c "import tomli; print(tomli.load(open('pyproject.toml', 'rb'))['project']['version'])")
         init_version=$(python -c "import re; print(re.search(r\"__version__\\s*=\\s*['\\\"]([^'\\\"]+)['\\\"]\", open('src/merrypopins/__init__.py').read()).group(1))")
 
         echo "py_version=$py_version" >> $GITHUB_OUTPUT
