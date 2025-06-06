@@ -30,7 +30,7 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/SerpRateAI/merrypopins"
+Homepage = "https://serprateai.github.io/merrypopins/"
 Source   = "https://github.com/SerpRateAI/merrypopins"
 
 [project.optional-dependencies]
