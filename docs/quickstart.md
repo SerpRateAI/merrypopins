@@ -2,7 +2,7 @@
 
 ### Importing merrypopins Modules
 
-```python
+```python linenums="1"
 from pathlib import Path
 from merrypopins.load_datasets import load_txt, load_tdm
 from merrypopins.preprocess import default_preprocess, remove_pre_min_load, rescale_data, finalise_contact_index
@@ -12,7 +12,7 @@ from merrypopins.make_dataset import merrypopins_pipeline
 
 ### Load Indentation Data and Metadata
 
-```python
+```python linenums="1"
 # 1) Load indentation data:
 data_file = Path("data/experiment1.txt")
 df = load_txt(data_file)
@@ -38,7 +38,7 @@ print(df_tdm_meta_channels.head(50))
 
 #### Option 1: Use default pipeline
 
-```python
+```python linenums="1"
 # This applies:
 # 1. Removes all rows before minimum Load
 # 2. Detects contact point and shifts Depth so contact = 0
@@ -52,7 +52,7 @@ print("Contact point index:", df_processed[df_processed["contact_point"]].index[
 
 #### Option 2: Customize each step (with optional arguments)
 
-```python
+```python linenums="1"
 # Step 1: Remove initial noise based on minimum Load
 df_clean = remove_pre_min_load(df, load_col="Load (µN)")
 
@@ -90,7 +90,7 @@ You can omit or modify any step depending on your data:
 
 #### Detect Pop-ins using Default Method
 
-```python
+```python linenums="1"
 # Detect pop-ins using all methods
 results = default_locate(df_processed)
 print(results[results.popin])
@@ -98,7 +98,7 @@ print(results[results.popin])
 
 ### Customize Detection Thresholds
 
-```python
+```python linenums="1"
 results_tuned = default_locate(
     df_processed,
     iforest_contamination=0.002,
@@ -110,7 +110,7 @@ results_tuned = default_locate(
 
 ### Visualize Detections
 
-```python
+```python linenums="1"
 import matplotlib.pyplot as plt
 
 plt.figure(figsize=(8,6))
@@ -150,7 +150,7 @@ This function runs the entire merrypopins workflow, from loading data to locatin
 
 #### Define Input and Output Paths
 
-```python
+```python linenums="1"
 # Define the text file that will be processed and output directory that will contain the visualization
 text_file = Path("datasets/6microntip_slowloading/grain9_6um_indent03_HL_QS_LC.txt")
 output_dir = Path("visualisations/6microntip_slowloading/grain9_6um_indent03_HL_QS_LC")
@@ -161,7 +161,7 @@ output_dir.mkdir(parents=True, exist_ok=True)
 
 #### Run The merrypopins Pipeline
 
-```python
+```python linenums="1"
 df_pipeline = merrypopins_pipeline(
     text_file,
     save_plot_dir=output_dir,
@@ -171,13 +171,13 @@ df_pipeline = merrypopins_pipeline(
 
 #### View Result DataFrame
 
-```python
+```python linenums="1"
 df_pipeline.head()
 ```
 
 #### View Result Visualizations
 
-```python
+```python linenums="1"
 # The pipeline generates plot in the specified output directory for the provided text file.
 from PIL import Image
 import matplotlib.pyplot as plt

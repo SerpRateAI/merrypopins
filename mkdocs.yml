@@ -18,10 +18,20 @@ nav:
 
 theme:
   name: material
+  language: en
   palette:
-    scheme: default
-    primary: indigo
-    accent: indigo
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+      primary: indigo
+      accent: lime
   features:
     - navigation.tabs
     - navigation.tabs.sticky
@@ -35,6 +45,10 @@ theme:
     - search.suggest
     - search.highlight
     - search.share
+    - toc.integrate
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
 
 plugins:
   - search
@@ -48,6 +62,12 @@ plugins:
 markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
+  - pymdownx.inlinehilite
+  - admonition
+  - pymdownx.arithmatex:
+      generic: true
+  - footnotes
+  - pymdownx.mark
   - pymdownx.superfences
   - pymdownx.caret
   - pymdownx.mark
@@ -60,3 +80,12 @@ markdown_extensions:
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.details
+  - attr_list
+
+extra:
+  social:
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/SerpRateAI/merrypopins
+
+copyright: |
+  &copy; 2025 <a href="https://github.com/SerpRateAI/merrypopins" target="_blank" rel="noopener">Merrypopins</a>
