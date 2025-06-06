@@ -11,7 +11,7 @@ A modular pipeline for nanoindentation analysis. Includes tools for:
  - `make_dataset`: Construct enriched datasets by running the full pipeline and exporting annotated results and visualizations.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 # Expose submodules at the package level
 from . import load_datasets, preprocess, locate, statistics, make_dataset
