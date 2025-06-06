@@ -27,6 +27,9 @@ plugins:
       handlers:
         python:
           paths: ["src"]
+site_url: https://serprateai.github.io/merrypopins/
+repo_name: SerpRateAI/merrypopins
+repo_url: https://github.com/SerpRateAI/merrypopins
 nav:
   - Home: index.md
   - Installation: installation.md
