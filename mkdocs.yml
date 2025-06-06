@@ -1,4 +1,20 @@
 site_name: Merrypopins
+site_url: https://serprateai.github.io/merrypopins/
+repo_name: SerpRateAI/merrypopins
+repo_url: https://github.com/SerpRateAI/merrypopins
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Quick Start: quickstart.md
+  - Contribution Guide: contributing.md
+  - Features:
+      - Load Datasets: reference/merrypopins.load_datasets.md
+      - Preprocess Data: reference/merrypopins.preprocess.md
+      - Locate: reference/merrypopins.locate.md
+      - Statistics: reference/merrypopins.statistics.md
+      - Make Dataset: reference/merrypopins.make_dataset.md
+
 theme:
   name: material
   palette:
@@ -27,20 +43,7 @@ plugins:
       handlers:
         python:
           paths: ["src"]
-site_url: https://serprateai.github.io/merrypopins/
-repo_name: SerpRateAI/merrypopins
-repo_url: https://github.com/SerpRateAI/merrypopins
-nav:
-  - Home: index.md
-  - Installation: installation.md
-  - Quick Start: quickstart.md
-  - Contribution Guide: contributing.md
-  - Features:
-      - Load Datasets: reference/merrypopins.load_datasets.md
-      - Preprocess Data: reference/merrypopins.preprocess.md
-      - Locate: reference/merrypopins.locate.md
-      - Statistics: reference/merrypopins.statistics.md
-      - Make Dataset: reference/merrypopins.make_dataset.md
+
 markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
