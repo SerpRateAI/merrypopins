@@ -1,13 +1,14 @@
-name: Publish to PyPI
+name: Auto Publish to PyPI
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'  # Triggers on new version tag
+  pull_request:
+    branches: [dev]  # or your release branch
 
 jobs:
-  build-and-publish:
+  check-and-release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Needed to push new tag
 
     steps:
     - name: Check out code
@@ -18,12 +19,48 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: Install build tools
+    - name: Install dependencies
       run: |
-        python -m pip install --upgrade build twine
+        pip install tomli packaging
+
+    - name: Extract versions
+      id: extract
+      run: |
+        py_version=$(python -c "import tomli; print(tomli.load(open('pyproject.toml', 'rb'))['project']['version'])")
+        init_version=$(python -c "import re; print(re.search(r\"__version__\\s*=\\s*['\\\"]([^'\\\"]+)['\\\"]\", open('src/merrypopins/__init__.py').read()).group(1))")
+
+        echo "py_version=$py_version" >> $GITHUB_OUTPUT
+        echo "init_version=$init_version" >> $GITHUB_OUTPUT
+
+    - name: Check version match
+      run: |
+        if [[ "${{ steps.extract.outputs.py_version }}" != "${{ steps.extract.outputs.init_version }}" ]]; then
+          echo "❌ Version mismatch between pyproject.toml and __init__.py"
+          exit 1
+        fi
+
+    - name: Get latest git tag
+      id: tag
+      run: |
+        latest_tag=$(git tag --sort=creatordate | tail -n 1)
+        echo "latest_tag=$latest_tag" >> $GITHUB_OUTPUT
+
+    - name: Compare with latest tag
+      run: |
+        new_ver=${{ steps.extract.outputs.py_version }}
+        tag_ver=${{ steps.tag.outputs.latest_tag }}
+
+        echo "New version: $new_ver"
+        echo "Last tag: $tag_ver"
+
+        if [[ "$tag_ver" == "v$new_ver" ]]; then
+          echo "❌ Version $new_ver already tagged"
+          exit 1
+        fi
 
     - name: Build package
       run: |
+        python -m pip install --upgrade build
         python -m build
 
     - name: Publish to PyPI
@@ -31,5 +68,12 @@ jobs:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
       run: |
+        python -m pip install --upgrade twine
         twine upload dist/*
-        echo "Package published to PyPI successfully!"
+
+    - name: Create tag
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git tag v${{ steps.extract.outputs.py_version }}
+        git push origin v${{ steps.extract.outputs.py_version }}

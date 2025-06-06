@@ -1,64 +1,8 @@
-# Merrypopins
-
-[![merrypopins CI Tests](https://github.com/SerpRateAI/merrypopins/actions/workflows/python-app.yml/badge.svg)](https://github.com/SerpRateAI/merrypopins/actions/workflows/python-app.yml)
-[![📘 Merrypopins Documentation](https://img.shields.io/badge/docs-view-blue?logo=readthedocs)](https://serprateai.github.io/merrypopins/)
-[![PyPI](https://img.shields.io/pypi/v/merrypopins.svg)](https://pypi.org/project/merrypopins/)
-[![Python](https://img.shields.io/pypi/pyversions/merrypopins.svg)](https://pypi.org/project/merrypopins/)
-[![codecov](https://codecov.io/gh/SerpRateAI/merrypopins/branch/main/graph/badge.svg)](https://codecov.io/gh/SerpRateAI/merrypopins)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Downloads](https://pepy.tech/badge/merrypopins)](https://pepy.tech/project/merrypopins)
-[![Issues](https://img.shields.io/github/issues/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/issues)
-[![Dependencies](https://img.shields.io/librariesio/github/SerpRateAI/merrypopins)](https://github.com/SerpRateAI/merrypopins/network/dependencies)
-[![Last commit](https://img.shields.io/github/last-commit/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/commits/main)
-[![Release](https://img.shields.io/github/release-date/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/releases)
-[![Contributors](https://img.shields.io/github/contributors/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/graphs/contributors)
-
-**merrypopins** is a Python library to streamline the workflow of nano‑indentation experiment data processing, automated pop-in detection and analysis. It provides five core modules:
-
-- **`load_datasets`**: Load and parse `.txt` measurement files and `.tdm`/`.tdx` metadata files into structured pandas DataFrames. Automatically detects headers, timestamps, and measurement channels.
-- **`preprocess`**: Clean and normalize indentation data with filtering, baseline correction, and contact point detection.
-- **`locate`**: Identify and extract pop‑in events within indentation curves using advanced detection algorithms, including:
-  - Isolation Forest anomaly detection
-  - CNN Autoencoder reconstruction error
-  - Fourier-based derivative outlier detection
-  - Savitzky-Golay smoothed gradient thresholds
-- **`statistics`**: Perform statistical analysis and model fitting on located pop‑in events (e.g., frequency, magnitude, distribution).
-- **`make_dataset`**: Construct enriched datasets by running the full merrypopins pipeline and exporting annotated results and visualizations.
-
-Merrypopins is developed by [Cahit Acar](mailto:c.acar.business@gmail.com), [Anna Marcelissen](mailto:anna.marcelissen@live.nl), [Hugo van Schrojenstein Lantman](mailto:h.w.vanschrojensteinlantman@uu.nl), and [John M. Aiken](mailto:johnm.aiken@gmail.com).
-
----
-
-## Installation
-
-```bash
-# From PyPI
-pip install merrypopins
-
-# For development
-git clone https://github.com/SerpRateAI/merrypopins.git
-cd merrypopins
-pip install -e .
-```
-
-merrypopins supports Python 3.10+ and depends on:
-
-- `matplotlib`
-- `numpy`
-- `pandas`
-- `scipy`
-- `scikit-learn`
-- `tensorflow`
-
-These are installed automatically via `pip`.
-
----
-
 ## Quickstart
 
 ### Importing merrypopins Modules
 
-```python
+```python linenums="1"
 from pathlib import Path
 from merrypopins.load_datasets import load_txt, load_tdm
 from merrypopins.preprocess import default_preprocess, remove_pre_min_load, rescale_data, finalise_contact_index
@@ -68,7 +12,7 @@ from merrypopins.make_dataset import merrypopins_pipeline
 
 ### Load Indentation Data and Metadata
 
-```python
+```python linenums="1"
 # 1) Load indentation data:
 data_file = Path("data/experiment1.txt")
 df = load_txt(data_file)
@@ -94,7 +38,7 @@ print(df_tdm_meta_channels.head(50))
 
 #### Option 1: Use default pipeline
 
-```python
+```python linenums="1"
 # This applies:
 # 1. Removes all rows before minimum Load
 # 2. Detects contact point and shifts Depth so contact = 0
@@ -108,7 +52,7 @@ print("Contact point index:", df_processed[df_processed["contact_point"]].index[
 
 #### Option 2: Customize each step (with optional arguments)
 
-```python
+```python linenums="1"
 # Step 1: Remove initial noise based on minimum Load
 df_clean = remove_pre_min_load(df, load_col="Load (µN)")
 
@@ -146,7 +90,7 @@ You can omit or modify any step depending on your data:
 
 #### Detect Pop-ins using Default Method
 
-```python
+```python linenums="1"
 # Detect pop-ins using all methods
 results = default_locate(df_processed)
 print(results[results.popin])
@@ -154,7 +98,7 @@ print(results[results.popin])
 
 ### Customize Detection Thresholds
 
-```python
+```python linenums="1"
 results_tuned = default_locate(
     df_processed,
     iforest_contamination=0.002,
@@ -166,7 +110,7 @@ results_tuned = default_locate(
 
 ### Visualize Detections
 
-```python
+```python linenums="1"
 import matplotlib.pyplot as plt
 
 plt.figure(figsize=(8,6))
@@ -206,7 +150,7 @@ This function runs the entire merrypopins workflow, from loading data to locatin
 
 #### Define Input and Output Paths
 
-```python
+```python linenums="1"
 # Define the text file that will be processed and output directory that will contain the visualization
 text_file = Path("datasets/6microntip_slowloading/grain9_6um_indent03_HL_QS_LC.txt")
 output_dir = Path("visualisations/6microntip_slowloading/grain9_6um_indent03_HL_QS_LC")
@@ -217,7 +161,7 @@ output_dir.mkdir(parents=True, exist_ok=True)
 
 #### Run The merrypopins Pipeline
 
-```python
+```python linenums="1"
 df_pipeline = merrypopins_pipeline(
     text_file,
     save_plot_dir=output_dir,
@@ -227,13 +171,13 @@ df_pipeline = merrypopins_pipeline(
 
 #### View Result DataFrame
 
-```python
+```python linenums="1"
 df_pipeline.head()
 ```
 
 #### View Result Visualizations
 
-```python
+```python linenums="1"
 # The pipeline generates plot in the specified output directory for the provided text file.
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -252,71 +196,3 @@ if image_paths:
 else:
     print("No plots found in output folder.")
 ```
-
----
-
-## Development & Testing
-
-1. Install development requirements:
-   ```bash
-   pip install -e '.[dev]'
-   ```
-
-### 🔧 Pre-commit Hooks
-
-We use [pre-commit](https://pre-commit.com/) to automatically check code formatting and linting before each commit. This helps ensure consistent code quality across the project.
-
-#### Setup (Run Once)
-
-```bash
-# After installing the development dependencies, set up pre-commit hooks:
-# This will install the hooks defined in .pre-commit-config.yaml
-pre-commit install
-```
-
-This sets up a Git hook that will run ruff and black automatically before each commit.
-
-Run Manually
-
-To run all checks on all files:
-
-```bash
-pre-commit run --all-files
-```
-
-Notes:
-- Hooks are defined in .pre-commit-config.yaml.
-- You can exclude specific files or directories (e.g., tutorials/) by modifying that config file.
-
-### 🧪 Running Tests
-2. Run tests with coverage:
-   ```bash
-   pytest --cov=merrypopins --cov-report=term-missing
-   ```
-
-3. Generate HTML coverage report:
-   ```bash
-   pytest --cov=merrypopins --cov-report=html
-   # open htmlcov/index.html in browser
-   ```
-
----
-
-## Contributing
-
-Contributions are welcome! Please file issues and submit pull requests on [GitHub](https://github.com/SerpRateAI/merrypoppins).
-
-Before submitting a PR:
-
-1. Fork the repository.
-2. Create a feature branch (`git checkout -b feature/foo`).
-3. Commit your changes (`git commit -m "feat: add bar"`).
-4. Push to the branch (`git push origin feature/foo`).
-5. Open a pull request.
-
----
-
-## License
-
-This project is licensed under the **GNU General Public License v3.0**.
-See [LICENSE](LICENSE) for details.

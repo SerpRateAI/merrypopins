@@ -9,6 +9,10 @@ Detects pop-ins (sudden displacement jumps) in nano-indentation curves using mul
 • Finite difference method using Fourier spectral analysis
 • Savitzky-Golay derivative method
 
+To ensure relevance, all detection methods operate only on the indentation curve **up to the maximum load point**.
+This is because pop-in events occur during the loading phase of indentation. After reaching peak load, material unloading
+or post-penetration artifacts may dominate, which are irrelevant for pop-in analysis.
+
 Provides:
 - compute_stiffness
 - compute_features
@@ -111,20 +115,33 @@ def compute_features(
     return df2 if return_derivatives else df
 
 
+def find_max_load_index(df, load_col="Load (µN)"):
+    """
+    Find the index of the maximum load point in the indentation curve.
+
+    Args:
+        df (DataFrame): Input indentation data.
+        load_col (str): Column name for the load data.
+
+    Returns:
+        int: Index of the maximum load value.
+    """
+    return df[load_col].idxmax()
+
+
 def trim_edges(series, margin):
     """
-    Trim the first and last `margin` elements of a pandas Series.
+    Trim the first `margin` elements of a pandas Series.
     This is useful for removing edge effects in time-series data where
-    the first and last few points may not be reliable.
+    the first few points may not be reliable.
     Args:
         series (pd.Series): Input time-series data.
-        margin (int): Number of elements to trim from each end.
+        margin (int): Number of elements to trim from the start.
     Returns:
-        pd.Series: A copy of the input series with the first and last `margin` elements set to False.
+        pd.Series: A copy of the input series with the first `margin` elements set to False.
     """
     trimmed = series.copy()
     trimmed[:margin] = False
-    trimmed[-margin:] = False
     return trimmed
 
 
@@ -137,6 +154,7 @@ def detect_popins_iforest(
     window=5,
     trim_edges_enabled=True,
     trim_margin=None,
+    max_load_trim_enabled=True,
 ):
     """
     Detect pop-ins using Isolation Forest based on local stiffness and curvature.
@@ -156,12 +174,14 @@ def detect_popins_iforest(
         depth_col (str): Name of the depth column.
         load_col (str): Name of the load column.
         window (int): Size of the sliding window used to compute stiffness.
-        trim_edges_enabled (bool): If True, trims the first and last `window` elements
-        trim_margin (int or None): Number of elements to trim from each end.
+        trim_edges_enabled (bool): If True, trims the first `window` elements
+        trim_margin (int or None): Number of elements to trim from the start.
+        max_load_trim_enabled (bool): If True, masks out any anomalies after the maximum load point. Default is True.
 
     Returns:
         DataFrame: A copy of the original DataFrame with a new boolean column:
             - "popin_iforest": True for detected pop-ins (anomalies), False otherwise.
+                - Only pre-max-load anomalies are returned to focus on loading-phase events. If `max_load_trim_enabled` is True which is the default.
     """
     df2 = compute_features(df, depth_col, load_col, window)
     iso = IsolationForest(contamination=contamination, random_state=random_state)
@@ -170,6 +190,12 @@ def detect_popins_iforest(
     if trim_edges_enabled:
         margin = trim_margin if trim_margin is not None else max(10, window)
         preds = trim_edges(preds, margin=margin)
+
+    if max_load_trim_enabled:
+        # Mask out anything *after* max load
+        max_idx = find_max_load_index(df, load_col)
+        preds[max_idx + 1 :] = False
+
     df2["popin_iforest"] = preds
     logger.info(f"IsolationForest flagged {df2['popin_iforest'].sum()} anomalies")
     return df2
@@ -225,6 +251,7 @@ def detect_popins_cnn(
     window=5,
     trim_edges_enabled=True,
     trim_margin=None,
+    max_load_trim_enabled=True,
 ):
     """
     Detect pop-ins using a Convolutional Autoencoder trained on stiffness features.
@@ -252,12 +279,14 @@ def detect_popins_cnn(
         depth_col (str): Column name for depth measurements.
         load_col (str): Column name for load measurements.
         window (int): Size of the moving window used for stiffness calculation.
-        trim_edges_enabled (bool): If True, trims the first and last `window_size` elements.
-        trim_margin (int or None): Number of elements to trim from each end.
+        trim_edges_enabled (bool): If True, trims the first `window` elements
+        trim_margin (int or None): Number of elements to trim from the start.
+        max_load_trim_enabled (bool): If True, masks out any anomalies after the maximum load point. Default is True.
 
     Returns:
         DataFrame: Original DataFrame with a new boolean column:
             - "popin_cnn": True for detected anomalies, False otherwise.
+                - Only pre-max-load anomalies are returned to focus on loading-phase events. If `max_load_trim_enabled` is True which is the default.
     """
     df2 = compute_features(df, depth_col, load_col, window)
     X = df2[["stiff_diff", "curvature"]].fillna(0).values
@@ -289,13 +318,24 @@ def detect_popins_cnn(
         margin = trim_margin if trim_margin is not None else max(10, window)
         flags = trim_edges(flags, margin=margin)
 
+    if max_load_trim_enabled:
+        # Mask out anything *after* max load
+        max_idx = find_max_load_index(df, load_col)
+        flags[max_idx + 1 :] = False
+
     df2["popin_cnn"] = flags
     logger.info(f"CNN flagged {df2['popin_cnn'].sum()} anomalies")
     return df2
 
 
 def detect_popins_fd_fourier(
-    df, threshold=3.0, spacing=1.0, trim_edges_enabled=True, trim_margin=None
+    df,
+    threshold=3.0,
+    spacing=1.0,
+    trim_edges_enabled=True,
+    trim_margin=None,
+    load_col="Load (µN)",
+    max_load_trim_enabled=True,
 ):
     """
     Detect pop-ins by estimating the derivative of Load using a Fourier spectral method.
@@ -316,13 +356,17 @@ def detect_popins_fd_fourier(
         df (DataFrame): Input indentation data.
         threshold (float): Std deviation multiplier to flag anomalies in derivative.
         spacing (float): Spacing between data points (in nm or similar units).
-        trim_edges_enabled (bool): If True, trims the first and last 10 points to avoid edge effects.
-        trim_margin (int or None): Number of elements to trim from each end.
+        trim_edges_enabled (bool): If True, trims the first `window` elements
+        trim_margin (int or None): Number of elements to trim from the start.
+        load_col (str): Column name for load data.
+        max_load_trim_enabled (bool): If True, masks out any anomalies after the maximum load point. Default is True.
 
     Returns:
-        DataFrame: Copy of input with "popin_fd" flag column.
+        DataFrame: Original DataFrame with a new boolean column:
+            - "popin_fd": True for detected anomalies, False otherwise.
+                - Only pre-max-load anomalies are returned to focus on loading-phase events. If `max_load_trim_enabled` is True which is the default.
     """
-    load = df["Load (µN)"].values
+    load = df[load_col].values
     fft_load = np.fft.fft(load)
     freqs = np.fft.fftfreq(len(load), d=spacing)
     derivative = np.real(np.fft.ifft(1j * 2 * np.pi * freqs * fft_load))
@@ -332,6 +376,12 @@ def detect_popins_fd_fourier(
     if trim_edges_enabled:
         margin = trim_margin if trim_margin is not None else 10
         anomalies = trim_edges(anomalies, margin=margin)
+
+    if max_load_trim_enabled:
+        # Mask out anything *after* max load
+        max_idx = find_max_load_index(df, load_col)
+        anomalies[max_idx + 1 :] = False
+
     df2 = df.copy()
     df2["popin_fd"] = anomalies
     logger.info(f"Fourier spectral method flagged {anomalies.sum()} anomalies")
@@ -347,6 +397,7 @@ def detect_popins_savgol(
     load_col="Load (µN)",
     trim_edges_enabled=True,
     trim_margin=None,
+    max_load_trim_enabled=True,
 ):
     """
     Detect pop-ins using Savitzky-Golay filtered derivatives.
@@ -367,11 +418,14 @@ def detect_popins_savgol(
         threshold (float): Threshold in standard deviations for detecting anomalies.
         deriv (int): Order of derivative to compute (default is 1 for first derivative).
         load_col (str): Column name for load data.
-        trim_edges_enabled (bool): If True, trims the first and last 10 points to avoid edge effects.
-        trim_margin (int or None): Number of elements to trim from each end.
+        trim_edges_enabled (bool): If True, trims the first `window` elements
+        trim_margin (int or None): Number of elements to trim from the start.
+        max_load_trim_enabled (bool): If True, masks out any anomalies after the maximum load point. Default is True.
 
     Returns:
-        DataFrame: Original data with popin_savgol column.
+        - DataFrame: Original dataframe with a new boolean column:
+            - "popin_savgol": True for detected anomalies, False otherwise.
+                - Only pre-max-load anomalies are returned to focus on loading-phase events. If `max_load_trim_enabled` is True which is the default.
     """
     derivative = savgol_filter(df[load_col], window_length, polyorder, deriv=deriv)
     anomalies = np.abs(derivative - np.mean(derivative)) > threshold * np.std(
@@ -380,6 +434,12 @@ def detect_popins_savgol(
     if trim_edges_enabled:
         margin = trim_margin if trim_margin is not None else max(10, window_length)
         anomalies = trim_edges(anomalies, margin=margin)
+
+    if max_load_trim_enabled:
+        # Mask out anything *after* max load
+        max_idx = find_max_load_index(df, load_col)
+        anomalies[max_idx + 1 :] = False
+
     df2 = df.copy()
     df2["popin_savgol"] = anomalies
     logger.info(f"Savitzky-Golay flagged {anomalies.sum()} anomalies")
@@ -408,6 +468,7 @@ def default_locate(
     stiffness_window=5,
     trim_edges_enabled=True,
     trim_margin=None,
+    max_load_trim_enabled=True,
     use_iforest=True,
     use_cnn=True,
     use_fd=True,
@@ -434,7 +495,9 @@ def default_locate(
         savgol_threshold (float): Std deviation threshold for Savitzky-Golay.
         sg_deriv_order (int): Derivative order for Savitzky-Golay.
         stiffness_window (int): Sliding window size for stiffness computation.
-        trim_edges_enabled (bool): Whether to trim edges in the data.
+        trim_edges_enabled (bool): If True, trims the first `window` elements
+        trim_margin (int or None): Number of elements to trim from the start.
+        max_load_trim_enabled (bool): If True, masks out any anomalies after the maximum load point. Default is True.
         use_iforest (bool): Whether to use IsolationForest method.
         use_cnn (bool): Whether to use CNN method.
         use_fd (bool): Whether to use finite difference method.
@@ -458,6 +521,7 @@ def default_locate(
             window=stiffness_window,
             trim_edges_enabled=trim_edges_enabled,
             trim_margin=trim_margin,
+            max_load_trim_enabled=max_load_trim_enabled,
         )
         df_combined["popin_iforest"] = df_iforest["popin_iforest"]
         method_flags.append("popin_iforest")
@@ -475,6 +539,7 @@ def default_locate(
             window=stiffness_window,
             trim_edges_enabled=trim_edges_enabled,
             trim_margin=trim_margin,
+            max_load_trim_enabled=max_load_trim_enabled,
         )
         df_combined["popin_cnn"] = df_cnn["popin_cnn"]
         method_flags.append("popin_cnn")
@@ -486,6 +551,8 @@ def default_locate(
             spacing=fd_spacing,
             trim_edges_enabled=trim_edges_enabled,
             trim_margin=trim_margin,
+            load_col=load_col,
+            max_load_trim_enabled=max_load_trim_enabled,
         )
         df_combined["popin_fd"] = df_fd["popin_fd"]
         method_flags.append("popin_fd")
@@ -500,6 +567,7 @@ def default_locate(
             load_col=load_col,
             trim_edges_enabled=trim_edges_enabled,
             trim_margin=trim_margin,
+            max_load_trim_enabled=max_load_trim_enabled,
         )
         df_combined["popin_savgol"] = df_savgol["popin_savgol"]
         method_flags.append("popin_savgol")
