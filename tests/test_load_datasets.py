@@ -203,6 +203,7 @@ def test_load_tdm_file_not_found():
         load_tdm(Path("missing.tdm"))
 
 
+@pytest.mark.slow
 def test_load_tdm_basic(tmp_path):
     # A minimal TDM XML: root metadata + one channel + one group, no sequence mapping
     xml = """<?xml version="1.0"?>
@@ -262,6 +263,7 @@ def test_load_tdm_basic(tmp_path):
     assert pd.isna(c["sequence_id"])
 
 
+@pytest.mark.slow
 def test_load_tdm_sequence_mapping(tmp_path):
     # Now include a <usi:include> block, a <double_sequence>, and a <localcolumn> mapping C1 → s1
     xml = """<?xml version="1.0"?>
