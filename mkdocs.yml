@@ -1,0 +1,51 @@
+site_name: Merrypopins
+site_url:  https://SerpRateAI.github.io/merrypopins
+theme:
+  name: material
+  palette:
+    scheme: default
+    primary: indigo
+    accent: indigo
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.instant.preview
+    - navigation.tracking
+    - navigation.expand
+    - navigation.sections
+    - search.suggest
+    - search.highlight
+    - search.share
+
+plugins:
+  - search
+  - tags
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Quick Start: quickstart.md
+  - Contribution Guide: contributing.md
+  - Features:
+      - Load Datasets: reference/merrypopins.load_datasets.md
+      - Preprocess Data: reference/merrypopins.preprocess.md
+      - Locate: reference/merrypopins.locate.md
+      - Statistics: reference/merrypopins.statistics.md
+      - Make Dataset: reference/merrypopins.make_dataset.md
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.caret
+  - pymdownx.mark
+  - pymdownx.tilde
+  - pymdownx.tabbed
+  - pymdownx.snippets
+  - pymdownx.emoji:
+      emoji_index: !!python/name:pymdownx.emoji.twemoji
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.details
