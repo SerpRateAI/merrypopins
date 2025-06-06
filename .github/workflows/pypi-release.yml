@@ -1,8 +1,8 @@
 name: Auto Publish to PyPI
 
 on:
-  pull_request:
-    branches: [dev]  # or your release branch
+  push:
+    branches: [main]
 
 jobs:
   version-check-and-pypi-publish:

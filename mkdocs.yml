@@ -7,7 +7,6 @@ nav:
   - Home: index.md
   - Installation: installation.md
   - Quick Start: quickstart.md
-  - Contribution Guide: contributing.md
   - Experimental Setup Documentation: documentation.md
   - Features:
       - Load Datasets: reference/merrypopins.load_datasets.md
@@ -15,6 +14,8 @@ nav:
       - Locate: reference/merrypopins.locate.md
       - Statistics: reference/merrypopins.statistics.md
       - Make Dataset: reference/merrypopins.make_dataset.md
+  - Contribution Guide: contributing.md
+  - Release Guide: RELEASING.md
 
 theme:
   name: material
