@@ -22,6 +22,11 @@ theme:
 plugins:
   - search
   - tags
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: ["src"]
 nav:
   - Home: index.md
   - Installation: installation.md
