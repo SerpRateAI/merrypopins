@@ -7,6 +7,8 @@ on:
 jobs:
   version-check-and-pypi-publish:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.extract.outputs.py_version }}
     permissions:
       contents: write  # Needed to push new tag
 
@@ -87,5 +89,5 @@ jobs:
     - name: Create GitHub release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: v${{ needs.version-check-and-pypi-publish.outputs.versions.py_version }}
+        tag_name: v${{ needs.version-check-and-pypi-publish.outputs.version }}
         generate_release_notes: true
