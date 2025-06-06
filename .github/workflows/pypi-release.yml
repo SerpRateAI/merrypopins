@@ -5,7 +5,7 @@ on:
     branches: [dev]  # or your release branch
 
 jobs:
-  check-and-release:
+  version-check-and-pypi-publish:
     runs-on: ubuntu-latest
     permissions:
       contents: write  # Needed to push new tag
@@ -77,3 +77,15 @@ jobs:
         git config user.email github-actions@github.com
         git tag v${{ steps.extract.outputs.py_version }}
         git push origin v${{ steps.extract.outputs.py_version }}
+  
+  create_release:
+    needs: version-check-and-pypi-publish
+    runs-on: ubuntu-latest
+    if: success()
+
+    steps:
+    - name: Create GitHub release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v${{ needs.version-check-and-pypi-publish.outputs.versions.py_version }}
+        generate_release_notes: true
