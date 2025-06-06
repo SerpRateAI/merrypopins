@@ -38,6 +38,7 @@ def merrypopins_pipeline(
     stiffness_window=5,
     trim_edges_enabled=True,
     trim_margin=None,
+    max_load_trim_enabled=True,
     use_iforest=True,
     use_cnn=True,
     use_fd=True,
@@ -66,7 +67,8 @@ def merrypopins_pipeline(
         sg_deriv_order (int): Derivative order for Savitzky-Golay.
         stiffness_window (int): Smoothing window for stiffness calculation.
         trim_edges_enabled (bool): Whether to trim pop-ins at curve edges.
-        trim_margin (int): Margin to trim detections at beginning/end.
+        trim_margin (int): Margin to trim detections at beginning.
+        max_load_trim_enabled (bool): Whether to trim pop-ins based on max load.
         use_iforest (bool): Enable IsolationForest detection.
         use_cnn (bool): Enable CNN detection.
         use_fd (bool): Enable Fourier detection.
@@ -99,6 +101,7 @@ def merrypopins_pipeline(
         stiffness_window=stiffness_window,
         trim_edges_enabled=trim_edges_enabled,
         trim_margin=trim_margin,
+        max_load_trim_enabled=max_load_trim_enabled,
         use_iforest=use_iforest,
         use_cnn=use_cnn,
         use_fd=use_fd,
