@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "merrypopins"
-version = "0.1.1"
+version = "0.2.3"
 description = "Merrypopins: Automated pop-in detection for nano-indentation experiments tooling: load_datasets, preprocess, locate, statistics & make_dataset"
 readme = "README.md"
 requires-python = ">=3.10 ,<3.13"
@@ -16,6 +16,7 @@ authors = [
   { name = "John M. Aiken", email = "johnm.aiken@gmail.com" }
 ]
 dependencies = [
+  "matplotlib>=3.10.3",
   "numpy>=1.23,<2.5",
   "pandas>=2.2.3",
   "scipy>=1.15.3",
@@ -29,7 +30,7 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/SerpRateAI/merrypopins"
+Homepage = "https://serprateai.github.io/merrypopins/"
 Source   = "https://github.com/SerpRateAI/merrypopins"
 
 [project.optional-dependencies]
