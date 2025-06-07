@@ -368,6 +368,24 @@ If you prefer to run the Streamlit app without Docker, you can do so by followin
 
 3. Open your web browser and go to [http://localhost:8501](http://localhost:8501) to access the app.
 
+## Publishing New App Versions to Docker Hub (Only for Maintainers)
+
+To publish a new version of the Merrypopins Streamlit app, follow these steps:
+
+1. Update the version date in `streamlit_app/app.py`.
+2. Commit your changes to the Git repository.
+3. Push the changes to the remote repository.
+4. Build and push the updated Docker image to Docker Hub:
+   ```bash
+   docker build -t cacarvuai/merrypopins-app:latest .
+   docker login
+   docker push cacarvuai/merrypopins-app:latest
+   ```
+5. Update the documentation to reflect the new version.
+
+Note: If you are not a maintainer, please do not attempt to publish new versions. Instead, you can contribute by submitting issues or pull requests with improvements or bug fixes.
+If you want to create your own version of the app, you can fork the repository and modify the code as needed. Just remember to change the Docker image name to avoid conflicts with the official version. e.g `docker build -t yourdockerhubusername/merrypopins-app:latest .`
+
 ---
 
 ## Contributing
