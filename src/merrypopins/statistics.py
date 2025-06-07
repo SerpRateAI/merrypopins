@@ -103,10 +103,10 @@ def extract_popin_intervals(df, popin_col="popin_selected", load_col="Load (µN)
 
 def calculate_popin_statistics(
     df,
+    general_stats=True,
     precursor_stats=True,
     temporal_stats=True,
     popin_shape_stats=True,
-    recovery_stats=True,
     time_col="Time (s)",
     load_col="Load (µN)",
     depth_col="Depth (nm)",
@@ -122,14 +122,14 @@ def calculate_popin_statistics(
     ----------
     df : pd.DataFrame
         Data with start/end indices of pop-ins.
+    general_stats : bool
+        Compute overall curve-level stats (e.g. n_popins, total duration).
     precursor_stats : bool
         Compute indicators before pop-in onset.
     temporal_stats : bool
         Compute timing-based statistics (duration, intervals).
     popin_shape_stats : bool
-        Compute features related to the drop shape.
-    recovery_stats : bool
-        Compute post-pop-in features.
+        Compute features related to the popin shape.
     time_col, load_col, depth_col : str
         Column names for time, load, and depth.
     start_col, end_col : str
@@ -146,6 +146,32 @@ def calculate_popin_statistics(
     interval_rows = df.dropna(subset=[start_col, end_col]).copy().reset_index(drop=True)
     df["dLoad"] = df[load_col].diff() / df[time_col].diff()
 
+    # General stats block (per curve)
+    if general_stats:
+        n_popins = len(interval_rows)
+        df["n_popins"] = n_popins
+
+        if n_popins > 0:
+            all_starts = interval_rows[start_col].astype(int).apply(lambda idx: df.at[idx, time_col])
+            all_ends = interval_rows[end_col].astype(int).apply(lambda idx: df.at[idx, time_col])
+            total_popin_duration = all_ends.max() - all_starts.min()
+            avg_time_between = all_starts.diff().dropna().mean()
+            first_popin_time = all_starts.min()
+            last_popin_time = all_ends.max()
+        else:
+            total_popin_duration = 0.0
+            avg_time_between = None
+            first_popin_time = None
+            last_popin_time = None
+
+        test_duration = df[time_col].max() - df[time_col].min()
+        df["total_test_duration"] = test_duration
+        df["total_popin_duration"] = total_popin_duration
+        df["first_popin_time"] = first_popin_time
+        df["last_popin_time"] = last_popin_time
+        df["avg_time_between_popins"] = avg_time_between
+
+    # Per-pop-in stats
     results = []
 
     for i, row in interval_rows.iterrows():
@@ -162,7 +188,6 @@ def calculate_popin_statistics(
 
         before = df[(df[time_col] >= start_time - before_window) & (df[time_col] < start_time)]
         during = df[(df[time_col] >= start_time) & (df[time_col] <= end_time)]
-        after = df[(df[time_col] > end_time) & (df[time_col] <= end_time + after_window)]
 
         def slope_or_none(subset):
             if len(subset) > 1:
@@ -196,12 +221,6 @@ def calculate_popin_statistics(
                 "load_drop": df.at[start_idx, load_col] - df.at[end_idx, load_col]
             })
 
-        if recovery_stats:
-            record.update({
-                "avg_dload_after": after["dLoad"].mean() if not after.empty else None,
-                "slope_after": slope_or_none(after)
-            })
-
         results.append(record)
 
     stats_df = pd.DataFrame(results)
@@ -211,6 +230,8 @@ def calculate_popin_statistics(
 
     logger.info(f"Computed pop-in statistics for {len(stats_df)} pop-ins")
     return df
+
+
 
 
 def calculate_stress_strain(df,
