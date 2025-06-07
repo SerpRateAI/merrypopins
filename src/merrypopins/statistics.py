@@ -103,8 +103,10 @@ def extract_popin_intervals(df, popin_col="popin_selected", load_col="Load (µN)
 
 def calculate_popin_statistics(
     df,
-    compute_basic_stats=True,
-    compute_popin_features=True,
+    precursor_stats=True,
+    temporal_stats=True,
+    popin_shape_stats=True,
+    recovery_stats=True,
     time_col="Time (s)",
     load_col="Load (µN)",
     depth_col="Depth (nm)",
@@ -114,30 +116,26 @@ def calculate_popin_statistics(
     after_window=0.2
 ):
     """
-    Compute basic and/or feature statistics for pop-in intervals.
+    Compute selected statistics for pop-in intervals.
 
     Parameters
     ----------
     df : pd.DataFrame
         Data with start/end indices of pop-ins.
-    compute_basic_stats : bool
-        Whether to compute duration and time-between-popins.
-    compute_popin_features : bool
-        Whether to compute slopes and depth-based features.
-    time_col : str
-        Column name for time.
-    load_col : str
-        Column name for load.
-    depth_col : str
-        Column name for depth.
-    start_col : str
-        Column name for pop-in start indices.
-    end_col : str
-        Column name for pop-in end indices.
-    before_window : float
-        Time window before pop-in (s).
-    after_window : float
-        Time window after pop-in (s).
+    precursor_stats : bool
+        Compute indicators before pop-in onset.
+    temporal_stats : bool
+        Compute timing-based statistics (duration, intervals).
+    popin_shape_stats : bool
+        Compute features related to the drop shape.
+    recovery_stats : bool
+        Compute post-pop-in features.
+    time_col, load_col, depth_col : str
+        Column names for time, load, and depth.
+    start_col, end_col : str
+        Column names for pop-in start and end indices.
+    before_window, after_window : float
+        Time windows before and after pop-in.
 
     Returns
     -------
@@ -146,6 +144,8 @@ def calculate_popin_statistics(
     """
     df = df.copy()
     interval_rows = df.dropna(subset=[start_col, end_col]).copy().reset_index(drop=True)
+    df["dLoad"] = df[load_col].diff() / df[time_col].diff()
+
     results = []
 
     for i, row in interval_rows.iterrows():
@@ -160,7 +160,16 @@ def calculate_popin_statistics(
             "end_idx": end_idx
         }
 
-        if compute_basic_stats:
+        before = df[(df[time_col] >= start_time - before_window) & (df[time_col] < start_time)]
+        during = df[(df[time_col] >= start_time) & (df[time_col] <= end_time)]
+        after = df[(df[time_col] > end_time) & (df[time_col] <= end_time + after_window)]
+
+        def slope_or_none(subset):
+            if len(subset) > 1:
+                return linregress(subset[time_col], subset[load_col]).slope
+            return None
+
+        if temporal_stats:
             popin_length = end_time - start_time
             time_until_next = None
             if i < len(interval_rows) - 1:
@@ -170,30 +179,27 @@ def calculate_popin_statistics(
 
             record.update({
                 "popin_length": popin_length,
-                "time_until_next": time_until_next
+                "time_until_next": time_until_next,
+                "avg_time_during": during[time_col].mean() if not during.empty else None
             })
 
-        if compute_popin_features:
-            dload = df[load_col].diff() / df[time_col].diff()
-            df["dLoad"] = dload
-
-            before = df[(df[time_col] >= start_time - before_window) & (df[time_col] < start_time)]
-            during = df[(df[time_col] >= start_time) & (df[time_col] <= end_time)]
-            after = df[(df[time_col] > end_time) & (df[time_col] <= end_time + after_window)]
-
-            def slope_or_none(subset):
-                if len(subset) > 1:
-                    return linregress(subset[time_col], subset[load_col]).slope
-                return None
-
+        if precursor_stats:
             record.update({
                 "avg_dload_before": before["dLoad"].mean() if not before.empty else None,
-                "avg_dload_after": after["dLoad"].mean() if not after.empty else None,
-                "slope_before": slope_or_none(before),
-                "slope_after": slope_or_none(after),
-                "depth_drop": df.at[end_idx, depth_col] - df.at[start_idx, depth_col],
+                "slope_before": slope_or_none(before)
+            })
+
+        if popin_shape_stats:
+            record.update({
+                "depth_jump": df.at[end_idx, depth_col] - df.at[start_idx, depth_col],
                 "avg_depth_during": during[depth_col].mean() if not during.empty else None,
-                "avg_time_during": during[time_col].mean() if not during.empty else None
+                "load_drop": df.at[start_idx, load_col] - df.at[end_idx, load_col]
+            })
+
+        if recovery_stats:
+            record.update({
+                "avg_dload_after": after["dLoad"].mean() if not after.empty else None,
+                "slope_after": slope_or_none(after)
             })
 
         results.append(record)
