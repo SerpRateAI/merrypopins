@@ -14,6 +14,7 @@ nav:
       - Locate: reference/merrypopins.locate.md
       - Statistics: reference/merrypopins.statistics.md
       - Make Dataset: reference/merrypopins.make_dataset.md
+  - Merrypopins Streamlit App: streamlit.md
   - Contribution Guide: contributing.md
   - Release Guide: RELEASING.md
 
