@@ -112,7 +112,6 @@ def _compute_shape_stats(df, start_idx, end_idx, during, time_col, depth_col):
 
 def calculate_popin_statistics(
     df,
-    general_stats=False,
     precursor_stats=True,
     temporal_stats=True,
     popin_shape_stats=True,
