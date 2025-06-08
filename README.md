@@ -4,7 +4,7 @@
 [![📘 Merrypopins Documentation](https://img.shields.io/badge/docs-view-blue?logo=readthedocs)](https://serprateai.github.io/merrypopins/)
 [![PyPI](https://img.shields.io/pypi/v/merrypopins.svg)](https://pypi.org/project/merrypopins/)
 [![Python](https://img.shields.io/pypi/pyversions/merrypopins.svg)](https://pypi.org/project/merrypopins/)
-[![codecov](https://codecov.io/gh/SerpRateAI/merrypopins/branch/main/graph/badge.svg)](https://codecov.io/gh/SerpRateAI/merrypopins)
+[![codecov](https://codecov.io/gh/SerpRateAI/merrypopins/graph/badge.svg)](https://codecov.io/gh/SerpRateAI/merrypopins)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Downloads](https://pepy.tech/badge/merrypopins)](https://pepy.tech/project/merrypopins)
 [![Issues](https://img.shields.io/github/issues/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/issues)
