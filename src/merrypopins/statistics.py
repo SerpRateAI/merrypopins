@@ -317,7 +317,7 @@ def calculate_stress_strain(df,
 
 
 
-def default_statistics(df_locate, method_column="popin", before_window=0.2, after_window=0.2):
+def default_statistics(df_locate, method_column="popin", before_window=0.5, after_window=0.5):
     """
     Pipeline for pop-in statistics from load–depth domain.
 
