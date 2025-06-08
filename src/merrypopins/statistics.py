@@ -112,8 +112,8 @@ def calculate_popin_statistics(
     depth_col="Depth (nm)",
     start_col="start_idx",
     end_col="end_idx",
-    before_window=0.2,
-    after_window=0.2
+    before_window=0.5,
+    after_window=0.5
 ):
     """
     Compute selected statistics for pop-in intervals.
@@ -215,10 +215,26 @@ def calculate_popin_statistics(
             })
 
         if popin_shape_stats:
+            t_vals = during[time_col].values
+            h_vals = during[depth_col].values
+
+            # Compute average depth velocity and curvature
+            if len(h_vals) > 2:
+                d_depth = np.diff(h_vals)
+                d_time = np.diff(t_vals)
+                avg_velocity = np.mean(d_depth / d_time)
+
+                curvature = np.gradient(np.gradient(h_vals, t_vals), t_vals)
+                avg_curvature = np.mean(curvature)
+            else:
+                avg_velocity = None
+                avg_curvature = None
+
             record.update({
                 "depth_jump": df.at[end_idx, depth_col] - df.at[start_idx, depth_col],
                 "avg_depth_during": during[depth_col].mean() if not during.empty else None,
-                "load_drop": df.at[start_idx, load_col] - df.at[end_idx, load_col]
+                "avg_depth_velocity": avg_velocity,
+                "avg_curvature_depth": avg_curvature
             })
 
         results.append(record)
