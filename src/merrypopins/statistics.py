@@ -23,7 +23,7 @@ if not logger.handlers:
     logger.setLevel(logging.INFO)
 
 
-def postprocess_popins_local_max(df, method_column="popin", window=1):
+def postprocess_popins_local_max(df, popin_flag_column="popin", window=1):
     """
     Select local load maxima (true pop-ins) before max load.
 
@@ -31,7 +31,7 @@ def postprocess_popins_local_max(df, method_column="popin", window=1):
     ----------
     df : pd.DataFrame
         Input indentation data with pop-in flag.
-    method_column : str
+    popin_flag_column : str
         Column with boolean pop-in detection.
     window : int
         Local window around each point to assess max.
@@ -43,7 +43,7 @@ def postprocess_popins_local_max(df, method_column="popin", window=1):
     """
     df = df.copy()
     max_load_idx = df["Load (µN)"].idxmax()
-    popin_flags = df[method_column] == True
+    popin_flags = df[popin_flag_column] == True
     selected_indices = []
 
     for idx in df.index[window:-window]:
@@ -61,6 +61,7 @@ def postprocess_popins_local_max(df, method_column="popin", window=1):
     df.loc[selected_indices, "popin_selected"] = True
     logger.info(f"Filtered to {len(selected_indices)} local max pop-ins before max load")
     return df
+
 
 
 def extract_popin_intervals(df, popin_col="popin_selected", load_col="Load (µN)"):
@@ -99,6 +100,7 @@ def extract_popin_intervals(df, popin_col="popin_selected", load_col="Load (µN)
     df["start_idx"] = start_idx_col
     df["end_idx"] = end_idx_col
     return df
+
 
 
 def calculate_popin_statistics(
@@ -248,76 +250,7 @@ def calculate_popin_statistics(
     return df
 
 
-
-
-def calculate_stress_strain(df,
-                            depth_col="Depth (nm)",
-                            load_col="Load (µN)",
-                            Reff_um=5.323,
-                            min_load_uN=2000,
-                            smooth_stress=True,
-                            smooth_window=11,
-                            smooth_polyorder=2,
-                            copy_popin_cols=True):
-    """
-    Convert load–depth data to stress–strain using Dao et al. (2008) formulas,
-    optionally copying pop-in markers from the input DataFrame using timestamp-based matching.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Original unfiltered data with pop-in detection metadata.
-    copy_popin_cols : bool
-        If True, uses 'Time (s)' to transfer pop-in info to the filtered result.
-
-    Returns
-    -------
-    pd.DataFrame
-        Filtered DataFrame with stress/strain (and optionally pop-in info).
-    """
-    # Step 1: Compute stress–strain
-    df_filtered = df[df[load_col] >= min_load_uN].copy()
-    if df_filtered.empty:
-        raise ValueError("No data points remain after filtering by min_load_uN")
-
-    h_m = df_filtered[depth_col] * 1e-9
-    P_N = df_filtered[load_col] * 1e-6
-    Reff_m = Reff_um * 1e-6
-
-    a = np.sqrt(Reff_m * h_m)
-    stress = P_N / (np.pi * a**2)
-    strain = h_m / (2.4 * a)
-
-    df_filtered["a_contact_m"] = a
-    df_filtered["strain"] = strain
-    df_filtered["stress"] = stress / 1e6  # MPa
-
-    if smooth_stress and len(df_filtered) >= smooth_window:
-        df_filtered["stress"] = savgol_filter(df_filtered["stress"], smooth_window, smooth_polyorder)
-
-    # Step 2: Timestamp-based pop-in transfer
-    if copy_popin_cols:
-        if "start_idx" in df.columns and "end_idx" in df.columns:
-            try:
-                feature_stats = df[df["start_idx"].notna()].copy()
-                start_times = df.loc[feature_stats["start_idx"].astype(int), "Time (s)"].values
-                end_times = df.loc[feature_stats["end_idx"].astype(int), "Time (s)"].values
-
-                df_filtered["popin_start"] = df_filtered["Time (s)"].isin(start_times)
-                df_filtered["popin_end"] = df_filtered["Time (s)"].isin(end_times)
-
-                if "popin_selected" in df.columns:
-                    popin_times = df[df["popin_selected"]]["Time (s)"].values
-                    df_filtered["popin_selected"] = df_filtered["Time (s)"].isin(popin_times)
-            except Exception as e:
-                logger.warning(f"Could not align pop-in times: {e}")
-
-    logger.info(f"Computed stress–strain for {len(df_filtered)} points")
-    return df_filtered
-
-
-
-def default_statistics(df_locate, method_column="popin", before_window=0.5, after_window=0.5):
+def default_statistics(df_locate, popin_flag_column="popin", before_window=0.5, after_window=0.5):
     """
     Pipeline for pop-in statistics from load–depth domain.
 
@@ -325,19 +258,24 @@ def default_statistics(df_locate, method_column="popin", before_window=0.5, afte
     ----------
     df_locate : pd.DataFrame
         With pop-in candidate flags and load/time/depth.
-    method_column : str
-        Column name indicating raw pop-in detection.
+    popin_flag_column : str
+        Column name indicating pop-in detection flag.
     before_window : float
-        Time window before pop-in (not yet used here).
+        Time window before pop-in.
     after_window : float
-        Time window after pop-in (not yet used here).
+        Time window after pop-in.
 
     Returns
     -------
     pd.DataFrame
         Copy with popin intervals and basic stats.
     """
-    df1 = postprocess_popins_local_max(df_locate, method_column=method_column)
+    required_cols = ["Time (s)", "Load (µN)", "Depth (nm)", popin_flag_column]
+    if "contact_point" in df_locate.columns:
+        required_cols.append("contact_point")
+    df_locate = df_locate[required_cols].copy()
+
+    df1 = postprocess_popins_local_max(df_locate, popin_flag_column=popin_flag_column)
     df2 = extract_popin_intervals(df1)
     return calculate_popin_statistics(df2, time_col="Time (s)")
 
