@@ -8,7 +8,7 @@
 # ----------------------
 coverage:
   status:
-    patch: false # Set to false to disable status checks on pull requests
+    patch: true # Set to false to disable status checks on pull requests
 
   range: 70..90     # First number represents red, and second represents green
                     # (default is 70..100)
