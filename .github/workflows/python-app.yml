@@ -63,3 +63,6 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           files: ./coverage.xml
+          # if your repo is public you don’t need a token,
+          # otherwise add a CODECOV_TOKEN secret in your repo settings
+          token: ${{ secrets.CODECOV_TOKEN }}
