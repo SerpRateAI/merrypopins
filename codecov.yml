@@ -19,7 +19,7 @@ coverage:
 # --------------
 # which folders/files to ignore
 ignore:
-  - */tests/.*
+  - "*/tests/.*"  # Ignore all test files
 
 # Pull request comments:
 # ----------------------
