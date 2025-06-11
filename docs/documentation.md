@@ -82,13 +82,13 @@ This section documents important metadata fields collected during nanoindentatio
 
 ---
 
-# 🔬 Experimental Setup and File Naming Conventions
+## 🔬 Experimental Setup and File Naming Conventions
 
 This page outlines the experimental equipment, procedure, file naming scheme, and specific loading parameters used in the indentation experiments analyzed by **merrypopins**.
 
 ---
 
-## 🧪 Instrumentation
+### 🧪 Instrumentation
 
 All nanoindentation experiments were performed using the **Bruker Hysitron TI 990 TriboIndenter**, a precision instrument for measuring mechanical properties at the nanoscale.
 
@@ -110,7 +110,7 @@ All nanoindentation experiments were performed using the **Bruker Hysitron TI 99
 
 ---
 
-## 🧱 Sample Preparation
+### 🧱 Sample Preparation
 
 The sample used is a thin-section of **blueschist**, a metamorphic rock rich in:
 - Glaucophane
@@ -126,16 +126,16 @@ The sample used is a thin-section of **blueschist**, a metamorphic rock rich in:
 
 ---
 
-## ⚙️ Experimental Parameters
+### ⚙️ Experimental Parameters
 
-### Tip Radius & Load Settings
+#### Tip Radius & Load Settings
 
 | Tip Type     | Nominal Radius | Actual Radius | Peak Load |
 |--------------|----------------|---------------|-----------|
 | 6 µm         | 6 µm           | 5.323 µm      | 200 mN    |
 | 3 µm         | 3 µm           | 3.064 µm      | 100 mN    |
 
-### Loading Profiles
+#### Loading Profiles
 
 | Type          | Ramp Duration | Notes                        |
 |---------------|---------------|------------------------------|
@@ -146,16 +146,16 @@ All other parameters (e.g., hold, unload) were identical across experiments.
 
 ---
 
-## 📂 File Naming Convention
+### 📂 File Naming Convention
 
 Each experiment file name consists of **six components** separated by underscores:
 
 - grain<size>_<tip_radius>_<name_or_number>_<HL/LL>_<QS/DMA>_<LC/DC/OL>.tdm
 
-### Example: `grain5_6um_01_HL_QS_LC.tdm`
+- Example: `grain5_6um_01_HL_QS_LC.tdm`
 
 
-### Components
+#### Components
 
 | Part           | Description                                                                 |
 |----------------|-----------------------------------------------------------------------------|
@@ -170,7 +170,7 @@ Each experiment file name consists of **six components** separated by underscore
 
 ---
 
-## 🗂 Mapping Tip & Load Speed (6 Micron Tip)
+### 🗂 Mapping Tip & Load Speed (6 Micron Tip)
 
 | File Identifier | Peak Load | Loading Type |
 |-----------------|-----------|--------------|
@@ -180,35 +180,33 @@ Each experiment file name consists of **six components** separated by underscore
 
 ---
 
----
-
-## 📸 Experimental Images
+### 📸 Experimental Images
 
 Below are a series of microstructural and equipment images related to the nanoindentation experiments.
 
-### 🔬 Electron Backscatter Diffraction (EBSD) Maps
+#### 🔬 Electron Backscatter Diffraction (EBSD) Maps
 
 These EBSD maps show the microstructural grains in the blueschist rock sample.
 
-#### 1. Inverse Pole Figure (IPF) Coloring
+##### 1. Inverse Pole Figure (IPF) Coloring
 ![EBSD IPF Map](static/inverse-pole-figure-coloring.png)
 
-#### 2. Phase Map with Mineral Segmentation
+##### 2. Phase Map with Mineral Segmentation
 ![EBSD Phase Map](static/phase-map-mineral-segmentation.png)
 
-### 📍 Grain Selection for Indentation
+#### 📍 Grain Selection for Indentation
 
 The following image shows selected grains (e.g., Grain 4, 5, 7, 11, 12) that were targeted for indentation:
 
 ![Grain Selection Annotated](static/grain-selection-for-indentation.png)
 
-### 🧪 Instrumentation
+#### 🧪 Instrumentation
 
 The nanoindentation experiments were conducted using the Bruker Hysitron TI 990 TriboIndenter.
 
-#### 1. Close-up of the Tip and Sample Stage
+##### 1. Close-up of the Tip and Sample Stage
 ![TriboIndenter Close-up](static/close-up-tip-sample.jpg)
 
-#### 2. Full View of the Instrument
+##### 2. Full View of the Instrument
 ![Hysitron TI 990 Full View](static/full-view-hysitron-machine.jpg)
 
