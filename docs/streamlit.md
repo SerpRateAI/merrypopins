@@ -36,7 +36,7 @@ docker run -p 8501:8501 cacarvuai/merrypopins-app:latest
 Once the app is running, you can access it in your web browser at [http://localhost:8501](http://localhost:8501).
 
 #### 🧼 Clean Up
-To stop the app, press `Ctrl+C` or `⌘(Command)+C` (on Mac) in the terminal where it's running.
+To stop the app, press `Ctrl+C` (on Windows/Linux) or `⌘(Command)+C` (on MacOS) in the terminal where it's running.
 
 If you want to remove the Docker container, you can run:
 
