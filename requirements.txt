@@ -1,15 +1,7 @@
 # Core dependencies
-matplotlib>=3.10.3
-numpy>=1.23,<2.5
-pandas>=2.2.3
-scipy>=1.15.3
-scikit-learn>=1.6.1
-tensorflow>=2.16.2
-
-# Development & testing
-black>=25.1.0
-coverage>=7.8.2
-pre-commit>=4.2.0
-pytest>=8.3.5
-pytest-cov>=6.1.1
-ruff>=0.11.12
+matplotlib>=3.7
+numpy>=1.23
+pandas>=2.2
+scipy>=1.10
+scikit-learn>=1.2
+tensorflow>=2.10

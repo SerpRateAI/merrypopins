@@ -5,7 +5,7 @@
 [![📘 Merrypopins Documentation](https://img.shields.io/badge/docs-view-blue?logo=readthedocs)](https://serprateai.github.io/merrypopins/)
 [![PyPI](https://img.shields.io/pypi/v/merrypopins.svg)](https://pypi.org/project/merrypopins/)
 [![Python](https://img.shields.io/pypi/pyversions/merrypopins.svg)](https://pypi.org/project/merrypopins/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: GNU](https://img.shields.io/badge/License-GNU-yellow.svg)](LICENSE)
 [![Downloads](https://pepy.tech/badge/merrypopins)](https://pepy.tech/project/merrypopins)
 [![Issues](https://img.shields.io/github/issues/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/issues)
 [![Dependencies](https://img.shields.io/librariesio/github/SerpRateAI/merrypopins)](https://github.com/SerpRateAI/merrypopins/network/dependencies)
@@ -53,6 +53,7 @@ merrypopins supports Python 3.10+ and depends on:
 
 These are installed automatically via `pip`.
 
+All core and development dependencies are tested with Python 3.10 through 3.12.
 ---
 
 ## Quickstart
@@ -260,7 +261,14 @@ else:
 
 1. Install development requirements:
    ```bash
-   pip install -e '.[dev]'
+    # For development (includes dev tools like pytest, black, ruff, etc.)
+    pip install -e '.[dev]'
+   ```
+   This installs the main package and development dependencies listed in pyproject.toml under [project.optional-dependencies].dev
+
+   Optionally, you can install development dependencies via:
+   ```bash
+   pip install -r requirements-dev.txt
    ```
 
 ### 🔧 Pre-commit Hooks
@@ -294,6 +302,8 @@ Notes:
    ```bash
    pytest --cov=merrypopins --cov-report=term-missing
    ```
+    This command runs all tests in the `tests/` directory and generates a coverage report showing which lines of code were executed during the tests.
+    Tests and linting are automatically run on each pull request via GitHub Actions. The CI uses Python 3.10–3.12 and runs pre-commit, pytest, and coverage checks.
 
 3. Generate HTML coverage report:
    ```bash

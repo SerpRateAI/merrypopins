@@ -14,9 +14,6 @@ updates:
     labels:
       - "dependencies"
       - "pip"
-    ignore:
-      - dependency-name: "tensorflow"
-        versions: ["<2.0.0"]  # optional if you want to avoid breaking updates
 
   # ✅ Keep GitHub Actions dependencies up to date
   - package-ecosystem: "github-actions"

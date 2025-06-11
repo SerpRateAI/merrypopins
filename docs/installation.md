@@ -23,11 +23,20 @@ merrypopins supports Python 3.10+ and depends on:
 
 These are installed automatically via `pip`.
 
+All core and development dependencies are tested with Python 3.10 through 3.12.
+
 # Development & Testing
 
 1. Install development requirements:
    ```bash
-   pip install -e '.[dev]'
+    # For development (includes dev tools like pytest, black, ruff, etc.)
+    pip install -e '.[dev]'
+   ```
+   This installs the main package and development dependencies listed in pyproject.toml under [project.optional-dependencies].dev
+
+   Optionally, you can install development dependencies via:
+   ```bash
+   pip install -r requirements-dev.txt
    ```
 
 ## 🔧 Pre-commit Hooks
@@ -61,6 +70,8 @@ Notes:
    ```bash
    pytest --cov=merrypopins --cov-report=term-missing
    ```
+   This command runs all tests in the `tests/` directory and generates a coverage report showing which lines of code were executed during the tests.
+   Tests and linting are automatically run on each pull request via GitHub Actions. The CI uses Python 3.10–3.12 and runs pre-commit, pytest, and coverage checks.
 
 3. Generate HTML coverage report:
    ```bash
