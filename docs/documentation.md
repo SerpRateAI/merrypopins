@@ -80,6 +80,7 @@ This section documents important metadata fields collected during nanoindentatio
 - These fields can be accessed using `load_tdm()` in the `merrypopins.load_datasets` module.
 - Consider saving metadata alongside each test’s main `.txt` dataset for reproducibility and auditing.
 
+---
 
 # 🔬 Experimental Setup and File Naming Conventions
 
