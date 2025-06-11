@@ -51,6 +51,7 @@ st.set_page_config(page_title=PAGE_TITLE, layout="wide")
 # ───────────────────────────────────────────────────────────────
 
 st.sidebar.title(PAGE_TITLE)
+st.sidebar.image("streamlit_app/static/logo-transparent.png", use_container_width=True)
 # docs link
 st.sidebar.markdown(
     f"📚 For detailed documentation about `merrypopins` library and tuning parameters visit our [home page.]({DOC_URL})"
