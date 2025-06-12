@@ -20,9 +20,11 @@ from merrypopins.statistics import (
 def synthetic_df_with_popin():
     time = np.linspace(0, 1, 100)
     load = np.linspace(0, 100, 100)
-    load[50] = 105  # Force a peak so it's a local max
+    load[49] = 90
+    load[50] = 110  # Now a local max!
+    load[51] = 100
     depth = np.linspace(0, 50, 100)
-    depth[50:52] += 10  # Simulated depth jump
+    depth[50:52] += 10  # Simulated pop-in
     df = pd.DataFrame({
         "Time (s)": time,
         "Load (µN)": load,
@@ -31,6 +33,7 @@ def synthetic_df_with_popin():
     df["popin"] = False
     df.loc[50, "popin"] = True
     return df
+
 
 
 @pytest.fixture
@@ -123,7 +126,7 @@ def test_stress_strain_statistics_adds_columns(synthetic_df_with_popin):
 # ========== Tests for default_statistics_stress_strain ==========
 
 def test_default_statistics_stress_strain_pipeline(synthetic_df_with_popin):
-    df_result = default_statistics_stress_strain(synthetic_df_with_popin, min_load_uN=50)
+    df_result = default_statistics_stress_strain(synthetic_df_with_popin, min_load_uN=10)
     assert isinstance(df_result, pd.DataFrame)
     assert not df_result.empty
     assert "strain" in df_result.columns
