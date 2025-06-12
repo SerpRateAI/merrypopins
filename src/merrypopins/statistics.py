@@ -3,12 +3,12 @@ statistics.py
 -------------
 
 Extracts statistics from nanoindentation data:
-- Postprocess popin candidate flags
-- Extract pop-in intervals from candidate flags
-- Calculate pop-in statistics
-- Calculate curve-level summary statistics about pop-in activity
+- Postprocess located popins 
+- Extract pop-in intervals 
 - Stress–strain transformation (Dao et al. 2008)
-""" 
+- Calculate pop-in statistics (load-depth and stress-strain)
+- Calculate curve-level summary statistics (load-depth)
+"""
 
 import numpy as np
 import pandas as pd
@@ -23,9 +23,13 @@ if not logger.handlers:
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
 
+
+####### POSTPROCESSING #########
+
+
 def postprocess_popins_local_max(df, popin_flag_column="popin", window=1):
     """
-    Select local load maxima (true pop-ins) before max load.
+    Select pop-ins that have a local load maxima.
 
     Parameters
     ----------
@@ -99,6 +103,8 @@ def extract_popin_intervals(df, popin_col="popin_selected", load_col="Load (µN)
     df["end_idx"] = end_idx_col
     return df
 
+########## HELPER FUNCTIONS #############
+
 def _compute_temporal_stats(start_time, end_time, interval_rows, i, df, time_col, start_col):
     popin_length = end_time - start_time
     time_until_next = None
@@ -144,6 +150,10 @@ def _compute_shape_stats(df, start_idx, end_idx, during, time_col, depth_col):
         "avg_depth_velocity": avg_velocity,
         "avg_curvature_depth": avg_curvature
     }
+
+
+######## LOAD–DEPTH STATISTICS ########
+
 
 def calculate_popin_statistics(
     df,
@@ -261,7 +271,7 @@ def calculate_curve_summary(df, start_col="start_idx", end_col="end_idx", time_c
 
 def default_statistics(df_locate, popin_flag_column="popin", before_window=0.5, after_window=0.5):
     """
-    Pipeline to compute pop-in statistics from raw detection flags.
+    Pipeline to compute pop-in statistics from raw located popins.
 
     This function extracts only required columns, selects valid pop-in candidates,
     filters for local maxima, extracts intervals, and calculates descriptive features.
@@ -288,6 +298,8 @@ def default_statistics(df_locate, popin_flag_column="popin", before_window=0.5, 
     df2 = extract_popin_intervals(df1)
     return calculate_popin_statistics(df2, time_col="Time (s)")
 
+
+######### STRESS–STRAIN TRANSFORMATION ########
 
 def calculate_stress_strain(df,
                             depth_col="Depth (nm)",
@@ -366,11 +378,223 @@ def calculate_stress_strain(df,
     logger.info(f"Computed stress–strain for {len(df_filtered)} points")
     return df_filtered
 
+
+######## STRESS–STRAIN STATISTICS ##########
+
+### Helper Functions stress-strain ####
+
+
+def _compute_stress_strain_jump_stats(df, start_idx, end_idx, stress_col, strain_col):
+    return {
+        "stress_jump": df.at[end_idx, stress_col] - df.at[start_idx, stress_col],
+        "strain_jump": df.at[end_idx, strain_col] - df.at[start_idx, strain_col]
+    }
+
+def _compute_stress_strain_shape_stats(during, time_col, stress_col, strain_col):
+    if len(during) < 3:
+        return {
+            "avg_stress_during": None,
+            "avg_strain_during": None,
+            "stress_slope": None,
+            "strain_slope": None
+        }
+
+    dt = np.diff(during[time_col])
+    d_stress = np.diff(during[stress_col])
+    d_strain = np.diff(during[strain_col])
+    
+    stress_slope = np.mean(d_stress / dt)
+    strain_slope = np.mean(d_strain / dt)
+
+    return {
+        "avg_stress_during": during[stress_col].mean(),
+        "avg_strain_during": during[strain_col].mean(),
+        "stress_slope": stress_slope,
+        "strain_slope": strain_slope
+    }
+
+def _compute_stress_strain_precursor_stats(before, time_col, stress_col, strain_col):
+    def slope_or_none(x, y):
+        if len(x) > 1:
+            return linregress(x, y).slope
+        return None
+
+    if len(before) > 1:
+        dstress = np.gradient(before[stress_col], before[time_col])
+        dstrain = np.gradient(before[strain_col], before[time_col])
+    else:
+        dstress, dstrain = [], []
+
+    return {
+        "avg_dstress_before": np.mean(dstress) if len(dstress) > 0 else None,
+        "avg_dstrain_before": np.mean(dstrain) if len(dstrain) > 0 else None,
+        "stress_slope_before": slope_or_none(before[time_col], before[stress_col]),
+        "strain_slope_before": slope_or_none(before[time_col], before[strain_col])
+    }
+
+
+
+### Calculate statistics stress-strain ###
+
+def calculate_stress_strain_statistics(
+    df,
+    start_col="start_idx",
+    end_col="end_idx",
+    time_col="Time (s)",
+    stress_col="stress",
+    strain_col="strain",
+    before_window=0.5,
+    precursor_stats=True,
+    temporal_stats=True,
+    shape_stats=True
+):
+
+    """
+    Compute statistics for each pop-in in stress–strain space.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Data with stress/strain and pop-in intervals.
+    start_col, end_col : str
+        Columns marking start/end of pop-ins.
+    time_col : str
+        Time column.
+    stress_col, strain_col : str
+        Stress and strain columns.
+    before_window : float
+        Time window to use for precursor features.
+    precursor_stats : bool
+        Whether to compute pre-pop-in features (slope, dStress).
+    temporal_stats, shape_stats : bool
+        Whether to compute those features.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with per-pop-in stress/strain statistics added.
+    """
+    df = df.copy()
+    interval_rows = df.dropna(subset=[start_col, end_col]).copy().reset_index(drop=True)
+    results = []
+
+    for i, row in interval_rows.iterrows():
+        start_idx = int(row[start_col])
+        end_idx = int(row[end_col])
+        start_time = df.at[start_idx, time_col]
+        end_time = df.at[end_idx, time_col]
+
+        during = df[(df[time_col] >= start_time) & (df[time_col] <= end_time)]
+        before = df[(df[time_col] >= start_time - before_window) & (df[time_col] < start_time)]
+
+        record = {
+            "start_idx": start_idx,
+            "end_idx": end_idx
+        }
+
+        if shape_stats:
+            record.update(_compute_stress_strain_jump_stats(df, start_idx, end_idx, stress_col, strain_col))
+            record.update(_compute_stress_strain_shape_stats(during, time_col, stress_col, strain_col))
+
+        if precursor_stats:
+            record.update(_compute_stress_strain_precursor_stats(before, time_col, stress_col, strain_col))
+
+
+        results.append(record)
+
+    stats_df = pd.DataFrame(results)
+    for col in stats_df.columns:
+        if col not in [start_col, end_col]:
+            df[col] = df[start_col].map(stats_df.set_index("start_idx")[col])
+
+    logger.info(f"Computed stress–strain statistics for {len(stats_df)} pop-ins")
+    return df
+
+
+### Full pipeline stress-strain ###
+
+def default_statistics_stress_strain(
+    df_locate,
+    popin_flag_column="popin",
+    before_window=0.5,
+    after_window=0.5,
+    Reff_um=5.323,
+    min_load_uN=2000,
+    smooth_stress=True,
+    stress_col="stress",
+    strain_col="strain",
+    time_col="Time (s)"
+):
+    """
+    Full pipeline: from raw data to stress–strain statistics.
+
+    This includes:
+    - Load–depth pop-in detection
+    - Interval extraction
+    - Stress–strain transformation
+    - Stress–strain statistics
+
+    Parameters
+    ----------
+    df_locate : pd.DataFrame
+        Raw indentation data with pop-in flag column.
+    popin_flag_column : str
+        Column with Boolean flags for pop-in candidates.
+    before_window, after_window : float
+        Context windows around pop-ins.
+    Reff_um : float
+        Effective tip radius in microns.
+    min_load_uN : float
+        Minimum load filter for stress–strain conversion.
+    smooth_stress : bool
+        Whether to smooth the stress signal.
+    stress_col, strain_col, time_col : str
+        Column names for stress, strain, and time.
+
+    Returns
+    -------
+    pd.DataFrame
+        Stress–strain DataFrame annotated with pop-in intervals and statistics.
+    """
+    df_ld = default_statistics(
+        df_locate,
+        popin_flag_column=popin_flag_column,
+        before_window=before_window,
+        after_window=after_window
+    )
+
+    df_stress = calculate_stress_strain(
+        df_ld,
+        Reff_um=Reff_um,
+        min_load_uN=min_load_uN,
+        smooth_stress=smooth_stress,
+        copy_popin_cols=True
+    )
+
+    df_stats = calculate_stress_strain_statistics(
+        df_stress,
+        start_col="start_idx",
+        end_col="end_idx",
+        time_col=time_col,
+        stress_col=stress_col,
+        strain_col=strain_col,
+        before_window=before_window
+    )
+
+    return df_stats
+
+
+
+####### EXPORTS ########
+
 __all__ = [
     "postprocess_popins_local_max",
     "extract_popin_intervals",
     "calculate_popin_statistics",
     "calculate_curve_summary",
     "calculate_stress_strain",
-    "default_statistics"
+    "calculate_stress_strain_statistics",
+    "default_statistics",
+    "default_statistics_stress_strain"
 ]
+
