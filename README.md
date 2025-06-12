@@ -106,7 +106,7 @@ from merrypopins.load_datasets import load_txt, load_tdm
 from merrypopins.preprocess import default_preprocess, remove_pre_min_load, rescale_data, finalise_contact_index
 from merrypopins.locate import default_locate
 from merrypopins.make_dataset import merrypopins_pipeline
-from merrypopins.statistics import default_statistics, calculate_stress_strain, default_statistics_stress_strain
+from merrypopins.statistics import default_statistics, calculate_stress_strain, calculate_stress_strain_statistics, default_statistics_stress_strain
 ```
 
 ### Load Indentation Data and Metadata
