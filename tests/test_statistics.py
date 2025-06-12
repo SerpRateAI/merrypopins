@@ -126,9 +126,25 @@ def test_stress_strain_statistics_adds_columns(synthetic_df_with_popin):
 # ========== Tests for default_statistics_stress_strain ==========
 
 def test_default_statistics_stress_strain_pipeline(synthetic_df_with_popin):
-    df_result = default_statistics_stress_strain(synthetic_df_with_popin, min_load_uN=10)
-    assert isinstance(df_result, pd.DataFrame)
-    assert not df_result.empty
-    assert "strain" in df_result.columns
-    assert "stress" in df_result.columns
+    df_result = default_statistics_stress_strain(
+        synthetic_df_with_popin,
+        min_load_uN=10,           # Should retain the pop-in
+        before_window=0.1         # Matches your short time span
+    )
+
+    # Debug print to inspect what's going on
+    print("\n--- df_result.head() ---")
+    print(df_result.head())
+
+    print("\n--- Pop-ins after processing ---")
+    print(df_result[df_result["popin_selected"] == True][
+        ["Time (s)", "Load (µN)", "stress", "strain", "start_idx", "end_idx"]
+    ])
+
+    # Actual test assertions
+    assert isinstance(df_result, pd.DataFrame), "Result is not a DataFrame"
+    assert not df_result.empty, "df_result is empty"
+    assert "strain" in df_result.columns, f"'strain' column missing: {df_result.columns}"
+    assert "stress" in df_result.columns, f"'stress' column missing: {df_result.columns}"
+
 
