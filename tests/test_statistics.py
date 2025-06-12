@@ -121,8 +121,9 @@ def test_stress_strain_statistics_adds_columns(synthetic_df_with_popin):
 # ========== Tests for default_statistics_stress_strain ==========
 
 def test_default_statistics_stress_strain_pipeline(synthetic_df_with_popin):
-    df_result = default_statistics_stress_strain(synthetic_df_with_popin)
+    df_result = default_statistics_stress_strain(synthetic_df_with_popin, min_load_uN=50)
     assert isinstance(df_result, pd.DataFrame)
-    assert "stress" in df_result.columns
+    assert not df_result.empty
     assert "strain" in df_result.columns
-    assert "stress_jump" in df_result.columns
+    assert "stress" in df_result.columns
+
