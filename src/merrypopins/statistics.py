@@ -312,71 +312,49 @@ def calculate_stress_strain(df,
                             copy_popin_cols=True):
     """
     Convert load–depth data to stress–strain using Dao et al. (2008) formulas,
-    optionally copying pop-in markers from the input DataFrame using timestamp-based matching.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Data with pop-in detection metadata.
-    depth_col : str
-        Column name for depth in nanometres.
-    load_col : str
-        Column name for load in microNewtons.
-    Reff_um : float
-        Effective tip radius in microns.
-    min_load_uN : float
-        Minimum load filter in microNewtons.
-    smooth_stress : bool
-        Whether to apply Savitzky-Golay smoothing.
-    smooth_window : int
-        Window size for smoothing.
-    smooth_polyorder : int
-        Polynomial order for smoothing.
-    copy_popin_cols : bool
-        Whether to propagate pop-in metadata by time matching.
-
-    Returns
-    -------
-    pd.DataFrame
-        Filtered DataFrame with stress/strain (and optionally pop-in info).
+    optionally copying pop-in markers from the input DataFrame using index-based matching.
     """
-    df_filtered = df[df[load_col] >= min_load_uN].copy()
-    if df_filtered.empty:
-        raise ValueError("No data points remain after filtering by min_load_uN")
+    required_cols = [depth_col, load_col, "Time (s)"]
+    missing_cols = [col for col in required_cols if col not in df.columns]
+    if missing_cols:
+        raise ValueError(f"Missing required column(s): {missing_cols}")
 
-    h_m = df_filtered[depth_col] * 1e-9
-    P_N = df_filtered[load_col] * 1e-6
+    df = df.copy()
+
+    # Calculate stress and strain before filtering
+    h_m = df[depth_col] * 1e-9
+    P_N = df[load_col] * 1e-6
     Reff_m = Reff_um * 1e-6
 
     a = np.sqrt(Reff_m * h_m)
-    stress = P_N / (np.pi * a**2)
-    strain = h_m / (2.4 * a)
+    df["a_contact_m"] = a
+    df["strain"] = h_m / (2.4 * a)
+    df["stress"] = P_N / (np.pi * a**2) / 1e6  # MPa
 
-    df_filtered["a_contact_m"] = a
-    df_filtered["strain"] = strain
-    df_filtered["stress"] = stress / 1e6  # MPa
+    # Copy pop-in flags by index 
+    if copy_popin_cols:
+        df["popin_start"] = False
+        df["popin_end"] = False
+        if "start_idx" in df.columns:
+            df.loc[df["start_idx"].dropna().astype(int), "popin_start"] = True
+        if "end_idx" in df.columns:
+            df.loc[df["end_idx"].dropna().astype(int), "popin_end"] = True
+        if "popin_selected" in df.columns:
+            df["popin_selected"] = df["popin_selected"].fillna(False)
 
+    # Filter by load
+    df_filtered = df[df[load_col] >= min_load_uN].copy()
+
+    if df_filtered.empty:
+        raise ValueError("No data points remain after filtering by min_load_uN")
+
+    # Apply smoothing if needed
     if smooth_stress and len(df_filtered) >= smooth_window:
         df_filtered["stress"] = savgol_filter(df_filtered["stress"], smooth_window, smooth_polyorder)
 
-    if copy_popin_cols:
-        if "start_idx" in df.columns and "end_idx" in df.columns:
-            try:
-                feature_stats = df[df["start_idx"].notna()].copy()
-                start_times = df.loc[feature_stats["start_idx"].astype(int), "Time (s)"].values
-                end_times = df.loc[feature_stats["end_idx"].astype(int), "Time (s)"].values
-
-                df_filtered["popin_start"] = df_filtered["Time (s)"].isin(start_times)
-                df_filtered["popin_end"] = df_filtered["Time (s)"].isin(end_times)
-
-                if "popin_selected" in df.columns:
-                    popin_times = df[df["popin_selected"]]["Time (s)"].values
-                    df_filtered["popin_selected"] = df_filtered["Time (s)"].isin(popin_times)
-            except Exception as e:
-                logger.warning(f"Could not align pop-in times: {e}")
-
     logger.info(f"Computed stress–strain for {len(df_filtered)} points")
     return df_filtered
+
 
 
 ######## STRESS–STRAIN STATISTICS ##########
