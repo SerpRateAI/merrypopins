@@ -202,7 +202,7 @@ else:
 
 #### Calculate Pop-in Statistics (Load-Depth)
 
-```python
+```python linenums="1"
 df_statistics = default_statistics(df_pipeline)
 
 # View the computed statistics for each pop-in
@@ -214,7 +214,7 @@ print(df_statistics.head())
 
 #### Perform Stress-Strain Transformation and Statistics
 
-```python
+```python linenums="1"
 # Perform stress-strain transformation
 df_stress_strain = calculate_stress_strain(df_statistics)
 
@@ -229,7 +229,7 @@ print(df_stress_strain_statistics.head())
 
 #### Perform Default Full Statistics Pipeline for Stress-Strain
 
-```python
+```python linenums="1"
 df_statistics_stress_strain = default_statistics_stress_strain(
     df_pipeline,
     popin_flag_column="popin",
