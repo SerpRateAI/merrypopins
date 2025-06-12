@@ -16,6 +16,7 @@ from merrypopins.statistics import (
 
 # ========== Fixtures ==========
 
+
 @pytest.fixture
 def synthetic_df_with_popin():
     time = np.linspace(0, 1, 100)
@@ -25,15 +26,16 @@ def synthetic_df_with_popin():
     load[51] = 100
     depth = np.linspace(0, 50, 100)
     depth[50:52] += 10  # Simulated pop-in
-    df = pd.DataFrame({
-        "Time (s)": time,
-        "Load (µN)": load,
-        "Depth (nm)": depth,
-    })
+    df = pd.DataFrame(
+        {
+            "Time (s)": time,
+            "Load (µN)": load,
+            "Depth (nm)": depth,
+        }
+    )
     df["popin"] = False
     df.loc[50, "popin"] = True
     return df
-
 
 
 @pytest.fixture
@@ -41,15 +43,19 @@ def df_no_popin():
     time = np.linspace(0, 1, 100)
     load = np.linspace(0, 100, 100)
     depth = np.linspace(0, 50, 100)
-    df = pd.DataFrame({
-        "Time (s)": time,
-        "Load (µN)": load,
-        "Depth (nm)": depth,
-        "popin": False,
-    })
+    df = pd.DataFrame(
+        {
+            "Time (s)": time,
+            "Load (µN)": load,
+            "Depth (nm)": depth,
+            "popin": False,
+        }
+    )
     return df
 
+
 # ========== Tests for postprocess_popins_local_max ==========
+
 
 def test_postprocess_popins_selects_peak(synthetic_df_with_popin, caplog):
     caplog.set_level(logging.INFO)
@@ -58,13 +64,16 @@ def test_postprocess_popins_selects_peak(synthetic_df_with_popin, caplog):
     assert df["popin_selected"].sum() == 1
     assert "local max" in caplog.text
 
+
 def test_postprocess_popins_none_selected(df_no_popin, caplog):
     caplog.set_level(logging.INFO)
     df = postprocess_popins_local_max(df_no_popin)
     assert "popin_selected" in df.columns
     assert df["popin_selected"].sum() == 0
 
+
 # ========== Tests for extract_popin_intervals ==========
+
 
 def test_extract_popin_intervals_has_columns(synthetic_df_with_popin):
     df1 = postprocess_popins_local_max(synthetic_df_with_popin)
@@ -72,7 +81,9 @@ def test_extract_popin_intervals_has_columns(synthetic_df_with_popin):
     assert "start_idx" in df2.columns
     assert "end_idx" in df2.columns
 
+
 # ========== Tests for calculate_popin_statistics ==========
+
 
 def test_calculate_popin_statistics_creates_columns(synthetic_df_with_popin):
     df1 = postprocess_popins_local_max(synthetic_df_with_popin)
@@ -81,6 +92,7 @@ def test_calculate_popin_statistics_creates_columns(synthetic_df_with_popin):
     assert "depth_jump" in df3.columns
     assert "popin_length" in df3.columns
 
+
 def test_calculate_popin_statistics_no_popins(df_no_popin):
     df1 = postprocess_popins_local_max(df_no_popin)
     df2 = extract_popin_intervals(df1)
@@ -88,7 +100,9 @@ def test_calculate_popin_statistics_no_popins(df_no_popin):
     assert "depth_jump" in df3.columns
     assert df3["depth_jump"].isna().all()
 
+
 # ========== Tests for calculate_curve_summary ==========
+
 
 def test_curve_summary_values(synthetic_df_with_popin):
     df1 = postprocess_popins_local_max(synthetic_df_with_popin)
@@ -97,7 +111,9 @@ def test_curve_summary_values(synthetic_df_with_popin):
     assert summary["n_popins"] >= 0
     assert "first_popin_time" in summary
 
+
 # ========== Tests for default_statistics (full pipeline) ==========
+
 
 def test_default_statistics_pipeline_runs(synthetic_df_with_popin):
     result = default_statistics(synthetic_df_with_popin)
@@ -105,7 +121,9 @@ def test_default_statistics_pipeline_runs(synthetic_df_with_popin):
     assert "start_idx" in result.columns
     assert "depth_jump" in result.columns
 
+
 # ========== Tests for calculate_stress_strain ==========
+
 
 def test_calculate_stress_strain_runs(synthetic_df_with_popin):
     df_stats = default_statistics(synthetic_df_with_popin)
@@ -114,7 +132,9 @@ def test_calculate_stress_strain_runs(synthetic_df_with_popin):
     assert "strain" in df_strain.columns
     assert not df_strain.empty
 
+
 # ========== Tests for calculate_stress_strain_statistics ==========
+
 
 def test_stress_strain_statistics_adds_columns(synthetic_df_with_popin):
     df_stats = default_statistics(synthetic_df_with_popin)
@@ -123,13 +143,15 @@ def test_stress_strain_statistics_adds_columns(synthetic_df_with_popin):
     assert "stress_jump" in df_final.columns
     assert "strain_jump" in df_final.columns
 
+
 # ========== Tests for default_statistics_stress_strain ==========
+
 
 def test_default_statistics_stress_strain_pipeline(synthetic_df_with_popin):
     df_result = default_statistics_stress_strain(
         synthetic_df_with_popin,
-        min_load_uN=10,           # Should retain the pop-in
-        before_window=0.1         # Matches your short time span
+        min_load_uN=10,  # Should retain the pop-in
+        before_window=0.1,  # Matches your short time span
     )
 
     # Debug print to inspect what's going on
@@ -137,14 +159,18 @@ def test_default_statistics_stress_strain_pipeline(synthetic_df_with_popin):
     print(df_result.head())
 
     print("\n--- Pop-ins after processing ---")
-    print(df_result[df_result["popin_selected"] == True][
-        ["Time (s)", "Load (µN)", "stress", "strain", "start_idx", "end_idx"]
-    ])
+    print(
+        df_result["popin_selected"][
+            ["Time (s)", "Load (µN)", "stress", "strain", "start_idx", "end_idx"]
+        ]
+    )
 
     # Actual test assertions
     assert isinstance(df_result, pd.DataFrame), "Result is not a DataFrame"
     assert not df_result.empty, "df_result is empty"
-    assert "strain" in df_result.columns, f"'strain' column missing: {df_result.columns}"
-    assert "stress" in df_result.columns, f"'stress' column missing: {df_result.columns}"
-
-
+    assert (
+        "strain" in df_result.columns
+    ), f"'strain' column missing: {df_result.columns}"
+    assert (
+        "stress" in df_result.columns
+    ), f"'stress' column missing: {df_result.columns}"
