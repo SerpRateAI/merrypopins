@@ -35,6 +35,13 @@ from merrypopins.locate import (
     detect_popins_savgol,
 )
 
+from merrypopins.statistics import (
+    default_statistics,
+    calculate_stress_strain,
+    calculate_stress_strain_statistics,
+    default_statistics_stress_strain,
+)
+
 # ───────────────────────────────────────────────────────────────
 #  1 ∙ PAGE CONFIG & APP‑LEVEL LOGGING
 # ───────────────────────────────────────────────────────────────
@@ -325,6 +332,7 @@ fig_raw_pre.add_scatter(
     line=dict(color="orange"),
 )
 
+# Add contact point markers
 if "contact_point" in df_pre.columns and df_pre["contact_point"].any():
     cp = df_pre[df_pre["contact_point"]]
     fig_raw_pre.add_scatter(
@@ -489,9 +497,80 @@ if df_det is not None:
                 data=zip_buf.getvalue(),
                 file_name="merrypopins_results.zip",
             )
+# ───────────────────────────────────────────────────────────────
+#  10 ∙ COMPUTE STATISTICS
+# ───────────────────────────────────────────────────────────────
+
+st.subheader("📊 Compute Pop-in Statistics")
+
+if st.session_state.get("df_det") is not None:
+    # Calculate pop-in statistics (load-depth)
+    st.markdown("### Load-Depth Pop-in Statistics")
+    df_statistics = default_statistics(st.session_state["df_det"])
+
+    st.write("#### Computed Pop-in Statistics:")
+    st.dataframe(df_statistics[["start_idx", "end_idx", "depth_jump", "popin_length"]])
+
+    # Display Load-Depth statistics visualization
+    fig_statistics = px.scatter(
+        df_statistics,
+        x="depth_jump",
+        y="popin_length",
+        title="Depth Jump vs Pop-in Length",
+    )
+    st.plotly_chart(fig_statistics, use_container_width=True)
+
+    # Now calculate stress-strain statistics
+    st.markdown("### Stress-Strain Pop-in Statistics")
+    df_stress_strain = calculate_stress_strain(df_statistics)
+    df_stress_strain_statistics = calculate_stress_strain_statistics(df_stress_strain)
+
+    st.write("#### Computed Stress-Strain Statistics:")
+    st.dataframe(
+        df_stress_strain_statistics[
+            ["stress_jump", "strain_jump", "stress_slope", "strain_slope"]
+        ]
+    )
+
+    # Display Stress-Strain statistics visualization
+    fig_stress_strain = px.scatter(
+        df_stress_strain_statistics,
+        x="stress_jump",
+        y="strain_jump",
+        title="Stress Jump vs Strain Jump",
+    )
+    st.plotly_chart(fig_stress_strain, use_container_width=True)
+
+    # Full Statistics Pipeline (Stress-Strain)
+    st.markdown("### Full Stress-Strain Statistics Pipeline")
+    df_statistics_stress_strain = default_statistics_stress_strain(
+        st.session_state["df_det"],
+        popin_flag_column="popin",
+        before_window=0.5,
+        after_window=0.5,
+        Reff_um=5.323,
+        min_load_uN=2000,
+        smooth_stress=True,
+        stress_col="stress",
+        strain_col="strain",
+        time_col="Time (s)",
+    )
+
+    st.write("#### Full Stress-Strain Statistics:")
+    st.dataframe(
+        df_statistics_stress_strain[
+            ["stress", "strain", "stress_slope", "strain_slope"]
+        ]
+    )
+
+    # Display Full Statistics visualization
+    fig_full_statistics = px.scatter(
+        df_statistics_stress_strain, x="stress", y="strain", title="Stress vs Strain"
+    )
+    st.plotly_chart(fig_full_statistics, use_container_width=True)
 
 # ───────────────────────────────────────────────────────────────
-# 10 ∙ FOOTER
+# 11 ∙ FOOTER
 # ───────────────────────────────────────────────────────────────
 
 st.sidebar.markdown("---")
