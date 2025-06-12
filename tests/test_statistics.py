@@ -20,6 +20,7 @@ from merrypopins.statistics import (
 def synthetic_df_with_popin():
     time = np.linspace(0, 1, 100)
     load = np.linspace(0, 100, 100)
+    load[50] = 105  # Force a peak so it's a local max
     depth = np.linspace(0, 50, 100)
     depth[50:52] += 10  # Simulated depth jump
     df = pd.DataFrame({
@@ -30,6 +31,7 @@ def synthetic_df_with_popin():
     df["popin"] = False
     df.loc[50, "popin"] = True
     return df
+
 
 @pytest.fixture
 def df_no_popin():
