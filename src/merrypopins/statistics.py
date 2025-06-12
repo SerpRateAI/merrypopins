@@ -31,19 +31,17 @@ def postprocess_popins_local_max(df, popin_flag_column="popin", window=1):
     """
     Select pop-ins that have a local load maxima.
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Input indentation data with pop-in flag.
-    method_column : str
-        Column with boolean pop-in detection.
-    window : int
-        Local window around each point to assess max.
+    This function filters out pop-in events that do not represent local maxima in the load curve.
+    A local maximum is defined as a point where the load is higher than the adjacent points
+    within a sliding window.
 
-    Returns
-    -------
-    pd.DataFrame
-        Copy with new boolean column: popin_selected
+    Args:
+        df (pd.DataFrame): Input indentation data with a pop-in flag column.
+        popin_flag_column (str): The column that marks pop-in candidates (True/False).
+        window (int): The local window size to assess if the current load is a maximum.
+
+    Returns:
+        pd.DataFrame: The original DataFrame with a new column indicating selected pop-ins.
     """
     df = df.copy()
     max_load_idx = df["Load (µN)"].idxmax()
@@ -73,19 +71,16 @@ def extract_popin_intervals(df, popin_col="popin_selected", load_col="Load (µN)
     """
     Extract start and end indices for each pop-in event.
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        DataFrame with boolean pop-in column.
-    popin_col : str
-        Column marking pop-in points.
-    load_col : str
-        Load column used to find recovery point.
+    For each detected pop-in, this function identifies the start and end points based on the load curve.
+    The start of a pop-in is where the load first increases, and the end is when the load returns to baseline.
 
-    Returns
-    -------
-    pd.DataFrame
-        Copy with start_idx and end_idx columns.
+    Args:
+        df (pd.DataFrame): DataFrame with pop-in flags.
+        popin_col (str): The column with Boolean values indicating pop-in events.
+        load_col (str): The load column used to identify the recovery point.
+
+    Returns:
+        pd.DataFrame: DataFrame with added start and end index columns for each pop-in interval.
     """
     start_idx_col = [None] * len(df)
     end_idx_col = [None] * len(df)
@@ -113,6 +108,24 @@ def extract_popin_intervals(df, popin_col="popin_selected", load_col="Load (µN)
 def _compute_temporal_stats(
     start_time, end_time, interval_rows, i, df, time_col, start_col
 ):
+    """
+    Compute temporal statistics for each pop-in event.
+
+    This function computes the duration of the pop-in, the time to the next event, and the average time
+    during the event.
+
+    Args:
+        start_time (float): The start time of the pop-in event.
+        end_time (float): The end time of the pop-in event.
+        interval_rows (pd.DataFrame): DataFrame with all pop-in intervals.
+        i (int): Index of the current event in the DataFrame.
+        df (pd.DataFrame): Original DataFrame containing the data.
+        time_col (str): Column name for the time data.
+        start_col (str): Column name for the start index.
+
+    Returns:
+        dict: Dictionary containing 'popin_length', 'time_until_next', and 'avg_time_during'.
+    """
     popin_length = end_time - start_time
     time_until_next = None
     if i < len(interval_rows) - 1:
@@ -130,6 +143,20 @@ def _compute_temporal_stats(
 
 
 def _compute_precursor_stats(before, time_col, load_col):
+    """
+    Compute the precursor statistics before the pop-in event.
+
+    This function calculates the average change in load and the slope of the load curve before the pop-in.
+
+    Args:
+        before (pd.DataFrame): DataFrame with the data before the pop-in event.
+        time_col (str): Column name for the time data.
+        load_col (str): Column name for the load data.
+
+    Returns:
+        dict: Dictionary containing 'avg_dload_before' and 'slope_before'.
+    """
+
     def slope_or_none(subset):
         if len(subset) > 1:
             return linregress(subset[time_col], subset[load_col]).slope
@@ -142,6 +169,22 @@ def _compute_precursor_stats(before, time_col, load_col):
 
 
 def _compute_shape_stats(df, start_idx, end_idx, during, time_col, depth_col):
+    """
+    Compute shape statistics during the pop-in event.
+
+    This function calculates features like the depth jump, average depth, velocity, and curvature of the indentation curve.
+
+    Args:
+        df (pd.DataFrame): Original DataFrame.
+        start_idx (int): Start index of the pop-in.
+        end_idx (int): End index of the pop-in.
+        during (pd.DataFrame): Data during the pop-in event.
+        time_col (str): Column name for time.
+        depth_col (str): Column name for depth.
+
+    Returns:
+        dict: Dictionary containing 'depth_jump', 'avg_depth_during', 'avg_depth_velocity', 'avg_curvature_depth'.
+    """
     t_vals = during[time_col].values
     h_vals = during[depth_col].values
 
@@ -185,27 +228,17 @@ def calculate_popin_statistics(
     This function calculates time-based, precursor-based, and shape-based features
     for each interval where a pop-in occurred (based on start and end index).
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Input DataFrame with indentation data and interval metadata.
-    precursor_stats : bool
-        Whether to calculate average dLoad and slope before the pop-in.
-    temporal_stats : bool
-        Whether to calculate duration and inter-event timing features.
-    popin_shape_stats : bool
-        Whether to compute shape-based features like velocity and curvature.
-    time_col, load_col, depth_col : str
-        Column names for time, load, and depth.
-    start_col, end_col : str
-        Column names for the start and end index of pop-in intervals.
-    before_window, after_window : float
-        Time window in seconds to use for context before/after the pop-in.
+    Args:
+        df (pd.DataFrame): Input DataFrame with indentation data and interval metadata.
+        precursor_stats (bool): Whether to calculate average dLoad and slope before the pop-in.
+        temporal_stats (bool): Whether to calculate duration and inter-event timing features.
+        popin_shape_stats (bool): Whether to compute shape-based features like velocity and curvature.
+        time_col, load_col, depth_col (str): Column names for time, load, and depth.
+        start_col, end_col (str): Column names for the start and end index of pop-in intervals.
+        before_window, after_window (float): Time window in seconds to use for context before/after the pop-in.
 
-    Returns
-    -------
-    pd.DataFrame
-        Original DataFrame with per-pop-in statistics added (NaNs elsewhere).
+    Returns:
+        pd.DataFrame: Original DataFrame with per-pop-in statistics added (NaNs elsewhere).
     """
     df = df.copy()
     interval_rows = df.dropna(subset=[start_col, end_col]).copy().reset_index(drop=True)
@@ -255,19 +288,16 @@ def calculate_curve_summary(
     """
     Compute curve-level summary statistics about pop-in activity.
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        DataFrame that includes pop-in intervals.
-    start_col, end_col : str
-        Column names for start and end indices of pop-ins.
-    time_col : str
-        Column name for time.
+    This function calculates the number of pop-ins, total pop-in duration, first and last pop-in times,
+    and the average time between consecutive pop-ins.
 
-    Returns
-    -------
-    pd.Series
-        Summary metrics: count, total duration, first/last timing, average interval.
+    Args:
+        df (pd.DataFrame): DataFrame that includes pop-in intervals.
+        start_col, end_col (str): Column names for start and end indices of pop-ins.
+        time_col (str): Column name for time.
+
+    Returns:
+        pd.Series: Summary metrics: count, total duration, first/last timing, average interval.
     """
     interval_rows = df.dropna(subset=[start_col, end_col]).copy().reset_index(drop=True)
     n_popins = len(interval_rows)
@@ -306,22 +336,17 @@ def default_statistics(
     """
     Pipeline to compute pop-in statistics from raw located popins.
 
-    This function extracts only required columns, selects valid pop-in candidates,
-    filters for local maxima, extracts intervals, and calculates descriptive features.
+    This function extracts relevant columns, selects valid pop-in candidates based on local maxima,
+    extracts intervals for each pop-in event, and calculates descriptive statistics for each interval.
 
-    Parameters
-    ----------
-    df_locate : pd.DataFrame
-        Input data including pop-in candidate flags and indentation curve.
-    popin_flag_column : str
-        Column name indicating Boolean pop-in candidate (True/False).
-    before_window, after_window : float
-        Time windows (in seconds) for computing features before and after pop-in.
+    Args:
+        df_locate (pd.DataFrame): Input data containing pop-in candidate flags and indentation curve.
+        popin_flag_column (str): Column name indicating Boolean pop-in candidate (True/False).
+        before_window (float): Time window (in seconds) to use for features before the pop-in event.
+        after_window (float): Time window (in seconds) to use for features after the pop-in event.
 
-    Returns
-    -------
-    pd.DataFrame
-        DataFrame with annotated pop-in intervals and computed statistics.
+    Returns:
+        pd.DataFrame: DataFrame with annotated pop-in intervals and computed statistics (e.g., time, shape, precursor).
     """
     required_cols = ["Time (s)", "Load (µN)", "Depth (nm)", popin_flag_column]
     if "contact_point" in df_locate.columns:
@@ -347,8 +372,25 @@ def calculate_stress_strain(
     copy_popin_cols=True,
 ):
     """
-    Convert load–depth data to stress–strain using Dao et al. (2008) formulas,
-    optionally copying pop-in markers from the input DataFrame using index-based matching.
+    Convert load–depth data to stress–strain using Dao et al. (2008) formulas.
+
+    This function converts indentation data from load and depth measurements to stress and strain values using
+    the Dao et al. (2008) approach. It optionally copies pop-in markers from the input DataFrame and filters
+    data based on load. Additionally, stress can be smoothed using the Savitzky-Golay filter.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing the indentation data.
+        depth_col (str): Column name for the depth data.
+        load_col (str): Column name for the load data.
+        Reff_um (float): Effective tip radius in microns.
+        min_load_uN (float): Minimum load threshold to filter out low-load points (in µN).
+        smooth_stress (bool): Whether to apply smoothing to the stress signal.
+        smooth_window (int): Window size for the Savitzky-Golay filter.
+        smooth_polyorder (int): Polynomial order for the Savitzky-Golay filter.
+        copy_popin_cols (bool): Whether to copy pop-in markers from the input DataFrame.
+
+    Returns:
+        pd.DataFrame: DataFrame with additional columns for stress, strain, and optionally pop-in markers.
     """
     required_cols = [depth_col, load_col, "Time (s)"]
     missing_cols = [col for col in required_cols if col not in df.columns]
@@ -400,6 +442,19 @@ def calculate_stress_strain(
 
 
 def _compute_stress_strain_jump_stats(df, start_idx, end_idx, stress_col, strain_col):
+    """
+    Compute the jump in stress and strain during a pop-in event.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing stress and strain data.
+        start_idx (int): Start index of the pop-in event.
+        end_idx (int): End index of the pop-in event.
+        stress_col (str): Column name for stress.
+        strain_col (str): Column name for strain.
+
+    Returns:
+        dict: Dictionary containing 'stress_jump' and 'strain_jump' values.
+    """
     return {
         "stress_jump": df.at[end_idx, stress_col] - df.at[start_idx, stress_col],
         "strain_jump": df.at[end_idx, strain_col] - df.at[start_idx, strain_col],
@@ -407,6 +462,18 @@ def _compute_stress_strain_jump_stats(df, start_idx, end_idx, stress_col, strain
 
 
 def _compute_stress_strain_shape_stats(during, time_col, stress_col, strain_col):
+    """
+    Compute shape-based statistics such as stress slope, strain slope, and average stress/strain during the pop-in.
+
+    Args:
+        during (pd.DataFrame): Data during the pop-in event.
+        time_col (str): Column name for time.
+        stress_col (str): Column name for stress.
+        strain_col (str): Column name for strain.
+
+    Returns:
+        dict: Dictionary containing 'avg_stress_during', 'avg_strain_during', 'stress_slope', and 'strain_slope'.
+    """
     if len(during) < 3:
         return {
             "avg_stress_during": None,
@@ -431,6 +498,19 @@ def _compute_stress_strain_shape_stats(during, time_col, stress_col, strain_col)
 
 
 def _compute_stress_strain_precursor_stats(before, time_col, stress_col, strain_col):
+    """
+    Compute precursor statistics like the average change in stress and strain before the pop-in.
+
+    Args:
+        before (pd.DataFrame): Data before the pop-in event.
+        time_col (str): Column name for time.
+        stress_col (str): Column name for stress.
+        strain_col (str): Column name for strain.
+
+    Returns:
+        dict: Dictionary containing 'avg_dstress_before', 'avg_dstrain_before', 'stress_slope_before', and 'strain_slope_before'.
+    """
+
     def slope_or_none(x, y):
         if len(x) > 1:
             return linregress(x, y).slope
@@ -468,27 +548,21 @@ def calculate_stress_strain_statistics(
     """
     Compute statistics for each pop-in in stress–strain space.
 
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Data with stress/strain and pop-in intervals.
-    start_col, end_col : str
-        Columns marking start/end of pop-ins.
-    time_col : str
-        Time column.
-    stress_col, strain_col : str
-        Stress and strain columns.
-    before_window : float
-        Time window to use for precursor features.
-    precursor_stats : bool
-        Whether to compute pre-pop-in features (slope, dStress).
-    temporal_stats, shape_stats : bool
-        Whether to compute those features.
+    This function computes various statistics related to stress and strain for each detected pop-in event.
+    It calculates features such as the jump in stress and strain, slope of the stress-strain curve, and temporal statistics.
 
-    Returns
-    -------
-    pd.DataFrame
-        DataFrame with per-pop-in stress/strain statistics added.
+    Args:
+        df (pd.DataFrame): Data with stress/strain and pop-in intervals.
+        start_col, end_col (str): Columns marking start and end indices of pop-ins.
+        time_col (str): Time column.
+        stress_col, strain_col (str): Stress and strain columns.
+        before_window (float): Time window to use for precursor features.
+        precursor_stats (bool): Whether to compute precursor statistics (e.g., slope).
+        temporal_stats (bool): Whether to compute temporal statistics (e.g., pop-in duration).
+        shape_stats (bool): Whether to compute shape-based statistics (e.g., velocity, curvature).
+
+    Returns:
+        pd.DataFrame: DataFrame with per-pop-in stress/strain statistics added.
     """
     df = df.copy()
     interval_rows = df.dropna(subset=[start_col, end_col]).copy().reset_index(drop=True)
@@ -561,27 +635,20 @@ def default_statistics_stress_strain(
     - Stress–strain transformation
     - Stress–strain statistics
 
-    Parameters
-    ----------
-    df_locate : pd.DataFrame
-        Raw indentation data with pop-in flag column.
-    popin_flag_column : str
-        Column with Boolean flags for pop-in candidates.
-    before_window, after_window : float
-        Context windows around pop-ins.
-    Reff_um : float
-        Effective tip radius in microns.
-    min_load_uN : float
-        Minimum load filter for stress–strain conversion.
-    smooth_stress : bool
-        Whether to smooth the stress signal.
-    stress_col, strain_col, time_col : str
-        Column names for stress, strain, and time.
+    Args:
+        df_locate (pd.DataFrame): Raw indentation data with pop-in flag column.
+        popin_flag_column (str): Column with Boolean flags for pop-in candidates.
+        before_window (float): Time window (in seconds) for computing precursor features.
+        after_window (float): Time window (in seconds) for computing shape-based features.
+        Reff_um (float): Effective tip radius in microns.
+        min_load_uN (float): Minimum load threshold for stress–strain conversion.
+        smooth_stress (bool): Whether to smooth the stress signal.
+        stress_col (str): Column name for stress data.
+        strain_col (str): Column name for strain data.
+        time_col (str): Column name for time data.
 
-    Returns
-    -------
-    pd.DataFrame
-        Stress–strain DataFrame annotated with pop-in intervals and statistics.
+    Returns:
+        pd.DataFrame: DataFrame with stress-strain statistics and pop-in intervals.
     """
     df_ld = default_statistics(
         df_locate,
