@@ -8,31 +8,31 @@ from merrypopins.statistics import (
     extract_popin_intervals,
     calculate_popin_statistics,
     calculate_curve_summary,
+    calculate_stress_strain,
+    calculate_stress_strain_statistics,
     default_statistics,
+    default_statistics_stress_strain,
 )
 
 # ========== Fixtures ==========
 
 @pytest.fixture
 def synthetic_df_with_popin():
-    """Synthetic curve with a single pop-in peak at index 50."""
     time = np.linspace(0, 1, 100)
     load = np.linspace(0, 100, 100)
     depth = np.linspace(0, 50, 100)
     depth[50:52] += 10  # Simulated depth jump
-
     df = pd.DataFrame({
         "Time (s)": time,
         "Load (µN)": load,
         "Depth (nm)": depth,
     })
     df["popin"] = False
-    df.loc[50, "popin"] = True  # Manually flag one pop-in
+    df.loc[50, "popin"] = True
     return df
 
 @pytest.fixture
 def df_no_popin():
-    """Curve with no pop-in event flagged."""
     time = np.linspace(0, 1, 100)
     load = np.linspace(0, 100, 100)
     depth = np.linspace(0, 50, 100)
@@ -66,7 +66,6 @@ def test_extract_popin_intervals_has_columns(synthetic_df_with_popin):
     df2 = extract_popin_intervals(df1)
     assert "start_idx" in df2.columns
     assert "end_idx" in df2.columns
-    assert df2["start_idx"].notna().sum() >= 0
 
 # ========== Tests for calculate_popin_statistics ==========
 
@@ -81,8 +80,8 @@ def test_calculate_popin_statistics_no_popins(df_no_popin):
     df1 = postprocess_popins_local_max(df_no_popin)
     df2 = extract_popin_intervals(df1)
     df3 = calculate_popin_statistics(df2)
-    assert "depth_jump" in df3.columns  # Should still exist
-    assert df3["depth_jump"].isna().all()  # But be NaN everywhere
+    assert "depth_jump" in df3.columns
+    assert df3["depth_jump"].isna().all()
 
 # ========== Tests for calculate_curve_summary ==========
 
@@ -100,3 +99,30 @@ def test_default_statistics_pipeline_runs(synthetic_df_with_popin):
     assert isinstance(result, pd.DataFrame)
     assert "start_idx" in result.columns
     assert "depth_jump" in result.columns
+
+# ========== Tests for calculate_stress_strain ==========
+
+def test_calculate_stress_strain_runs(synthetic_df_with_popin):
+    df_stats = default_statistics(synthetic_df_with_popin)
+    df_strain = calculate_stress_strain(df_stats)
+    assert "stress" in df_strain.columns
+    assert "strain" in df_strain.columns
+    assert not df_strain.empty
+
+# ========== Tests for calculate_stress_strain_statistics ==========
+
+def test_stress_strain_statistics_adds_columns(synthetic_df_with_popin):
+    df_stats = default_statistics(synthetic_df_with_popin)
+    df_stress = calculate_stress_strain(df_stats)
+    df_final = calculate_stress_strain_statistics(df_stress)
+    assert "stress_jump" in df_final.columns
+    assert "strain_jump" in df_final.columns
+
+# ========== Tests for default_statistics_stress_strain ==========
+
+def test_default_statistics_stress_strain_pipeline(synthetic_df_with_popin):
+    df_result = default_statistics_stress_strain(synthetic_df_with_popin)
+    assert isinstance(df_result, pd.DataFrame)
+    assert "stress" in df_result.columns
+    assert "strain" in df_result.columns
+    assert "stress_jump" in df_result.columns
