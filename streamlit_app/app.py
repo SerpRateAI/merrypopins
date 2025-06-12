@@ -1,11 +1,11 @@
-# --------------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------------------
 #  Merrypopins Streamlit App — Nano‑indentation pop‑in Analysis
 #  A user‑friendly interface for analyzing nanoindentation data.
 #  This app allows users to upload indentation data, preprocess it,
-#  detect pop-in events using various methods, and visualize the results.
+#  detect pop-in events using various methods, and visualize the results and produce statistical calculations from detected popins.
 #  It also provides options to download the results in CSV format or as a ZIP file containing the data and visualizations.
-#  (2025‑06‑07)
-# --------------------------------------------------------------------------------------------------------------------------
+#  (2025‑06‑13)
+# ----------------------------------------------------------------------------------------------------------------------------------
 
 from __future__ import annotations
 
@@ -46,7 +46,7 @@ from merrypopins.statistics import (
 #  1 ∙ PAGE CONFIG & APP‑LEVEL LOGGING
 # ───────────────────────────────────────────────────────────────
 PAGE_TITLE = "Merrypopins Nano‑indentation pop‑in Analysis"
-APP_VERSION = "2025‑06‑07"
+APP_VERSION = "2025‑06‑13"
 DOC_URL = (
     "https://serprateai.github.io/merrypopins/reference/merrypopins.load_datasets/"
 )
@@ -568,6 +568,77 @@ if st.session_state.get("df_det") is not None:
         df_statistics_stress_strain, x="stress", y="strain", title="Stress vs Strain"
     )
     st.plotly_chart(fig_full_statistics, use_container_width=True)
+
+    # Add download buttons
+    csv_bytes = df_statistics.to_csv(index=False).encode()
+    fig_statistics_html = fig_statistics.to_html(
+        full_html=False, include_plotlyjs="cdn"
+    ).encode()
+
+    # Add download buttons for CSV and plot
+    col_dl1, col_dl2 = st.columns(2)
+    with col_dl1:
+        st.download_button(
+            "📥 Download CSV (Load-Depth Statistics)",
+            data=csv_bytes,
+            file_name="popin_statistics_load_depth.csv",
+            mime="text/csv",
+        )
+
+    with col_dl2:
+        st.download_button(
+            "📥 Download Plot (Load-Depth Statistics)",
+            data=fig_statistics_html,
+            file_name="popin_statistics_load_depth.html",
+            mime="text/html",
+        )
+
+    # For stress-strain statistics
+    csv_bytes_stress_strain = df_stress_strain_statistics.to_csv(index=False).encode()
+    fig_stress_strain_html = fig_stress_strain.to_html(
+        full_html=False, include_plotlyjs="cdn"
+    ).encode()
+
+    # Add download buttons for CSV and plot
+    with col_dl1:
+        st.download_button(
+            "📥 Download CSV (Stress-Strain Statistics)",
+            data=csv_bytes_stress_strain,
+            file_name="popin_statistics_stress_strain.csv",
+            mime="text/csv",
+        )
+
+    with col_dl2:
+        st.download_button(
+            "📥 Download Plot (Stress-Strain Statistics)",
+            data=fig_stress_strain_html,
+            file_name="popin_statistics_stress_strain.html",
+            mime="text/html",
+        )
+
+    # For the full stress-strain statistics pipeline results
+    csv_bytes_full_stress_strain = df_statistics_stress_strain.to_csv(
+        index=False
+    ).encode()
+    fig_full_statistics_html = fig_full_statistics.to_html(
+        full_html=False, include_plotlyjs="cdn"
+    ).encode()
+
+    with col_dl1:
+        st.download_button(
+            "📥 Download Full CSV (Stress-Strain)",
+            data=csv_bytes_full_stress_strain,
+            file_name="popin_statistics_full_stress_strain.csv",
+            mime="text/csv",
+        )
+
+    with col_dl2:
+        st.download_button(
+            "📥 Download Full Plot (Stress-Strain)",
+            data=fig_full_statistics_html,
+            file_name="popin_statistics_full_stress_strain.html",
+            mime="text/html",
+        )
 
 # ───────────────────────────────────────────────────────────────
 # 11 ∙ FOOTER
