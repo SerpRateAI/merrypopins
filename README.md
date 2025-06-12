@@ -1,6 +1,11 @@
 # Merrypopins
 
-[![Merrypopins](docs/static/logo-transparent.png)](https://serprateai.github.io/merrypopins/)
+<p align="center">
+  <a href="https://serprateai.github.io/merrypopins/">
+    <img src="docs/static/logo-transparent.png" alt="Merrypopins" width="350"/>
+  </a>
+</p>
+
 [![Merrypopins CI Tests](https://github.com/SerpRateAI/merrypopins/actions/workflows/python-app.yml/badge.svg)](https://github.com/SerpRateAI/merrypopins/actions/workflows/python-app.yml)
 [![codecov](https://codecov.io/gh/SerpRateAI/merrypopins/graph/badge.svg)](https://codecov.io/gh/SerpRateAI/merrypopins)
 [![📘 Merrypopins Documentation](https://img.shields.io/badge/docs-view-blue?logo=readthedocs)](https://serprateai.github.io/merrypopins/)
