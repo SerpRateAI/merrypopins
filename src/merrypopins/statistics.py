@@ -250,10 +250,17 @@ def calculate_popin_statistics(
         end_idx = int(row[end_col])
         start_time = df.at[start_idx, time_col]
         end_time = df.at[end_idx, time_col]
+
+        # Ensure the 'before' window captures data before the pop-in
         before = df[
             (df[time_col] >= start_time - before_window) & (df[time_col] < start_time)
         ]
-        during = df[(df[time_col] >= start_time) & (df[time_col] <= end_time)]
+
+        # Ensure the 'during' window captures data during and after the pop-in
+        during = df[
+            (df[time_col] >= start_time) & (df[time_col] <= end_time + after_window)
+        ]
+
         record = {"start_idx": start_idx, "end_idx": end_idx}
 
         if temporal_stats:
@@ -352,9 +359,20 @@ def default_statistics(
     if "contact_point" in df_locate.columns:
         required_cols.append("contact_point")
     df_locate = df_locate[required_cols].copy()
+
+    # Postprocess to select local maxima pop-ins
     df1 = postprocess_popins_local_max(df_locate, popin_flag_column=popin_flag_column)
+
+    # Extract intervals for each pop-in
     df2 = extract_popin_intervals(df1)
-    return calculate_popin_statistics(df2, time_col="Time (s)")
+
+    # Calculate statistics using before_window and after_window
+    return calculate_popin_statistics(
+        df2,
+        time_col="Time (s)",
+        before_window=before_window,  # Pass before_window to the function
+        after_window=after_window,  # Pass after_window to the function
+    )
 
 
 ######### STRESS–STRAIN TRANSFORMATION ########
@@ -597,6 +615,14 @@ def calculate_stress_strain_statistics(
             record.update(
                 _compute_stress_strain_precursor_stats(
                     before, time_col, stress_col, strain_col
+                )
+            )
+
+        if temporal_stats:
+            # Add temporal statistics such as pop-in duration and time between events
+            record.update(
+                _compute_temporal_stats(
+                    start_time, end_time, interval_rows, i, df, time_col, start_col
                 )
             )
 
