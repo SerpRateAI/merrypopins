@@ -47,7 +47,7 @@ def postprocess_popins_local_max(df, popin_flag_column="popin", window=1):
     """
     df = df.copy()
     max_load_idx = df["Load (µN)"].idxmax()
-    popin_flags = df[popin_flag_column] == True
+    popin_flags = df[popin_flag_column]
     selected_indices = []
 
     for idx in df.index[window:-window]:
