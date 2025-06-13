@@ -479,9 +479,11 @@ To publish a new version of the Merrypopins Streamlit app, follow these steps:
 3. Push the changes to the remote repository.
 4. Build and push the updated Docker image to Docker Hub:
    ```bash
-   docker build -t cacarvuai/merrypopins-app:latest .
    docker login
-   docker push cacarvuai/merrypopins-app:latest
+   docker buildx build \                                   
+      --platform linux/amd64,linux/arm64 \
+      -t cacarvuai/merrypopins-app:latest \
+      --push .
    ```
 5. Update the documentation to reflect the new version.
 

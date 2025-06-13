@@ -1,5 +1,5 @@
 # Use Python as the base image
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 # Set working directory
 WORKDIR /app
@@ -14,8 +14,8 @@ RUN apt-get update && apt-get install -y \
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip \
- && pip install --no-cache-dir -e . \
- && pip install --no-cache-dir streamlit plotly matplotlib
+    && pip install --no-cache-dir -e . \
+    && pip install --no-cache-dir streamlit plotly matplotlib kaleido
 
 # Set the Streamlit port
 ENV PORT=8501
