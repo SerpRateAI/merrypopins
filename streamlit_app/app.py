@@ -65,7 +65,17 @@ st.sidebar.markdown(
     f"📚 For detailed documentation about `merrypopins` library and tuning parameters visit our [home page.]({DOC_URL})"
 )
 
-# —— upload helper ————————————————————————————
+# —— upload and png helper ————————————————————————————
+# ── ensure PNG export always uses Kaleido ──────────────────────
+pio.kaleido.scope.default_format = "png"  # <-- new
+pio.kaleido.scope.default_width = 1000  # optional defaults
+pio.kaleido.scope.default_height = 600
+pio.kaleido.scope.default_scale = 2
+
+
+def _fig_to_png(fig) -> bytes:
+    """Robust PNG export that always uses Kaleido."""
+    return pio.to_image(fig, format="png")  # dimensions come from scope defaults
 
 
 def persist_file_uploader(label: str, key: str, types: Tuple[str, ...]):
@@ -349,6 +359,15 @@ if "contact_point" in df_pre.columns and df_pre["contact_point"].any():
 fig_raw_pre.update_layout(showlegend=True)
 st.plotly_chart(fig_raw_pre, use_container_width=True)
 
+# --- NEW: download raw-vs-preprocessed plot -------------------
+raw_png = _fig_to_png(fig_raw_pre)
+st.download_button(
+    "🖼️ Download PNG (raw vs pre-processed)",
+    data=raw_png,
+    file_name="raw_vs_preprocessed.png",
+    mime="image/png",
+)
+
 # cache preprocessed df for detectors
 st.session_state["df_pre"] = df_pre
 
@@ -463,6 +482,7 @@ if df_det is not None:
 
     # —— download buttons ————————————————————————————
     csv_bytes = df_det.to_csv(index=False).encode()
+    png_bytes = _fig_to_png(fig)
 
     col_dl1, col_dl2 = st.columns(2)
     with col_dl1:
@@ -472,6 +492,12 @@ if df_det is not None:
             file_name="merrypopins_annotated.csv",
             mime="text/csv",
         )
+        st.download_button(
+            "🖼️ Download PNG (Merrypopings Popin Detections Plot)",
+            data=png_bytes,
+            file_name="detections_plot.png",
+            mime="image/png",
+        )
 
     with col_dl2:
         if want_zip:
@@ -479,9 +505,6 @@ if df_det is not None:
             with zipfile.ZipFile(zip_buf, "w", zipfile.ZIP_DEFLATED) as zf:
                 zf.writestr("merrypopins_annotated.csv", csv_bytes)
                 # save figure as html so no kaleido dependency
-                png_bytes = pio.to_image(
-                    fig, format="png", width=1000, height=600, scale=2
-                )
                 zf.writestr("detections_plot.png", png_bytes)
                 zf.writestr(
                     "session_config.json",
@@ -498,9 +521,32 @@ if df_det is not None:
                 data=zip_buf.getvalue(),
                 file_name="merrypopins_results.zip",
             )
-# ───────────────────────────────────────────────────────────────
-# 10 ∙ COMPUTE STATISTICS
-# ───────────────────────────────────────────────────────────────
+
+    # ───────────────────────────────────────────────────────────────
+    # 10 ∙ COMPUTE STATISTICS
+    # ───────────────────────────────────────────────────────────────
+    # -----------------------------------------------------------
+    # 4)  DOWNLOAD BUTTONS
+    # -----------------------------------------------------------
+    # ––– helper to create & place a pair of buttons
+    def _dl_pair(col_csv, col_plot, df, fig, stem):
+        csv_bytes = df.to_csv(index=False).encode()
+        png_bytes = _fig_to_png(fig)
+        with col_csv:
+            st.download_button(
+                f"📥 Download CSV ({stem})",
+                data=csv_bytes,
+                file_name=f"{stem}.csv",
+                mime="text/csv",
+            )
+        with col_plot:
+            st.download_button(
+                f"📥 Download Plot ({stem})",
+                data=png_bytes,
+                file_name=f"{stem}.png",
+                mime="image/png",
+            )
+
 
 st.subheader("📊 Compute Pop-in Statistics")
 
@@ -526,6 +572,10 @@ if st.session_state.get("df_det") is not None:
         },
     )
     st.plotly_chart(fig_statistics, use_container_width=True)
+    col_dl1, col_dl2 = st.columns(2)
+    _dl_pair(
+        col_dl1, col_dl2, df_statistics, fig_statistics, "popin_statistics_load_depth"
+    )
 
     # -----------------------------------------------------------
     # 2)  STRESS–STRAIN  statistics
@@ -554,6 +604,14 @@ if st.session_state.get("df_det") is not None:
         },
     )
     st.plotly_chart(fig_stress_strain, use_container_width=True)
+    col_dl3, col_dl4 = st.columns(2)
+    _dl_pair(
+        col_dl3,
+        col_dl4,
+        df_stress_strain_stats,
+        fig_stress_strain,
+        "popin_statistics_stress_strain",
+    )
 
     # -----------------------------------------------------------
     # 3)  FULL pipeline (stress–strain time-series)
@@ -588,43 +646,6 @@ if st.session_state.get("df_det") is not None:
         },
     )
     st.plotly_chart(fig_full_statistics, use_container_width=True)
-
-    # -----------------------------------------------------------
-    # 4)  DOWNLOAD BUTTONS
-    # -----------------------------------------------------------
-    # ––– helper to create & place a pair of buttons
-    def _dl_pair(col_csv, col_plot, df, fig, stem):
-        csv_bytes = df.to_csv(index=False).encode()
-        png_bytes = pio.to_image(fig, format="png", width=1000, height=600, scale=2)
-        with col_csv:
-            st.download_button(
-                f"📥 Download CSV ({stem})",
-                data=csv_bytes,
-                file_name=f"{stem}.csv",
-                mime="text/csv",
-            )
-        with col_plot:
-            st.download_button(
-                f"📥 Download Plot ({stem})",
-                data=png_bytes,
-                file_name=f"{stem}.png",
-                mime="image/png",
-            )
-
-    col_dl1, col_dl2 = st.columns(2)
-    _dl_pair(
-        col_dl1, col_dl2, df_statistics, fig_statistics, "popin_statistics_load_depth"
-    )
-
-    col_dl3, col_dl4 = st.columns(2)
-    _dl_pair(
-        col_dl3,
-        col_dl4,
-        df_stress_strain_stats,
-        fig_stress_strain,
-        "popin_statistics_stress_strain",
-    )
-
     col_dl5, col_dl6 = st.columns(2)
     _dl_pair(
         col_dl5,
