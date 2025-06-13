@@ -170,7 +170,7 @@ Each experiment file name consists of **six components** separated by underscore
 
 | File Identifier | Peak Load | Loading Type |
 |-----------------|-----------|--------------|
-| 6um             | 200 mN    | Slow*        |
+| 6 um            | 200 mN    | Slow*        |
 
 > *Slow = 60s ramp — not always obvious from the file name alone; must be manually mapped.*
 
