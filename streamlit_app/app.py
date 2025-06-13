@@ -19,6 +19,7 @@ from typing import Dict, Tuple
 
 import pandas as pd
 import plotly.express as px
+import plotly.io as pio
 import streamlit as st
 
 from merrypopins.load_datasets import load_txt, load_tdm
@@ -478,10 +479,10 @@ if df_det is not None:
             with zipfile.ZipFile(zip_buf, "w", zipfile.ZIP_DEFLATED) as zf:
                 zf.writestr("merrypopins_annotated.csv", csv_bytes)
                 # save figure as html so no kaleido dependency
-                html_bytes = fig.to_html(
-                    full_html=False, include_plotlyjs="cdn"
-                ).encode()
-                zf.writestr("detections_plot.html", html_bytes)
+                png_bytes = pio.to_image(
+                    fig, format="png", width=1000, height=600, scale=2
+                )
+                zf.writestr("detections_plot.png", png_bytes)
                 zf.writestr(
                     "session_config.json",
                     json.dumps(
@@ -498,52 +499,68 @@ if df_det is not None:
                 file_name="merrypopins_results.zip",
             )
 # ───────────────────────────────────────────────────────────────
-#  10 ∙ COMPUTE STATISTICS
+# 10 ∙ COMPUTE STATISTICS
 # ───────────────────────────────────────────────────────────────
 
 st.subheader("📊 Compute Pop-in Statistics")
 
 if st.session_state.get("df_det") is not None:
-    # Calculate pop-in statistics (load-depth)
+    # -----------------------------------------------------------
+    # 1)  LOAD–DEPTH  statistics
+    # -----------------------------------------------------------
     st.markdown("### Load-Depth Pop-in Statistics")
     df_statistics = default_statistics(st.session_state["df_det"])
 
     st.write("#### Computed Pop-in Statistics:")
     st.dataframe(df_statistics[["start_idx", "end_idx", "depth_jump", "popin_length"]])
 
-    # Display Load-Depth statistics visualization
+    # Depth-jump vs pop-in-length
     fig_statistics = px.scatter(
         df_statistics,
         x="depth_jump",
         y="popin_length",
         title="Depth Jump vs Pop-in Length",
+        labels={
+            "depth_jump": "Depth Jump (nm)",
+            "popin_length": "Pop-in Length (s)",
+        },
     )
     st.plotly_chart(fig_statistics, use_container_width=True)
 
-    # Now calculate stress-strain statistics
-    st.markdown("### Stress-Strain Pop-in Statistics")
-    df_stress_strain = calculate_stress_strain(df_statistics)
-    df_stress_strain_statistics = calculate_stress_strain_statistics(df_stress_strain)
+    # -----------------------------------------------------------
+    # 2)  STRESS–STRAIN  statistics
+    # -----------------------------------------------------------
+    st.markdown("### Stress–Strain Pop-in Statistics")
 
-    st.write("#### Computed Stress-Strain Statistics:")
+    df_stress_strain = calculate_stress_strain(df_statistics)
+    df_stress_strain_stats = calculate_stress_strain_statistics(df_stress_strain)
+
+    st.write("#### Computed Stress–Strain Statistics:")
     st.dataframe(
-        df_stress_strain_statistics[
+        df_stress_strain_stats[
             ["stress_jump", "strain_jump", "stress_slope", "strain_slope"]
         ]
     )
 
-    # Display Stress-Strain statistics visualization
+    # Strain-jump (x) vs stress-jump (y)
     fig_stress_strain = px.scatter(
-        df_stress_strain_statistics,
-        x="stress_jump",
-        y="strain_jump",
+        df_stress_strain_stats,
+        x="strain_jump",
+        y="stress_jump",
         title="Stress Jump vs Strain Jump",
+        labels={
+            "strain_jump": "Strain Jump (–)",
+            "stress_jump": "Stress Jump (MPa)",
+        },
     )
     st.plotly_chart(fig_stress_strain, use_container_width=True)
 
-    # Full Statistics Pipeline (Stress-Strain)
-    st.markdown("### Full Stress-Strain Statistics Pipeline")
-    df_statistics_stress_strain = default_statistics_stress_strain(
+    # -----------------------------------------------------------
+    # 3)  FULL pipeline (stress–strain time-series)
+    # -----------------------------------------------------------
+    st.markdown("### Full Stress–Strain Statistics Pipeline")
+
+    df_stats_ss_full = default_statistics_stress_strain(
         st.session_state["df_det"],
         popin_flag_column="popin",
         before_window=0.5,
@@ -556,89 +573,67 @@ if st.session_state.get("df_det") is not None:
         time_col="Time (s)",
     )
 
-    st.write("#### Full Stress-Strain Statistics:")
-    st.dataframe(
-        df_statistics_stress_strain[
-            ["stress", "strain", "stress_slope", "strain_slope"]
-        ]
-    )
+    st.write("#### Full Stress–Strain Statistics:")
+    st.dataframe(df_stats_ss_full[["stress", "strain", "stress_slope", "strain_slope"]])
 
-    # Display Full Statistics visualization
+    # Strain (x) vs stress (y)
     fig_full_statistics = px.scatter(
-        df_statistics_stress_strain, x="stress", y="strain", title="Stress vs Strain"
+        df_stats_ss_full,
+        x="strain",
+        y="stress",
+        title="Stress vs Strain",
+        labels={
+            "strain": "Strain (–)",
+            "stress": "Stress (MPa)",
+        },
     )
     st.plotly_chart(fig_full_statistics, use_container_width=True)
 
-    # Add download buttons
-    csv_bytes = df_statistics.to_csv(index=False).encode()
-    fig_statistics_html = fig_statistics.to_html(
-        full_html=False, include_plotlyjs="cdn"
-    ).encode()
+    # -----------------------------------------------------------
+    # 4)  DOWNLOAD BUTTONS
+    # -----------------------------------------------------------
+    # ––– helper to create & place a pair of buttons
+    def _dl_pair(col_csv, col_plot, df, fig, stem):
+        csv_bytes = df.to_csv(index=False).encode()
+        png_bytes = pio.to_image(fig, format="png", width=1000, height=600, scale=2)
+        with col_csv:
+            st.download_button(
+                f"📥 Download CSV ({stem})",
+                data=csv_bytes,
+                file_name=f"{stem}.csv",
+                mime="text/csv",
+            )
+        with col_plot:
+            st.download_button(
+                f"📥 Download Plot ({stem})",
+                data=png_bytes,
+                file_name=f"{stem}.png",
+                mime="image/png",
+            )
 
-    # Add download buttons for CSV and plot
     col_dl1, col_dl2 = st.columns(2)
-    with col_dl1:
-        st.download_button(
-            "📥 Download CSV (Load-Depth Statistics)",
-            data=csv_bytes,
-            file_name="popin_statistics_load_depth.csv",
-            mime="text/csv",
-        )
+    _dl_pair(
+        col_dl1, col_dl2, df_statistics, fig_statistics, "popin_statistics_load_depth"
+    )
 
-    with col_dl2:
-        st.download_button(
-            "📥 Download Plot (Load-Depth Statistics)",
-            data=fig_statistics_html,
-            file_name="popin_statistics_load_depth.html",
-            mime="text/html",
-        )
+    col_dl3, col_dl4 = st.columns(2)
+    _dl_pair(
+        col_dl3,
+        col_dl4,
+        df_stress_strain_stats,
+        fig_stress_strain,
+        "popin_statistics_stress_strain",
+    )
 
-    # For stress-strain statistics
-    csv_bytes_stress_strain = df_stress_strain_statistics.to_csv(index=False).encode()
-    fig_stress_strain_html = fig_stress_strain.to_html(
-        full_html=False, include_plotlyjs="cdn"
-    ).encode()
+    col_dl5, col_dl6 = st.columns(2)
+    _dl_pair(
+        col_dl5,
+        col_dl6,
+        df_stats_ss_full,
+        fig_full_statistics,
+        "popin_statistics_full_stress_strain",
+    )
 
-    # Add download buttons for CSV and plot
-    with col_dl1:
-        st.download_button(
-            "📥 Download CSV (Stress-Strain Statistics)",
-            data=csv_bytes_stress_strain,
-            file_name="popin_statistics_stress_strain.csv",
-            mime="text/csv",
-        )
-
-    with col_dl2:
-        st.download_button(
-            "📥 Download Plot (Stress-Strain Statistics)",
-            data=fig_stress_strain_html,
-            file_name="popin_statistics_stress_strain.html",
-            mime="text/html",
-        )
-
-    # For the full stress-strain statistics pipeline results
-    csv_bytes_full_stress_strain = df_statistics_stress_strain.to_csv(
-        index=False
-    ).encode()
-    fig_full_statistics_html = fig_full_statistics.to_html(
-        full_html=False, include_plotlyjs="cdn"
-    ).encode()
-
-    with col_dl1:
-        st.download_button(
-            "📥 Download Full CSV (Stress-Strain)",
-            data=csv_bytes_full_stress_strain,
-            file_name="popin_statistics_full_stress_strain.csv",
-            mime="text/csv",
-        )
-
-    with col_dl2:
-        st.download_button(
-            "📥 Download Full Plot (Stress-Strain)",
-            data=fig_full_statistics_html,
-            file_name="popin_statistics_full_stress_strain.html",
-            mime="text/html",
-        )
 
 # ───────────────────────────────────────────────────────────────
 # 11 ∙ FOOTER
