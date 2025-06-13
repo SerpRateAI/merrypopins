@@ -394,7 +394,9 @@ def calculate_stress_strain(
 
     This function converts indentation data from load and depth measurements to stress and strain values using
     the Dao et al. (2008) approach. It optionally copies pop-in markers from the input DataFrame and filters
-    data based on load. Additionally, stress can be smoothed using the Savitzky-Golay filter.
+    data based on load. Additionally, stress can be smoothed using the Savitzky-Golay filter. With the current setup, 
+    stress-strain data is accurate up to the yield point, after which it becomes increasingly inaccurate. To be
+    expanded upon in a future version.
 
     Args:
         df (pd.DataFrame): DataFrame containing the indentation data.
