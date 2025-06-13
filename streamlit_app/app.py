@@ -161,23 +161,38 @@ class TrimConfig:
     max_load_cut: bool = True
 
 
-if "prep_cfg" not in st.session_state:
-    st.session_state["prep_cfg"] = PreprocessConfig()
-if "trim_cfg" not in st.session_state:
-    st.session_state["trim_cfg"] = TrimConfig()
+@dataclass
+class StatsConfig:
+    before_window: float = 0.5
+    after_window: float = 0.5
+    Reff_um: float = 5.323
+    min_load_uN: int = 2000
+    smooth_stress: bool = True
+    drop_all_nan: bool = True  # ← remove rows whose statistics are all NaN/None
+
+
+# init in session
+for key, cls in {
+    "prep_cfg": PreprocessConfig,
+    "trim_cfg": TrimConfig,
+    "stat_cfg": StatsConfig,
+}.items():
+    if key not in st.session_state:
+        st.session_state[key] = cls()
 
 prep_cfg: PreprocessConfig = st.session_state["prep_cfg"]
 trim_cfg: TrimConfig = st.session_state["trim_cfg"]
+stat_cfg: StatsConfig = st.session_state["stat_cfg"]
 
 # ───────────────────────────────────────────────────────────────
 #  5 ∙ SIDEBAR CONTROLS (update dataclasses in‑place)
 # ───────────────────────────────────────────────────────────────
 
-st.sidebar.header("⚙️ Pre‑processing")
+st.sidebar.header("⚙️ Pre-processing")
 prep_cfg.remove_pre = st.sidebar.checkbox(
     "Remove data before min(load)", prep_cfg.remove_pre
 )
-prep_cfg.rescale = st.sidebar.checkbox("Auto‑rescale depth", prep_cfg.rescale)
+prep_cfg.rescale = st.sidebar.checkbox("Auto-rescale depth", prep_cfg.rescale)
 prep_cfg.finalise = st.sidebar.checkbox("Trim/flag contact point", prep_cfg.finalise)
 
 with st.sidebar.expander("Advanced thresholds"):
@@ -186,7 +201,7 @@ with st.sidebar.expander("Advanced thresholds"):
     prep_cfg.smooth_win = st.slider(
         "Smooth window (odd)", 3, 51, prep_cfg.smooth_win, step=2
     )
-    prep_cfg.polyorder = st.slider("Poly‑order", 1, 5, prep_cfg.polyorder)
+    prep_cfg.polyorder = st.slider("Poly-order", 1, 5, prep_cfg.polyorder)
 
 st.sidebar.header("🪚 Edge trimming")
 trim_cfg.trim_edges = st.sidebar.checkbox("Trim first points", trim_cfg.trim_edges)
@@ -194,10 +209,25 @@ trim_cfg.trim_margin = st.sidebar.number_input(
     "Trim margin (pts)", 0, 500, trim_cfg.trim_margin
 )
 trim_cfg.max_load_cut = st.sidebar.checkbox(
-    "Ignore after max‑load", trim_cfg.max_load_cut
+    "Ignore after max-load", trim_cfg.max_load_cut
 )
 
-want_zip = st.sidebar.checkbox("Bundle outputs as ZIP", value=True)
+st.sidebar.header("📊 Statistics")
+stat_cfg.before_window = st.sidebar.number_input(
+    "Time window before pop-in (s)", 0.0, 5.0, stat_cfg.before_window, 0.1
+)
+stat_cfg.after_window = st.sidebar.number_input(
+    "Time window after  pop-in (s)", 0.0, 5.0, stat_cfg.after_window, 0.1
+)
+stat_cfg.min_load_uN = st.sidebar.number_input(
+    "Min load for stress-strain (µN)", 0, 1_000_000, stat_cfg.min_load_uN, 100
+)
+stat_cfg.smooth_stress = st.sidebar.checkbox("Smooth stress", stat_cfg.smooth_stress)
+stat_cfg.drop_all_nan = st.sidebar.checkbox(
+    "Remove rows with all NaN/None values in statistics", stat_cfg.drop_all_nan
+)
+
+want_zip = st.sidebar.checkbox("Bundle detection outputs as ZIP", True)
 
 # ───────────────────────────────────────────────────────────────
 #  6 ∙ PREPROCESSING HELPERS (cached)
@@ -359,14 +389,25 @@ if "contact_point" in df_pre.columns and df_pre["contact_point"].any():
 fig_raw_pre.update_layout(showlegend=True)
 st.plotly_chart(fig_raw_pre, use_container_width=True)
 
-# --- NEW: download raw-vs-preprocessed plot -------------------
+# --- NEW: download raw-vs-preprocessed csv and plot -------------------
+csv_bytes = df_pre.to_csv(index=False).encode()
 raw_png = _fig_to_png(fig_raw_pre)
-st.download_button(
-    "🖼️ Download PNG (raw vs pre-processed)",
-    data=raw_png,
-    file_name="raw_vs_preprocessed.png",
-    mime="image/png",
-)
+
+col_dl1, col_dl2 = st.columns(2)
+with col_dl1:
+    st.download_button(
+        "📥  Download CSV of Preprocessed Data",
+        data=csv_bytes,
+        file_name="merrypopins_preprocessed.csv",
+        mime="text/csv",
+    )
+with col_dl2:
+    st.download_button(
+        "🖼️ Download PNG (raw vs pre-processed)",
+        data=raw_png,
+        file_name="raw_vs_preprocessed.png",
+        mime="image/png",
+    )
 
 # cache preprocessed df for detectors
 st.session_state["df_pre"] = df_pre
@@ -484,14 +525,16 @@ if df_det is not None:
     csv_bytes = df_det.to_csv(index=False).encode()
     png_bytes = _fig_to_png(fig)
 
-    col_dl1, col_dl2 = st.columns(2)
+    col_dl1, col_dl2, col_dl3 = st.columns(3)
     with col_dl1:
         st.download_button(
-            "📥 CSV results",
+            "📥 Download CSV (Merrypopings Popin Detections Data)",
             data=csv_bytes,
             file_name="merrypopins_annotated.csv",
             mime="text/csv",
         )
+
+    with col_dl2:
         st.download_button(
             "🖼️ Download PNG (Merrypopings Popin Detections Plot)",
             data=png_bytes,
@@ -499,7 +542,7 @@ if df_det is not None:
             mime="image/png",
         )
 
-    with col_dl2:
+    with col_dl3:
         if want_zip:
             zip_buf = io.BytesIO()
             with zipfile.ZipFile(zip_buf, "w", zipfile.ZIP_DEFLATED) as zf:
@@ -522,40 +565,49 @@ if df_det is not None:
                 file_name="merrypopins_results.zip",
             )
 
-    # ───────────────────────────────────────────────────────────────
-    # 10 ∙ COMPUTE STATISTICS
-    # ───────────────────────────────────────────────────────────────
-    # -----------------------------------------------------------
-    # 4)  DOWNLOAD BUTTONS
-    # -----------------------------------------------------------
-    # ––– helper to create & place a pair of buttons
-    def _dl_pair(col_csv, col_plot, df, fig, stem):
-        csv_bytes = df.to_csv(index=False).encode()
-        png_bytes = _fig_to_png(fig)
-        with col_csv:
-            st.download_button(
-                f"📥 Download CSV ({stem})",
-                data=csv_bytes,
-                file_name=f"{stem}.csv",
-                mime="text/csv",
-            )
-        with col_plot:
-            st.download_button(
-                f"📥 Download Plot ({stem})",
-                data=png_bytes,
-                file_name=f"{stem}.png",
-                mime="image/png",
-            )
+
+# ───────────────────────────────────────────────────────────────
+# 10 ∙ COMPUTE STATISTICS
+# ───────────────────────────────────────────────────────────────
+# -----------------------------------------------------------
+# 4)  DOWNLOAD BUTTONS
+# -----------------------------------------------------------
+# ––– helper to create & place a pair of buttons
+def _dl_pair(col_csv, col_plot, df, fig, stem):
+    csv_bytes = df.to_csv(index=False).encode()
+    png_bytes = _fig_to_png(fig)
+    with col_csv:
+        st.download_button(
+            f"📥 Download CSV ({stem})",
+            data=csv_bytes,
+            file_name=f"{stem}.csv",
+            mime="text/csv",
+        )
+    with col_plot:
+        st.download_button(
+            f"📥 Download Plot ({stem})",
+            data=png_bytes,
+            file_name=f"{stem}.png",
+            mime="image/png",
+        )
 
 
 st.subheader("📊 Compute Pop-in Statistics")
-
-if st.session_state.get("df_det") is not None:
+df_det = st.session_state.get("df_det")
+if df_det is not None:
     # -----------------------------------------------------------
     # 1)  LOAD–DEPTH  statistics
     # -----------------------------------------------------------
     st.markdown("### Load-Depth Pop-in Statistics")
-    df_statistics = default_statistics(st.session_state["df_det"])
+    df_statistics = default_statistics(
+        df_det,
+        before_window=stat_cfg.before_window,
+        after_window=stat_cfg.after_window,
+    )
+    # Optionally drop rows where *every* stats column is NaN/None
+    ld_cols = ["depth_jump", "popin_length"]
+    if stat_cfg.drop_all_nan:
+        df_stats_ld = df_statistics.dropna(subset=ld_cols, how="all")
 
     st.write("#### Computed Pop-in Statistics:")
     st.dataframe(df_statistics[["start_idx", "end_idx", "depth_jump", "popin_length"]])
@@ -582,19 +634,29 @@ if st.session_state.get("df_det") is not None:
     # -----------------------------------------------------------
     st.markdown("### Stress–Strain Pop-in Statistics")
 
-    df_stress_strain = calculate_stress_strain(df_statistics)
-    df_stress_strain_stats = calculate_stress_strain_statistics(df_stress_strain)
+    df_stress_strain = calculate_stress_strain(
+        df_statistics,
+        Reff_um=stat_cfg.Reff_um,
+        min_load_uN=stat_cfg.min_load_uN,
+        smooth_stress=stat_cfg.smooth_stress,
+    )
+    df_stress_strain_stats = calculate_stress_strain_statistics(
+        df_stress_strain,
+        before_window=stat_cfg.before_window,
+    )
+
+    ss_cols = ["stress_jump", "strain_jump", "stress_slope", "strain_slope"]
+    if stat_cfg.drop_all_nan:
+        df_stats_ss = df_stress_strain_stats.dropna(subset=ss_cols, how="all")
+    else:
+        df_stats_ss = df_stress_strain_stats
 
     st.write("#### Computed Stress–Strain Statistics:")
-    st.dataframe(
-        df_stress_strain_stats[
-            ["stress_jump", "strain_jump", "stress_slope", "strain_slope"]
-        ]
-    )
+    st.dataframe(df_stats_ss[ss_cols])
 
     # Strain-jump (x) vs stress-jump (y)
     fig_stress_strain = px.scatter(
-        df_stress_strain_stats,
+        df_stats_ss,
         x="strain_jump",
         y="stress_jump",
         title="Stress Jump vs Strain Jump",
@@ -608,7 +670,7 @@ if st.session_state.get("df_det") is not None:
     _dl_pair(
         col_dl3,
         col_dl4,
-        df_stress_strain_stats,
+        df_stats_ss,
         fig_stress_strain,
         "popin_statistics_stress_strain",
     )
@@ -619,17 +681,19 @@ if st.session_state.get("df_det") is not None:
     st.markdown("### Full Stress–Strain Statistics Pipeline")
 
     df_stats_ss_full = default_statistics_stress_strain(
-        st.session_state["df_det"],
+        df_det,
         popin_flag_column="popin",
-        before_window=0.5,
-        after_window=0.5,
-        Reff_um=5.323,
-        min_load_uN=2000,
-        smooth_stress=True,
+        before_window=stat_cfg.before_window,
+        after_window=stat_cfg.after_window,
+        Reff_um=stat_cfg.Reff_um,
+        min_load_uN=stat_cfg.min_load_uN,
+        smooth_stress=stat_cfg.smooth_stress,
         stress_col="stress",
         strain_col="strain",
         time_col="Time (s)",
     )
+    if stat_cfg.drop_all_nan:
+        df_stats_full = df_stats_ss_full.dropna(how="all")
 
     st.write("#### Full Stress–Strain Statistics:")
     st.dataframe(df_stats_ss_full[["stress", "strain", "stress_slope", "strain_slope"]])
