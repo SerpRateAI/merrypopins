@@ -34,7 +34,7 @@
   - Savitzky-Golay smoothed gradient thresholds
 - **`statistics`**: Perform statistical analysis and model fitting on located pop‑in events (e.g., frequency, magnitude, distribution). The statistics module allows you to compute detailed pop-in statistics, such as:
   - Pop-in statistics (e.g., load-depth and stress-strain metrics)
-  - Stress-strain transformation using Dao et al. (2008)
+  - Stress-strain transformation using Kalidindi & Pathak. (2008)
   - Curve-level summary statistics (e.g., total pop-in duration, average time between pop-ins)
   - Pop-in shape statistics like depth jump, average velocity, and curvature
 - **`make_dataset`**: Construct enriched datasets by running the full merrypopins pipeline and exporting annotated results and visualizations. 
