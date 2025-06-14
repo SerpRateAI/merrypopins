@@ -10,6 +10,7 @@
 [![codecov](https://codecov.io/gh/SerpRateAI/merrypopins/graph/badge.svg)](https://codecov.io/gh/SerpRateAI/merrypopins)
 ![CodeQL](https://github.com/SerpRateAI/merrypopins/actions/workflows/codeql.yml/badge.svg)
 [![📘 Merrypopins Documentation](https://img.shields.io/badge/docs-view-blue?logo=readthedocs)](https://serprateai.github.io/merrypopins/)
+[![Merrypopins Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://merrypopins.streamlit.app)
 [![PyPI](https://img.shields.io/pypi/v/merrypopins.svg)](https://pypi.org/project/merrypopins/)
 [![Python](https://img.shields.io/pypi/pyversions/merrypopins.svg)](https://pypi.org/project/merrypopins/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/cacarvuai/merrypopins-app.svg)](https://hub.docker.com/r/cacarvuai/merrypopins-app)
@@ -20,7 +21,7 @@
 [![Last commit](https://img.shields.io/github/last-commit/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/commits/main)
 [![Release](https://img.shields.io/github/release-date/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/releases)
 [![Contributors](https://img.shields.io/github/contributors/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/graphs/contributors)
-[![License: GNU](https://img.shields.io/badge/License-GNU-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **merrypopins** is a Python library to streamline the workflow of nano‑indentation experiment data processing, automated pop-in detection and analysis. It provides five core modules:
 
@@ -39,6 +40,20 @@
 - **`make_dataset`**: Construct enriched datasets by running the full merrypopins pipeline and exporting annotated results and visualizations. 
 
 Merrypopins is developed by [Cahit Acar](mailto:c.acar.business@gmail.com), [Anna Marcelissen](mailto:anna.marcelissen@live.nl), [Hugo van Schrojenstein Lantman](mailto:h.w.vanschrojensteinlantman@uu.nl), and [John M. Aiken](mailto:johnm.aiken@gmail.com).
+
+---
+
+## 🌐 Try our Merrypopins Library Online
+
+🚀 **Live demo**: explore Merrypopins in your browser—no install needed!  
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://merrypopins.streamlit.app)
+
+The hosted app lets you:
+
+* upload raw `.txt` indentation files (and optional `.tdm/.tdx` metadata),
+* tune preprocessing, detection & statistics parameters,
+* visualise pop-ins interactively,
+* download annotated CSVs + plots.
 
 ---
 
@@ -428,6 +443,11 @@ Notes:
 
 Merrypopins includes an interactive Streamlit app for visualizing and detecting pop-ins in indentation data. This app allows you to upload your data files, run the detection algorithms, and visualize the results in a user-friendly interface.
 
+### 🌐 Try It Online
+
+🚀 **Live demo**: explore Merrypopins in your browser—no install needed!  
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://merrypopins.streamlit.app)
+
 ### 🐳 Using Docker
 
 You can run the interactive Streamlit app for visualizing and detecting pop-ins directly using Docker.
@@ -500,10 +520,10 @@ To publish a new version of the Merrypopins Streamlit app, follow these steps:
 4. Build and push the updated Docker image to Docker Hub:
    ```bash
    docker login
-   docker buildx build \                                   
-      --platform linux/amd64,linux/arm64 \
-      -t cacarvuai/merrypopins-app:latest \
-      --push .
+   docker buildx build \
+    --platform linux/amd64,linux/arm64 \
+    -t cacarvuai/merrypopins-app:latest \
+    --push .
    ```
 5. Update the documentation to reflect the new version.
 
@@ -528,5 +548,5 @@ Before submitting a PR:
 
 ## License
 
-This project is licensed under the **GNU General Public License v3.0**.
+This project is licensed under the **MIT**.
 See [LICENSE](LICENSE) for details.

@@ -10,4 +10,4 @@ Before submitting a PR:
 4. Push to the branch (`git push origin feature/foo`).
 5. Open a pull request.
 
-This project is licensed under the GNU GPL v3.0—see [LICENSE](../LICENSE).
+This project is licensed under the MIT see [LICENSE](LICENSE).
