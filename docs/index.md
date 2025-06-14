@@ -10,6 +10,7 @@
 [![codecov](https://codecov.io/gh/SerpRateAI/merrypopins/graph/badge.svg)](https://codecov.io/gh/SerpRateAI/merrypopins)
 ![CodeQL](https://github.com/SerpRateAI/merrypopins/actions/workflows/codeql.yml/badge.svg)
 [![📘 Merrypopins Documentation](https://img.shields.io/badge/docs-view-blue?logo=readthedocs)](https://serprateai.github.io/merrypopins/)
+[![Merrypopins Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://merrypopins.streamlit.app)
 [![PyPI](https://img.shields.io/pypi/v/merrypopins.svg)](https://pypi.org/project/merrypopins/)
 [![Python](https://img.shields.io/pypi/pyversions/merrypopins.svg)](https://pypi.org/project/merrypopins/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/cacarvuai/merrypopins-app.svg)](https://hub.docker.com/r/cacarvuai/merrypopins-app)
@@ -37,6 +38,20 @@
   - Curve-level summary statistics (e.g., total pop-in duration, average time between pop-ins)
   - Pop-in shape statistics like depth jump, average velocity, and curvature
 - **`make_dataset`**: Construct enriched datasets by running the full merrypopins pipeline and exporting annotated results and visualizations.
+
+---
+
+## 🌐 Try our Merrypopins Library Online
+
+🚀 **Live demo**: explore Merrypopins in your browser—no install needed!  
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://merrypopins.streamlit.app)
+
+The hosted app lets you:
+
+* upload raw `.txt` indentation files (and optional `.tdm/.tdx` metadata),
+* tune preprocessing, detection & statistics parameters,
+* visualise pop-ins interactively,
+* download annotated CSVs + plots.
 
 ---
 
