@@ -43,10 +43,9 @@ Merrypopins is developed by [Cahit Acar](mailto:c.acar.business@gmail.com), [Ann
 
 ---
 
-## 🌐 Try our Merrypopins Library Online
+## 🌐 Try Merrypopins Library Online
 
-🚀 **Live demo**: explore Merrypopins in your browser—no install needed!  
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://merrypopins.streamlit.app)
+🚀 **Live demo**: explore Merrypopins in your browser! [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://merrypopins.streamlit.app)
 
 The hosted app lets you:
 
@@ -445,8 +444,7 @@ Merrypopins includes an interactive Streamlit app for visualizing and detecting 
 
 ### 🌐 Try It Online
 
-🚀 **Live demo**: explore Merrypopins in your browser—no install needed!  
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://merrypopins.streamlit.app)
+🚀 **Live demo**: explore Merrypopins in your browser—no install needed! [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://merrypopins.streamlit.app)
 
 ### 🐳 Using Docker
 

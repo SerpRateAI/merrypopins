@@ -41,10 +41,9 @@
 
 ---
 
-## 🌐 Try our Merrypopins Library Online
+## 🌐 Try Merrypopins Library Online
 
-🚀 **Live demo**: explore Merrypopins in your browser—no install needed!  
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://merrypopins.streamlit.app)
+🚀 **Live demo**: explore Merrypopins in your browser! [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://merrypopins.streamlit.app)
 
 The hosted app lets you:
 
