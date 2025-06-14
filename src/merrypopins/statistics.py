@@ -5,7 +5,7 @@ statistics.py
 Extracts statistics from nanoindentation data:
 - Postprocess located popins
 - Extract pop-in intervals
-- Stress–strain transformation (Dao et al. 2008)
+- Stress–strain transformation Kalidindi & Pathak (2008).
 - Calculate pop-in statistics (load-depth and stress-strain)
 - Calculate curve-level summary statistics (load-depth)
 """
@@ -390,10 +390,10 @@ def calculate_stress_strain(
     copy_popin_cols=True,
 ):
     """
-    Convert load–depth data to stress–strain using Dao et al. (2008) formulas.
+    Convert load–depth data to stress–strain using Kalidindi & Pathak (2008) formulas.
 
     This function converts indentation data from load and depth measurements to stress and strain values using
-    the Dao et al. (2008) approach. It optionally copies pop-in markers from the input DataFrame and filters
+    the Kalidindi & Pathak (2008). approach. It optionally copies pop-in markers from the input DataFrame and filters
     data based on load. Additionally, stress can be smoothed using the Savitzky-Golay filter. With the current setup,
     stress-strain data is accurate up to the yield point, after which it becomes increasingly inaccurate. To be
     expanded upon in a future version.
