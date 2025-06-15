@@ -1,12 +1,19 @@
 # Merrypopins
 
-[![Merrypopins](docs/static/logo-transparent.png)](https://serprateai.github.io/merrypopins/)
+<p align="center">
+  <a href="https://serprateai.github.io/merrypopins/">
+    <img src="docs/static/logo-transparent.png" alt="Merrypopins" width="350"/>
+  </a>
+</p>
+
 [![Merrypopins CI Tests](https://github.com/SerpRateAI/merrypopins/actions/workflows/python-app.yml/badge.svg)](https://github.com/SerpRateAI/merrypopins/actions/workflows/python-app.yml)
 [![codecov](https://codecov.io/gh/SerpRateAI/merrypopins/graph/badge.svg)](https://codecov.io/gh/SerpRateAI/merrypopins)
+![CodeQL](https://github.com/SerpRateAI/merrypopins/actions/workflows/codeql.yml/badge.svg)
 [![📘 Merrypopins Documentation](https://img.shields.io/badge/docs-view-blue?logo=readthedocs)](https://serprateai.github.io/merrypopins/)
+[![Merrypopins Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://merrypopins.streamlit.app)
 [![PyPI](https://img.shields.io/pypi/v/merrypopins.svg)](https://pypi.org/project/merrypopins/)
 [![Python](https://img.shields.io/pypi/pyversions/merrypopins.svg)](https://pypi.org/project/merrypopins/)
-[![License: GNU](https://img.shields.io/badge/License-GNU-yellow.svg)](LICENSE)
+[![Docker Pulls](https://img.shields.io/docker/pulls/cacarvuai/merrypopins-app.svg)](https://hub.docker.com/r/cacarvuai/merrypopins-app)
 [![Downloads](https://pepy.tech/badge/merrypopins)](https://pepy.tech/project/merrypopins)
 [![Issues](https://img.shields.io/github/issues/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/issues)
 [![Dependencies](https://img.shields.io/librariesio/github/SerpRateAI/merrypopins)](https://github.com/SerpRateAI/merrypopins/network/dependencies)
@@ -14,6 +21,7 @@
 [![Last commit](https://img.shields.io/github/last-commit/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/commits/main)
 [![Release](https://img.shields.io/github/release-date/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/releases)
 [![Contributors](https://img.shields.io/github/contributors/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/graphs/contributors)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **merrypopins** is a Python library to streamline the workflow of nano‑indentation experiment data processing, automated pop-in detection and analysis. It provides five core modules:
 
@@ -24,10 +32,27 @@
   - CNN Autoencoder reconstruction error
   - Fourier-based derivative outlier detection
   - Savitzky-Golay smoothed gradient thresholds
-- **`statistics`**: Perform statistical analysis and model fitting on located pop‑in events (e.g., frequency, magnitude, distribution).
-- **`make_dataset`**: Construct enriched datasets by running the full merrypopins pipeline and exporting annotated results and visualizations.
+- **`statistics`**: Perform statistical analysis and model fitting on located pop‑in events (e.g., frequency, magnitude, distribution). The statistics module allows you to compute detailed pop-in statistics, such as:
+  - Pop-in statistics (e.g., load-depth and stress-strain metrics)
+  - Stress-strain transformation using Kalidindi & Pathak. (2008)
+  - Curve-level summary statistics (e.g., total pop-in duration, average time between pop-ins)
+  - Pop-in shape statistics like depth jump, average velocity, and curvature
+- **`make_dataset`**: Construct enriched datasets by running the full merrypopins pipeline and exporting annotated results and visualizations. 
 
 Merrypopins is developed by [Cahit Acar](mailto:c.acar.business@gmail.com), [Anna Marcelissen](mailto:anna.marcelissen@live.nl), [Hugo van Schrojenstein Lantman](mailto:h.w.vanschrojensteinlantman@uu.nl), and [John M. Aiken](mailto:johnm.aiken@gmail.com).
+
+---
+
+## 🌐 Try Merrypopins Library Online
+
+🚀 **Live demo**: explore Merrypopins in your browser! [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://merrypopins.streamlit.app)
+
+The hosted app lets you:
+
+* upload raw `.txt` indentation files (and optional `.tdm/.tdx` metadata),
+* tune preprocessing, detection & statistics parameters,
+* visualise pop-ins interactively,
+* download annotated CSVs + plots.
 
 ---
 
@@ -97,6 +122,7 @@ from merrypopins.load_datasets import load_txt, load_tdm
 from merrypopins.preprocess import default_preprocess, remove_pre_min_load, rescale_data, finalise_contact_index
 from merrypopins.locate import default_locate
 from merrypopins.make_dataset import merrypopins_pipeline
+from merrypopins.statistics import default_statistics, calculate_stress_strain, calculate_stress_strain_statistics, default_statistics_stress_strain
 ```
 
 ### Load Indentation Data and Metadata
@@ -286,6 +312,54 @@ else:
     print("No plots found in output folder.")
 ```
 
+### Calculate Pop-in Statistics
+
+#### Calculate Pop-in Statistics (Load-Depth)
+
+```python
+df_statistics = default_statistics(df_pipeline)
+
+# View the computed statistics for each pop-in
+print(df_statistics.head())
+
+```
+
+### Calculate Stress-Strain Statistics
+
+#### Perform Stress-Strain Transformation and Statistics
+
+```python
+# Perform stress-strain transformation
+df_stress_strain = calculate_stress_strain(df_statistics)
+
+# Calculate stress-strain statistics
+df_stress_strain_statistics = calculate_stress_strain_statistics(df_stress_strain)
+
+# View the calculated stress-strain statistics
+print(df_stress_strain_statistics.head())
+```
+
+### Full Statistics Pipeline
+
+#### Perform Default Full Statistics Pipeline for Stress-Strain
+
+```python
+df_statistics_stress_strain = default_statistics_stress_strain(
+    df_pipeline,
+    popin_flag_column="popin",
+    before_window=0.5,
+    after_window=0.5,
+    Reff_um=5.323,
+    min_load_uN=2000,
+    smooth_stress=True,
+    stress_col="stress",
+    strain_col="strain",
+    time_col="Time (s)",
+)
+
+# View the final stress-strain statistics
+print(df_statistics_stress_strain.head())
+```
 ---
 
 ## Development & Testing
@@ -304,19 +378,25 @@ else:
 
 ### 🔧 Pre-commit Hooks
 
-We use [pre-commit](https://pre-commit.com/) to automatically check code formatting and linting before each commit. This helps ensure consistent code quality across the project.
+We rely on [**pre-commit**](https://pre-commit.com/) to auto-run **ruff** (lint) and **black** (format) against **every** change before it is committed.  
+If these checks are **not** executed locally, your PR will fail in CI.
 
-#### Setup (Run Once)
+> **🚨 Important:** You must have the `pre-commit` package installed **globally**  
+> (`pip install --user pre-commit` or via the project’s *dev* extras) **before** making commits.
+
+#### Setup (Run once per clone)
 
 ```bash
-# After installing the development dependencies, set up pre-commit hooks:
-# This will install the hooks defined in .pre-commit-config.yaml
+# 1) Install the tool (only needed if it’s not already on your system)
+pip install pre-commit          # or: pip install -e '.[dev]'
+
+# 2) Install the Git hooks defined in .pre-commit-config.yaml
 pre-commit install
 ```
 
-This sets up a Git hook that will run ruff and black automatically before each commit.
+This adds a Git hook that formats / lints the staged files automatically at each `git commit`.
 
-Run Manually
+Run Checks Manually
 
 To run all checks on all files:
 
@@ -324,9 +404,23 @@ To run all checks on all files:
 pre-commit run --all-files
 ```
 
+#### What if the hook rejects my commit?
+
+If `pre-commit` finds issues (usually formatting via **black** or lint via **ruff**),  
+the commit will **abort** and the affected files will be *modified in-place* to satisfy the rules.
+
+1. Open **Source Control** (e.g. the Git sidebar in VS Code).  
+2. You will see the *updated* (but **unstaged**) files.
+3. Click the **➕** (stage) button next to each fixed file *or* `git add <file>`.
+4. Re-run `git commit` – it should now succeed.
+5. Finally, push your branch to the remote.
+
+> Tip: always run `pre-commit run --all-files` before making a commit to catch issues early.
+
 Notes:
-- Hooks are defined in .pre-commit-config.yaml.
-- You can exclude specific files or directories (e.g., tutorials/) by modifying that config file.
+- Hooks are defined in `.pre-commit-config.yaml`.
+- You can exclude specific files or directories (e.g., `tutorials/`) by modifying the config file `.pre-commit-config.yaml`.
+- CI will re-run the same hooks; commits that bypass them locally will be rejected.
 
 ### 🧪 Running Tests
 2. Run tests with coverage:
@@ -347,6 +441,10 @@ Notes:
 ## 📦 Run Merrypopins Streamlit App
 
 Merrypopins includes an interactive Streamlit app for visualizing and detecting pop-ins in indentation data. This app allows you to upload your data files, run the detection algorithms, and visualize the results in a user-friendly interface.
+
+### 🌐 Try It Online
+
+🚀 **Live demo**: explore Merrypopins in your browser! [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://merrypopins.streamlit.app)
 
 ### 🐳 Using Docker
 
@@ -419,9 +517,11 @@ To publish a new version of the Merrypopins Streamlit app, follow these steps:
 3. Push the changes to the remote repository.
 4. Build and push the updated Docker image to Docker Hub:
    ```bash
-   docker build -t cacarvuai/merrypopins-app:latest .
    docker login
-   docker push cacarvuai/merrypopins-app:latest
+   docker buildx build \
+    --platform linux/amd64,linux/arm64 \
+    -t cacarvuai/merrypopins-app:latest \
+    --push .
    ```
 5. Update the documentation to reflect the new version.
 
@@ -446,5 +546,5 @@ Before submitting a PR:
 
 ## License
 
-This project is licensed under the **GNU General Public License v3.0**.
+This project is licensed under the **MIT**.
 See [LICENSE](LICENSE) for details.

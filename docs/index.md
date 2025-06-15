@@ -1,12 +1,19 @@
 # Merrypopins
 
-[![Merrypopins](static/logo-transparent.png)](https://serprateai.github.io/merrypopins/)
+<p align="center">
+  <a href="https://serprateai.github.io/merrypopins/">
+    <img src="static/logo-transparent.png" alt="Merrypopins" width="350"/>
+  </a>
+</p>
+
 [![Merrypopins CI Tests](https://github.com/SerpRateAI/merrypopins/actions/workflows/python-app.yml/badge.svg)](https://github.com/SerpRateAI/merrypopins/actions/workflows/python-app.yml)
 [![codecov](https://codecov.io/gh/SerpRateAI/merrypopins/graph/badge.svg)](https://codecov.io/gh/SerpRateAI/merrypopins)
+![CodeQL](https://github.com/SerpRateAI/merrypopins/actions/workflows/codeql.yml/badge.svg)
 [![📘 Merrypopins Documentation](https://img.shields.io/badge/docs-view-blue?logo=readthedocs)](https://serprateai.github.io/merrypopins/)
+[![Merrypopins Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://merrypopins.streamlit.app)
 [![PyPI](https://img.shields.io/pypi/v/merrypopins.svg)](https://pypi.org/project/merrypopins/)
 [![Python](https://img.shields.io/pypi/pyversions/merrypopins.svg)](https://pypi.org/project/merrypopins/)
-[![License: GNU](https://img.shields.io/badge/License-GNU-yellow.svg)](LICENSE)
+[![Docker Pulls](https://img.shields.io/docker/pulls/cacarvuai/merrypopins-app.svg)](https://hub.docker.com/r/cacarvuai/merrypopins-app)
 [![Downloads](https://pepy.tech/badge/merrypopins)](https://pepy.tech/project/merrypopins)
 [![Issues](https://img.shields.io/github/issues/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/issues)
 [![Dependencies](https://img.shields.io/librariesio/github/SerpRateAI/merrypopins)](https://github.com/SerpRateAI/merrypopins/network/dependencies)
@@ -14,6 +21,7 @@
 [![Last commit](https://img.shields.io/github/last-commit/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/commits/main)
 [![Release](https://img.shields.io/github/release-date/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/releases)
 [![Contributors](https://img.shields.io/github/contributors/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/graphs/contributors)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **merrypopins** is a Python library to streamline the workflow of nano‑indentation experiment data processing, automated pop-in detection and analysis. It provides five core modules:
 
@@ -24,8 +32,25 @@
   - CNN Autoencoder reconstruction error
   - Fourier-based derivative outlier detection
   - Savitzky-Golay smoothed gradient thresholds
-- **`statistics`**: Perform statistical analysis and model fitting on located pop‑in events (e.g., frequency, magnitude, distribution).
+- **`statistics`**: Perform statistical analysis and model fitting on located pop‑in events (e.g., frequency, magnitude, distribution). The statistics module allows you to compute detailed pop-in statistics, such as:
+  - Pop-in statistics (e.g., load-depth and stress-strain metrics)
+  - Stress-strain transformation using Kalidindi & Pathak. (2008)
+  - Curve-level summary statistics (e.g., total pop-in duration, average time between pop-ins)
+  - Pop-in shape statistics like depth jump, average velocity, and curvature
 - **`make_dataset`**: Construct enriched datasets by running the full merrypopins pipeline and exporting annotated results and visualizations.
+
+---
+
+## 🌐 Try Merrypopins Library Online
+
+🚀 **Live demo**: explore Merrypopins in your browser! [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://merrypopins.streamlit.app)
+
+The hosted app lets you:
+
+* upload raw `.txt` indentation files (and optional `.tdm/.tdx` metadata),
+* tune preprocessing, detection & statistics parameters,
+* visualise pop-ins interactively,
+* download annotated CSVs + plots.
 
 ---
 

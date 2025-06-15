@@ -8,6 +8,7 @@ from merrypopins.load_datasets import load_txt, load_tdm
 from merrypopins.preprocess import default_preprocess, remove_pre_min_load, rescale_data, finalise_contact_index
 from merrypopins.locate import default_locate
 from merrypopins.make_dataset import merrypopins_pipeline
+from merrypopins.statistics import default_statistics, calculate_stress_strain, calculate_stress_strain_statistics, default_statistics_stress_strain
 ```
 
 ### Load Indentation Data and Metadata
@@ -195,4 +196,53 @@ if image_paths:
     plt.show()
 else:
     print("No plots found in output folder.")
+```
+
+### Calculate Pop-in Statistics
+
+#### Calculate Pop-in Statistics (Load-Depth)
+
+```python linenums="1"
+df_statistics = default_statistics(df_pipeline)
+
+# View the computed statistics for each pop-in
+print(df_statistics.head())
+
+```
+
+### Calculate Stress-Strain Statistics
+
+#### Perform Stress-Strain Transformation and Statistics
+
+```python linenums="1"
+# Perform stress-strain transformation
+df_stress_strain = calculate_stress_strain(df_statistics)
+
+# Calculate stress-strain statistics
+df_stress_strain_statistics = calculate_stress_strain_statistics(df_stress_strain)
+
+# View the calculated stress-strain statistics
+print(df_stress_strain_statistics.head())
+```
+
+### Full Statistics Pipeline
+
+#### Perform Default Full Statistics Pipeline for Stress-Strain
+
+```python linenums="1"
+df_statistics_stress_strain = default_statistics_stress_strain(
+    df_pipeline,
+    popin_flag_column="popin",
+    before_window=0.5,
+    after_window=0.5,
+    Reff_um=5.323,
+    min_load_uN=2000,
+    smooth_stress=True,
+    stress_col="stress",
+    strain_col="strain",
+    time_col="Time (s)",
+)
+
+# View the final stress-strain statistics
+print(df_statistics_stress_strain.head())
 ```

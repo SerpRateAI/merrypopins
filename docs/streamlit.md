@@ -4,6 +4,10 @@
 
 Merrypopins includes an interactive Streamlit app for visualizing and detecting pop-ins in indentation data. This app allows you to upload your data files, run the detection algorithms, and visualize the results in a user-friendly interface.
 
+### 🌐 Try It Online
+
+🚀 **Live demo**: explore Merrypopins in your browser! [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://merrypopins.streamlit.app)
+
 ### 🐳 Using Docker
 
 You can run the interactive Streamlit app for visualizing and detecting pop-ins directly using Docker.
@@ -75,9 +79,11 @@ To publish a new version of the Merrypopins Streamlit app, follow these steps:
 3. Push the changes to the remote repository.
 4. Build and push the updated Docker image to Docker Hub:
    ```bash
-   docker build -t cacarvuai/merrypopins-app:latest .
    docker login
-   docker push cacarvuai/merrypopins-app:latest
+   docker buildx build \
+    --platform linux/amd64,linux/arm64 \
+    -t cacarvuai/merrypopins-app:latest \
+    --push .
    ```
 5. Update the documentation to reflect the new version.
 

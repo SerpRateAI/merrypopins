@@ -31,7 +31,6 @@ This section documents important metadata fields collected during nanoindentatio
 - **Description**: Maximum force applied during the indentation.
 - **Use case**: Critical for verifying test configuration:
   - **6 µm tip** → ~200 mN
-  - **3 µm tip** → ~100 mN
 - **Note**: Inconsistent maximum demand values may indicate incorrect experimental parameters.
 
 ---
@@ -62,15 +61,15 @@ This section documents important metadata fields collected during nanoindentatio
 
 ## 🔍 Summary Table
 
-| Variable                                | Unit       | Purpose                           |
-|----------------------------------------|------------|------------------------------------|
-| `Acquisition_Contact_Threshold__μN__`  | μN         | Trim pre-contact region           |
-| `Initial_Drift_Rate__nm___s__`         | nm/s       | Environmental quality check       |
-| `Acquisition_Lift_Height__nm__`        | nm         | Detect trimmed offset region      |
-| `Acquisition_Maximum_Demand__µN__`     | μN         | Validate experiment configuration |
-| `Current_Area_Function_B`, `C0..C5`    | varies     | Calibrate contact area            |
-| `Current_Tip_Modulus__MPa__`           | MPa        | Used in modulus calculation       |
-| `Current_Tip_Poissons_Ratio`           | dimensionless | Stress-strain relations        |
+| Variable                                | Unit         | Purpose                           |
+|----------------------------------------|---------------|-----------------------------------|
+| `Acquisition_Contact_Threshold__μN__`  | μN            | Trim pre-contact region           |
+| `Initial_Drift_Rate__nm___s__`         | nm/s          | Environmental quality check       |
+| `Acquisition_Lift_Height__nm__`        | nm            | Detect trimmed offset region      |
+| `Acquisition_Maximum_Demand__µN__`     | μN            | Validate experiment configuration |
+| `Current_Area_Function_B`, `C0..C5`    | varies        | Calibrate contact area            |
+| `Current_Tip_Modulus__MPa__`           | MPa           | Used in modulus calculation       |
+| `Current_Tip_Poissons_Ratio`           | dimensionless | Stress-strain relations           |
 
 ---
 
@@ -102,7 +101,6 @@ All nanoindentation experiments were performed using the **Bruker Hysitron TI 99
 - **Control Software**: TriboScan 12.0.0.391
 - **Tip Type**: Conospherical diamond
   - 6 µm tip actual radius: **5.323 µm**
-  - 3 µm tip actual radius: **3.064 µm**
 
 **Calibration Materials**:
 - Fused Quartz
@@ -133,13 +131,11 @@ The sample used is a thin-section of **blueschist**, a metamorphic rock rich in:
 | Tip Type     | Nominal Radius | Actual Radius | Peak Load |
 |--------------|----------------|---------------|-----------|
 | 6 µm         | 6 µm           | 5.323 µm      | 200 mN    |
-| 3 µm         | 3 µm           | 3.064 µm      | 100 mN    |
 
 #### Loading Profiles
 
 | Type          | Ramp Duration | Notes                        |
 |---------------|---------------|------------------------------|
-| Fast Loading  | 20 seconds    | Shorter load ramp duration   |
 | Slow Loading  | 60 seconds    | Gentler loading phase        |
 
 All other parameters (e.g., hold, unload) were identical across experiments.
@@ -174,9 +170,9 @@ Each experiment file name consists of **six components** separated by underscore
 
 | File Identifier | Peak Load | Loading Type |
 |-----------------|-----------|--------------|
-| 6um             | 200 mN    | Fast/Slow*   |
+| 6 um            | 200 mN    | Slow*        |
 
-> *Fast = 20s ramp, Slow = 60s ramp — not always obvious from the file name alone; must be manually mapped.*
+> *Slow = 60s ramp — not always obvious from the file name alone; must be manually mapped.*
 
 ---
 

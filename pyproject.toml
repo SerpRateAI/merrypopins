@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "merrypopins"
-version = "0.2.3"
+version = "1.0.0"
 description = "Merrypopins: Automated pop-in detection for nano-indentation experiments tooling: load_datasets, preprocess, locate, statistics & make_dataset"
 readme = "README.md"
 requires-python = ">=3.10,<3.13"
-license = { text = "GNU" }
+license = { text = "MIT" }
 authors = [
   { name = "Cahit Acar", email = "c.acar.business@gmail.com" },
   { name = "Anna Marcelissen", email = "anna.marcelissen@live.nl" },
@@ -17,7 +17,7 @@ authors = [
 ]
 classifiers = [
   "Intended Audience :: Science/Research",
-  "License :: OSI Approved :: GNU License",
+  "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
