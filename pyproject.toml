@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "merrypopins"
+version = "1.0.0"
+description = "Merrypopins: Automated pop-in detection for nano-indentation experiments tooling: load_datasets, preprocess, locate, statistics & make_dataset"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+license = { text = "MIT" }
+authors = [
+  { name = "Cahit Acar", email = "c.acar.business@gmail.com" },
+  { name = "Anna Marcelissen", email = "anna.marcelissen@live.nl" },
+  { name = "Hugo van Schrojenstein Lantman", email = "h.w.vanschrojensteinlantman@uu.nl" },
+  { name = "John M. Aiken", email = "johnm.aiken@gmail.com" }
+]
+classifiers = [
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering :: Physics"
+]
+
+dependencies = [
+  "matplotlib>=3.7",
+  "numpy>=1.23",
+  "pandas>=2.2",
+  "scipy>=1.10",
+  "scikit-learn>=1.2",
+  "tensorflow>=2.10"
+]
+[project.optional-dependencies]
+dev = [
+  "black>=23.0",
+  "coverage>=7.0",
+  "pre-commit>=3.0",
+  "pytest>=7.0",
+  "pytest-cov>=4.0",
+  "ruff>=0.8.0"
+]
+
+[project.urls]
+Homepage = "https://serprateai.github.io/merrypopins/"
+Source   = "https://github.com/SerpRateAI/merrypopins"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["merrypopins*"]

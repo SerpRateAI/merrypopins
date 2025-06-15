@@ -1,0 +1,50 @@
+name: Merrypopins CI Tests
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - name: 🛎️ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: 📦 Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: 📥 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: 🧹 Run pre-commit hooks
+        uses: pre-commit/action@v3.0.1
+
+      - name: 🧪 Run tests with coverage
+        run: |
+          pytest --cov=merrypopins --cov-report=xml
+
+      - name: 📤 Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage.xml
+          token: ${{ secrets.CODECOV_TOKEN }}

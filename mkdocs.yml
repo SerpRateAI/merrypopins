@@ -1,0 +1,101 @@
+site_name: Merrypopins
+site_url: https://serprateai.github.io/merrypopins/
+repo_name: SerpRateAI/merrypopins
+repo_url: https://github.com/SerpRateAI/merrypopins
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Quick Start: quickstart.md
+  - Experimental Setup Documentation: documentation.md
+  - Features:
+      - Load Datasets: reference/merrypopins.load_datasets.md
+      - Preprocess Data: reference/merrypopins.preprocess.md
+      - Locate: reference/merrypopins.locate.md
+      - Statistics: reference/merrypopins.statistics.md
+      - Make Dataset: reference/merrypopins.make_dataset.md
+  - Merrypopins Streamlit App: streamlit.md
+  - Contribution Guide: contributing.md
+  - Release Guide: RELEASING.md
+
+theme:
+  name: material
+  language: en
+  palette:
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      scheme: default
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to system preference
+    - media: "(prefers-color-scheme: light)"
+      scheme: dark
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)" 
+      scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+      primary: indigo
+      accent: lime
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.top
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.instant.preview
+    - navigation.tracking
+    - navigation.expand
+    - navigation.sections
+    - search.suggest
+    - search.highlight
+    - search.share
+    - toc.integrate
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+
+plugins:
+  - search
+  - tags
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: ["src"]
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - admonition
+  - pymdownx.arithmatex:
+      generic: true
+  - footnotes
+  - pymdownx.mark
+  - pymdownx.superfences
+  - pymdownx.caret
+  - pymdownx.mark
+  - pymdownx.tilde
+  - pymdownx.tabbed
+  - pymdownx.snippets
+  - pymdownx.emoji:
+      emoji_index: !!python/name:pymdownx.emoji.twemoji
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.details
+  - attr_list
+
+extra:
+  social:
+    - icon: fontawesome/brands/github-alt
+      link: https://github.com/SerpRateAI/merrypopins
+
+copyright: |
+  &copy; 2025 <a href="https://github.com/SerpRateAI/merrypopins" target="_blank" rel="noopener">Merrypopins</a>
