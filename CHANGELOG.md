@@ -16,6 +16,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
   - **`statistics`** – Comprehensive pop-in analytics:
     load-depth, stress-strain transforms, shape/temporal descriptors, curve-level summaries.
   - **`make_dataset`** – One-shot pipeline that chains **load → preprocess → locate → visualise**.
+- **Streamlit App**
   - **`streamlit_app`** – Interactive UI with parameter tuning, visualisations, PNG/CSV export & deployed at <https://merrypopins.streamlit.app>.
 
 - **Infrastructure & Tooling**
