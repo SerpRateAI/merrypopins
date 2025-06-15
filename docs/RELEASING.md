@@ -78,5 +78,5 @@ Once merged, the GitHub Actions workflow will:
 
 - `pyproject.toml`
 - `src/merrypopins/__init__.py`
-- `.github/workflows/release.yml`
+- `.github/workflows/pypi-release.yml`
 - `.github/RELEASING.md`
