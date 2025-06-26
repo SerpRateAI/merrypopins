@@ -29,3 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 - **Licence** switched from **GNU GPL-3.0** ➜ **MIT**.
 - Branch strategy: feature PRs → `dev`; maintainers merge `dev` → `main` for releases.
 
+## [1.0.1] – 2025-06-20 &nbsp;:bug: **“Patch Release”**
+### Fixed
+- **Streamlit App**: 
+   - Fixed issue with PNG export not working in the latest version of Kaleido, new major version of Kaleido now requires Chromium to be installed. So we have downgraded Kaleido to 0.2.1.
