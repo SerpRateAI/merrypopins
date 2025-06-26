@@ -1,0 +1,1467 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://serprateai.github.io/merrypopins/documentation/">
+      
+      
+        <link rel="prev" href="../quickstart/">
+      
+      
+        <link rel="next" href="../reference/merrypopins.load_datasets/">
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.14">
+    
+    
+      
+        <title>Experimental Setup Documentation - Merrypopins</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.342714a4.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#experimental-metadata-reference" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Merrypopins" class="md-header__button md-logo" aria-label="Merrypopins" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Merrypopins
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Experimental Setup Documentation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="dark" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="lime"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/SerpRateAI/merrypopins" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    SerpRateAI/merrypopins
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../installation/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Installation
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../quickstart/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Quick Start
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Experimental Setup Documentation
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../reference/merrypopins.load_datasets/" class="md-tabs__link">
+          
+  
+  
+  Features
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../streamlit/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Merrypopins Streamlit App
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../contributing/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Contribution Guide
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../RELEASING/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Release Guide
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Merrypopins" class="md-nav__button md-logo" aria-label="Merrypopins" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Merrypopins
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/SerpRateAI/merrypopins" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    SerpRateAI/merrypopins
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Installation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quick Start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Experimental Setup Documentation
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Experimental Setup Documentation
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#metadata-variables-explained" class="md-nav__link">
+    <span class="md-ellipsis">
+      📐 Metadata Variables Explained
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📐 Metadata Variables Explained">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#acquisition_contact_threshold__n__" class="md-nav__link">
+    <span class="md-ellipsis">
+      Acquisition_Contact_Threshold__μN__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#initial_drift_rate__nm___s__" class="md-nav__link">
+    <span class="md-ellipsis">
+      Initial_Drift_Rate__nm___s__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#acquisition_lift_height__nm__" class="md-nav__link">
+    <span class="md-ellipsis">
+      Acquisition_Lift_Height__nm__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#acquisition_maximum_demand__n__" class="md-nav__link">
+    <span class="md-ellipsis">
+      Acquisition_Maximum_Demand__µN__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current_area_function_b-c0-c1-c5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Current_Area_Function_B, C0, C1, ..., C5
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current_tip_modulus__mpa__" class="md-nav__link">
+    <span class="md-ellipsis">
+      Current_Tip_Modulus__MPa__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#current_tip_poissons_ratio" class="md-nav__link">
+    <span class="md-ellipsis">
+      Current_Tip_Poissons_Ratio
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary-table" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔍 Summary Table
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔍 Summary Table">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#additional-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧰 Additional Notes
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#experimental-setup-and-file-naming-conventions" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔬 Experimental Setup and File Naming Conventions
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔬 Experimental Setup and File Naming Conventions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#instrumentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧪 Instrumentation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sample-preparation" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧱 Sample Preparation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#experimental-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚙️ Experimental Parameters
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="⚙️ Experimental Parameters">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tip-radius-load-settings" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tip Radius &amp; Load Settings
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#loading-profiles" class="md-nav__link">
+    <span class="md-ellipsis">
+      Loading Profiles
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-naming-convention" class="md-nav__link">
+    <span class="md-ellipsis">
+      📂 File Naming Convention
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📂 File Naming Convention">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Components
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mapping-tip-load-speed-6-micron-tip" class="md-nav__link">
+    <span class="md-ellipsis">
+      🗂 Mapping Tip &amp; Load Speed (6 Micron Tip)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#experimental-images" class="md-nav__link">
+    <span class="md-ellipsis">
+      📸 Experimental Images
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="📸 Experimental Images">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#electron-backscatter-diffraction-ebsd-maps" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔬 Electron Backscatter Diffraction (EBSD) Maps
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🔬 Electron Backscatter Diffraction (EBSD) Maps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-inverse-pole-figure-ipf-coloring" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Inverse Pole Figure (IPF) Coloring
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-phase-map-with-mineral-segmentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Phase Map with Mineral Segmentation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#grain-selection-for-indentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      📍 Grain Selection for Indentation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#instrumentation_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧪 Instrumentation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="🧪 Instrumentation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-close-up-of-the-tip-and-sample-stage" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Close-up of the Tip and Sample Stage
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-full-view-of-the-instrument" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Full View of the Instrument
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Features
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Features
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/merrypopins.load_datasets/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Load Datasets
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/merrypopins.preprocess/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Preprocess Data
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/merrypopins.locate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Locate
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/merrypopins.statistics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Statistics
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../reference/merrypopins.make_dataset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Make Dataset
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../streamlit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Merrypopins Streamlit App
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contribution Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RELEASING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Release Guide
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="experimental-metadata-reference">🧪 Experimental Metadata Reference</h1>
+<p>This section documents important metadata fields collected during nanoindentation experiments using the Hysitron TI 990 system. These variables are useful for preprocessing raw data, validating test conditions, and performing downstream statistical analysis.</p>
+<hr />
+<h2 id="metadata-variables-explained">📐 Metadata Variables Explained</h2>
+<h3 id="acquisition_contact_threshold__n__"><code>Acquisition_Contact_Threshold__μN__</code></h3>
+<ul>
+<li><strong>Description</strong>: Force threshold at which the machine determines that contact has been made.</li>
+<li><strong>Use case</strong>: Important for <strong>preprocessing</strong>. The region before this threshold typically contains fake contact cycles and should be trimmed.</li>
+<li><strong>Note</strong>: Marks the true start of the indentation curve.</li>
+</ul>
+<hr />
+<h3 id="initial_drift_rate__nm___s__"><code>Initial_Drift_Rate__nm___s__</code></h3>
+<ul>
+<li><strong>Description</strong>: Rate of displacement drift while the tip is held stationary at the start of the experiment.</li>
+<li><strong>Use case</strong>: Useful for assessing <strong>environmental stability</strong> and potential corrections during analysis.</li>
+<li><strong>Related field</strong>: <code>Acquisition_Drift_Monitor_Time__s__</code> specifies how long drift was measured.</li>
+<li><strong>Insight</strong>: High drift rates may indicate unstable conditions (e.g., thermal fluctuations).</li>
+</ul>
+<hr />
+<h3 id="acquisition_lift_height__nm__"><code>Acquisition_Lift_Height__nm__</code></h3>
+<ul>
+<li><strong>Description</strong>: Distance the indenter tip is lifted away from the sample before initiating the actual indentation.</li>
+<li><strong>Use case</strong>: Helps interpret displacement values <strong>below 0 nm</strong> in raw data, which should be trimmed during preprocessing.</li>
+</ul>
+<hr />
+<h3 id="acquisition_maximum_demand__n__"><code>Acquisition_Maximum_Demand__µN__</code></h3>
+<ul>
+<li><strong>Description</strong>: Maximum force applied during the indentation.</li>
+<li><strong>Use case</strong>: Critical for verifying test configuration:</li>
+<li><strong>6 µm tip</strong> → ~200 mN</li>
+<li><strong>Note</strong>: Inconsistent maximum demand values may indicate incorrect experimental parameters.</li>
+</ul>
+<hr />
+<h3 id="current_area_function_b-c0-c1-c5"><code>Current_Area_Function_B</code>, <code>C0</code>, <code>C1</code>, ..., <code>C5</code></h3>
+<ul>
+<li><strong>Description</strong>: Polynomial coefficients used to model the <strong>contact area</strong> of the tip as a function of depth:</li>
+</ul>
+<p>[
+  A(h) = C_0 h^2 + C_1 h + C_2 h^{0.5} + \dots + C_5 h^{-2}
+  ]</p>
+<ul>
+<li><strong>Use case</strong>: Necessary for accurate <strong>calculation of hardness and stress</strong>.</li>
+<li><strong>Explanation</strong>: The shape of the indenter tip may deviate from ideal geometry; these coefficients correct for that.</li>
+</ul>
+<hr />
+<h3 id="current_tip_modulus__mpa__"><code>Current_Tip_Modulus__MPa__</code></h3>
+<ul>
+<li><strong>Description</strong>: Young’s modulus of the indenter tip material.</li>
+<li><strong>Use case</strong>: Required in modulus and hardness calculations (e.g., reduced modulus).</li>
+</ul>
+<hr />
+<h3 id="current_tip_poissons_ratio"><code>Current_Tip_Poissons_Ratio</code></h3>
+<ul>
+<li><strong>Description</strong>: Poisson’s ratio of the tip.</li>
+<li><strong>Use case</strong>: Used in stress-strain calculations and corrections based on contact mechanics.</li>
+</ul>
+<hr />
+<h2 id="summary-table">🔍 Summary Table</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Unit</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Acquisition_Contact_Threshold__μN__</code></td>
+<td>μN</td>
+<td>Trim pre-contact region</td>
+</tr>
+<tr>
+<td><code>Initial_Drift_Rate__nm___s__</code></td>
+<td>nm/s</td>
+<td>Environmental quality check</td>
+</tr>
+<tr>
+<td><code>Acquisition_Lift_Height__nm__</code></td>
+<td>nm</td>
+<td>Detect trimmed offset region</td>
+</tr>
+<tr>
+<td><code>Acquisition_Maximum_Demand__µN__</code></td>
+<td>μN</td>
+<td>Validate experiment configuration</td>
+</tr>
+<tr>
+<td><code>Current_Area_Function_B</code>, <code>C0..C5</code></td>
+<td>varies</td>
+<td>Calibrate contact area</td>
+</tr>
+<tr>
+<td><code>Current_Tip_Modulus__MPa__</code></td>
+<td>MPa</td>
+<td>Used in modulus calculation</td>
+</tr>
+<tr>
+<td><code>Current_Tip_Poissons_Ratio</code></td>
+<td>dimensionless</td>
+<td>Stress-strain relations</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="additional-notes">🧰 Additional Notes</h3>
+<ul>
+<li>All metadata fields are parsed from the <code>.tdm</code> files exported by Hysitron's software.</li>
+<li>These fields can be accessed using <code>load_tdm()</code> in the <code>merrypopins.load_datasets</code> module.</li>
+<li>Consider saving metadata alongside each test’s main <code>.txt</code> dataset for reproducibility and auditing.</li>
+</ul>
+<hr />
+<h2 id="experimental-setup-and-file-naming-conventions">🔬 Experimental Setup and File Naming Conventions</h2>
+<p>This page outlines the experimental equipment, procedure, file naming scheme, and specific loading parameters used in the indentation experiments analyzed by <strong>merrypopins</strong>.</p>
+<hr />
+<h3 id="instrumentation">🧪 Instrumentation</h3>
+<p>All nanoindentation experiments were performed using the <strong>Bruker Hysitron TI 990 TriboIndenter</strong>, a precision instrument for measuring mechanical properties at the nanoscale.</p>
+<ul>
+<li><strong>Transducer</strong>: 3D OMNIProbe</li>
+<li><strong>Max Load</strong>: 10 N</li>
+<li><strong>Max Displacement</strong>: 80 µm</li>
+<li><strong>Displacement Resolution</strong>: &lt; 0.01 nm</li>
+<li><strong>Displacement Noise Floor</strong>: 0.5 nm</li>
+<li><strong>Force Resolution</strong>: 0.0014 mN</li>
+<li><strong>Force Noise Floor</strong>: 0.07 mN</li>
+<li><strong>Control Software</strong>: TriboScan 12.0.0.391</li>
+<li><strong>Tip Type</strong>: Conospherical diamond</li>
+<li>6 µm tip actual radius: <strong>5.323 µm</strong></li>
+</ul>
+<p><strong>Calibration Materials</strong>:
+- Fused Quartz
+- Polycarbonate</p>
+<hr />
+<h3 id="sample-preparation">🧱 Sample Preparation</h3>
+<p>The sample used is a thin-section of <strong>blueschist</strong>, a metamorphic rock rich in:
+- Glaucophane
+- Zoisite
+- Garnet
+- Phengite</p>
+<p><strong>Preparation Process</strong>:
+- Cut to 30 µm thickness and mounted on a glass slide.
+- Mechanically polished using aluminum oxide.
+- Chemically polished using colloidal silica.
+- <strong>Grain Selection</strong>: 12 glaucophane grains selected based on crystallographic orientation via electron backscatter diffraction (EBSD).</p>
+<hr />
+<h3 id="experimental-parameters">⚙️ Experimental Parameters</h3>
+<h4 id="tip-radius-load-settings">Tip Radius &amp; Load Settings</h4>
+<table>
+<thead>
+<tr>
+<th>Tip Type</th>
+<th>Nominal Radius</th>
+<th>Actual Radius</th>
+<th>Peak Load</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6 µm</td>
+<td>6 µm</td>
+<td>5.323 µm</td>
+<td>200 mN</td>
+</tr>
+</tbody>
+</table>
+<h4 id="loading-profiles">Loading Profiles</h4>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Ramp Duration</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Slow Loading</td>
+<td>60 seconds</td>
+<td>Gentler loading phase</td>
+</tr>
+</tbody>
+</table>
+<p>All other parameters (e.g., hold, unload) were identical across experiments.</p>
+<hr />
+<h3 id="file-naming-convention">📂 File Naming Convention</h3>
+<p>Each experiment file name consists of <strong>six components</strong> separated by underscores:</p>
+<ul>
+<li>
+<p>grain<size><em><tip_radius></em><name_or_number><em><HL/LL></em><QS/DMA>_<LC/DC/OL>.tdm</p>
+</li>
+<li>
+<p>Example: <code>grain5_6um_01_HL_QS_LC.tdm</code></p>
+</li>
+</ul>
+<h4 id="components">Components</h4>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>grain</code></td>
+<td>Denotes experiment location or group</td>
+</tr>
+<tr>
+<td><code>size</code></td>
+<td>Tip radius <strong>(approximate; may update to actual radius in future)</strong></td>
+</tr>
+<tr>
+<td><code>name+number</code></td>
+<td>Label for experiment within the grain group</td>
+</tr>
+<tr>
+<td><code>HL</code> or <code>LL</code></td>
+<td>Transducer: HL = High Load, LL = Low Load</td>
+</tr>
+<tr>
+<td><code>QS</code> or <code>DMA</code></td>
+<td>Mode: QS = Quasistatic, DMA = Continuous Property Measurement</td>
+</tr>
+<tr>
+<td><code>LC/DC/OL</code></td>
+<td>Load Control: LC = Load-Controlled, DC = Displacement-Controlled, OL = Open Loop</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>🧠 <em>Note</em>: While the last three identifiers are mostly used by the acquisition software, they may still hold value for sorting and statistical comparison. They're not essential for preprocessing but may help in interpreting mechanical response differences.</p>
+</blockquote>
+<hr />
+<h3 id="mapping-tip-load-speed-6-micron-tip">🗂 Mapping Tip &amp; Load Speed (6 Micron Tip)</h3>
+<table>
+<thead>
+<tr>
+<th>File Identifier</th>
+<th>Peak Load</th>
+<th>Loading Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6 um</td>
+<td>200 mN</td>
+<td>Slow*</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><em>Slow = 60s ramp — not always obvious from the file name alone; must be manually mapped.</em></p>
+</blockquote>
+<hr />
+<h3 id="experimental-images">📸 Experimental Images</h3>
+<p>Below are a series of microstructural and equipment images related to the nanoindentation experiments.</p>
+<h4 id="electron-backscatter-diffraction-ebsd-maps">🔬 Electron Backscatter Diffraction (EBSD) Maps</h4>
+<p>These EBSD maps show the microstructural grains in the blueschist rock sample.</p>
+<h5 id="1-inverse-pole-figure-ipf-coloring">1. Inverse Pole Figure (IPF) Coloring</h5>
+<p><img alt="EBSD IPF Map" src="../static/inverse-pole-figure-coloring.png" /></p>
+<h5 id="2-phase-map-with-mineral-segmentation">2. Phase Map with Mineral Segmentation</h5>
+<p><img alt="EBSD Phase Map" src="../static/phase-map-mineral-segmentation.png" /></p>
+<h4 id="grain-selection-for-indentation">📍 Grain Selection for Indentation</h4>
+<p>The following image shows selected grains (e.g., Grain 4, 5, 7, 11, 12) that were targeted for indentation:</p>
+<p><img alt="Grain Selection Annotated" src="../static/grain-selection-for-indentation.png" /></p>
+<h4 id="instrumentation_1">🧪 Instrumentation</h4>
+<p>The nanoindentation experiments were conducted using the Bruker Hysitron TI 990 TriboIndenter.</p>
+<h5 id="1-close-up-of-the-tip-and-sample-stage">1. Close-up of the Tip and Sample Stage</h5>
+<p><img alt="TriboIndenter Close-up" src="../static/close-up-tip-sample.jpg" /></p>
+<h5 id="2-full-view-of-the-instrument">2. Full View of the Instrument</h5>
+<p><img alt="Hysitron TI 990 Full View" src="../static/full-view-hysitron-machine.jpg" /></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var labels=set.querySelector(".tabbed-labels");for(var tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      &copy; 2025 <a href="https://github.com/SerpRateAI/merrypopins" target="_blank" rel="noopener">Merrypopins</a>
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/SerpRateAI/merrypopins" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 512"><!--! Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M186.1 328.7c0 20.9-10.9 55.1-36.7 55.1s-36.7-34.2-36.7-55.1 10.9-55.1 36.7-55.1 36.7 34.2 36.7 55.1M480 278.2c0 31.9-3.2 65.7-17.5 95-37.9 76.6-142.1 74.8-216.7 74.8-75.8 0-186.2 2.7-225.6-74.8-14.6-29-20.2-63.1-20.2-95 0-41.9 13.9-81.5 41.5-113.6-5.2-15.8-7.7-32.4-7.7-48.8 0-21.5 4.9-32.3 14.6-51.8 45.3 0 74.3 9 108.8 36 29-6.9 58.8-10 88.7-10 27 0 54.2 2.9 80.4 9.2 34-26.7 63-35.2 107.8-35.2 9.8 19.5 14.6 30.3 14.6 51.8 0 16.4-2.6 32.7-7.7 48.2 27.5 32.4 39 72.3 39 114.2m-64.3 50.5c0-43.9-26.7-82.6-73.5-82.6-18.9 0-37 3.4-56 6-14.9 2.3-29.8 3.2-45.1 3.2-15.2 0-30.1-.9-45.1-3.2-18.7-2.6-37-6-56-6-46.8 0-73.5 38.7-73.5 82.6 0 87.8 80.4 101.3 150.4 101.3h48.2c70.3 0 150.6-13.4 150.6-101.3m-82.6-55.1c-25.8 0-36.7 34.2-36.7 55.1s10.9 55.1 36.7 55.1 36.7-34.2 36.7-55.1-10.9-55.1-36.7-55.1"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+      <div class="md-progress" data-md-component="progress" role="progressbar"></div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.instant", "navigation.instant.progress", "navigation.instant.preview", "navigation.tracking", "navigation.expand", "navigation.sections", "search.suggest", "search.highlight", "search.share", "toc.integrate", "content.tabs.link", "content.code.annotation", "content.code.copy"], "search": "../assets/javascripts/workers/search.d50fe291.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.13a4f30d.min.js"></script>
+      
+    
+  </body>
+</html>
