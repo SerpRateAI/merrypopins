@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir -e . \
-    && pip install --no-cache-dir streamlit plotly matplotlib kaleido
+    && pip install --no-cache-dir streamlit plotly matplotlib "kaleido<=0.2.1"
 
 # Set the Streamlit port
 ENV PORT=8501
