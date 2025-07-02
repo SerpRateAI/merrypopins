@@ -36,11 +36,7 @@ aas-journal: Astrophysical Journal <- The name of the AAS journal.
 # Summary
 
 merrypopins is a Python library to streamline the workflow of nano‑indentation 
-experiment data processing, automated pop-in detection and analysis. merrypopins 
-is an open-source Python library that implements four unsupervised
-pop-in detectors: Savitzky-Golay filtering, Fourier-domain differ-
-entiation, Isolation Forest anomaly detection, and a convolutional
-autoencoder.
+experiment data processing, automated pop-in detection and analysis.
 Understanding the start of plasticity in materials at the microscale
 is crucial for various applications, including engineered materials
 and earthquake mechanics. Investigations into nano-indentation
@@ -48,7 +44,14 @@ reveal sudden "pop-in" events that cause significant spikes in in-
 dentation depth along load-depth curves under almost constant
 force. Manually recognizing these characteristics is labor-intensive
 and subjective, emphasizing the importance of automated, repro-
-ducible detection approaches. This thesis outlines 
+ducible detection approaches. 
+
+ merrypopins 
+is an open-source Python library that implements four unsupervised
+pop-in detectors: Savitzky-Golay filtering, Fourier-domain differ-
+entiation, Isolation Forest anomaly detection, and a convolutional
+autoencoder.
+This thesis outlines 
 
 We utilize merrypopins in 30 slow-loading experiments on glau-
 cophane grains in a thin slice of blueschist (60 s ramp, 200 mN peak
