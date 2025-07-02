@@ -35,15 +35,41 @@ aas-journal: Astrophysical Journal <- The name of the AAS journal.
 
 # Summary
 
-The forces on stars, galaxies, and dark matter under external gravitational
-fields lead to the dynamical evolution of structures in the universe. The orbits
-of these bodies are therefore key to understanding the formation, history, and
-future state of galaxies. The field of "galactic dynamics," which aims to model
-the gravitating components of galaxies to study their structure and evolution,
-is now well-established, commonly taught, and frequently used in astronomy.
-Aside from toy problems and demonstrations, the majority of problems require
-efficient numerical tools, many of which require the same base code (e.g., for
-performing numerical orbit integration).
+merrypopins is a Python library to streamline the workflow of nano‑indentation 
+experiment data processing, automated pop-in detection and analysis. merrypopins 
+is an open-source Python library that implements four unsupervised
+pop-in detectors: Savitzky-Golay filtering, Fourier-domain differ-
+entiation, Isolation Forest anomaly detection, and a convolutional
+autoencoder.
+Understanding the start of plasticity in materials at the microscale
+is crucial for various applications, including engineered materials
+and earthquake mechanics. Investigations into nano-indentation
+reveal sudden "pop-in" events that cause significant spikes in in-
+dentation depth along load-depth curves under almost constant
+force. Manually recognizing these characteristics is labor-intensive
+and subjective, emphasizing the importance of automated, repro-
+ducible detection approaches. This thesis outlines 
+
+We utilize merrypopins in 30 slow-loading experiments on glau-
+cophane grains in a thin slice of blueschist (60 s ramp, 200 mN peak
+load) utilizing a 6 µm cono-spherical tip on a Hysitron TI 990 Tri-
+boIndenter. High agreement across experiments, few false positives,
+and tight, physically reasonable clusters of pop-in depths (median
+≈650 nm) are the results of analytical derivative-based techniques
+(Savitzky–Golay and Fourier). On the other hand, the autoencoder
+and isolation forest methods generate many shallow-depth detec-
+tions that have a weak correlation with actual material instabilities.
+These findings show that conventional signal-processing methods
+offer reliable, comprehensible baselines for pop-in detection with
+slight adjustment of parameters.
+This study uses an anomaly-detection task on univariate time
+series to demonstrate the reliability of automated approaches in
+capturing pop-in occurrences and highlighting trade-offs between
+sensitivity, transparency, and complexity. The merrypopins library
+provides an integrated pipeline for loading, preparing, locating,
+and visualizing nano-indentation data. It enables researchers to use,
+expand, and improve pop-in analysis, opening the way for version 2
+developments, including semi-supervised lear
 
 # Statement of need
 
