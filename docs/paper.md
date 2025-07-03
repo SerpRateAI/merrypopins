@@ -1,5 +1,5 @@
 ---
-title: 'merrypopins: A Python package for nanoindentation data science'
+title: '`merrypopins`: A Python package for nanoindentation data science'
 tags:
   - Python
   - geology
@@ -35,44 +35,23 @@ aas-journal: Astrophysical Journal <- The name of the AAS journal.
 
 # Summary
 
-merrypopins is a Python library to streamline the workflow of nano‑indentation 
+`merrypopins` is a Python library to streamline the workflow of nano‑indentation 
 experiment data processing, automated pop-in detection and analysis.
 Understanding the start of plasticity in materials at the microscale
 is crucial for various applications, including engineered materials
 and earthquake mechanics. Investigations into nano-indentation
 reveal sudden "pop-in" events that cause significant spikes in in-
 dentation depth along load-depth curves under almost constant
-force. Manually recognizing these characteristics is labor-intensive
+force. Pop-ins are linked to dislocation in crystalline materials and are consid-
+ered small-scale analogues of earthquakes [@ispanovity2022dislocation, @sato2020unique]. Like real earthquakes,
+they follow statistical patterns, such as power-law distributions in size and
+time between events. Furthermore, the size of the indenter tip affects
+when a pop-in occurs. Smaller tips often lead to higher pop-in stresses be-
+cause they are more likely to probe regions without dislocations. In contrast,
+larger tips sample a bigger volume, increasing the chance of hitting existing
+dislocations and causing pop-ins at lower stresses.  Manually recognizing these characteristics is labor-intensive
 and subjective, emphasizing the importance of automated, repro-
 ducible detection approaches. 
-
- <!-- merrypopins 
-is an open-source Python library that implements four unsupervised
-pop-in detectors: Savitzky-Golay filtering, Fourier-domain differ-
-entiation, Isolation Forest anomaly detection, and a convolutional
-autoencoder.
-This thesis outlines 
-
-We utilize merrypopins in 30 slow-loading experiments on glau-
-cophane grains in a thin slice of blueschist (60 s ramp, 200 mN peak
-load) utilizing a 6 µm cono-spherical tip on a Hysitron TI 990 Tri-
-boIndenter. High agreement across experiments, few false positives,
-and tight, physically reasonable clusters of pop-in depths (median
-≈650 nm) are the results of analytical derivative-based techniques
-(Savitzky–Golay and Fourier). On the other hand, the autoencoder
-and isolation forest methods generate many shallow-depth detec-
-tions that have a weak correlation with actual material instabilities.
-These findings show that conventional signal-processing methods
-offer reliable, comprehensible baselines for pop-in detection with
-slight adjustment of parameters.
-This study uses an anomaly-detection task on univariate time
-series to demonstrate the reliability of automated approaches in
-capturing pop-in occurrences and highlighting trade-offs between
-sensitivity, transparency, and complexity. The merrypopins library
-provides an integrated pipeline for loading, preparing, locating,
-and visualizing nano-indentation data. It enables researchers to use,
-expand, and improve pop-in analysis, opening the way for version 2
-developments, including semi-supervised lear -->
 
 # Statement of need
 
@@ -83,7 +62,9 @@ pop-in occurrences manually, but this approach suffers from subjec-
 tivity, labor intensity, and potential inconsistencies among multiple
 observers and big datasets.
 
-The primary stakeholders of merrypopins are students, researchers,
+
+
+The primary stakeholders of `merrypopins` are students, researchers,
 and academics in the fields of materials science, geology, nano-
 mechanics, and earthquake science. High-resolution indentation
 experiments are increasingly used to investigate plastic and frac-
@@ -95,25 +76,62 @@ is an urgent need for adaptable, open-source solutions that can
 be used "out of the box" by non-programmers and provide exten-
 sibility for power users as nanoindentation tools grow, spanning
 both traditional materials laboratories and emerging geophysical
-applications [3, 9]. To advance the next generation of automated
+applications. To advance the next generation of automated
 pop-in analysis, researchers can submit new detection techniques,
 parameter settings, or visualization modules through our public
-merrypopins GitHub repository[2]. We, therefore, welcome feature
+`merrypopins` GitHub repository. We, therefore, welcome feature
 requests, bug reports, and community-contributed enhancements.
+
+Using a variety of detection techniques ensures that `merrypopins`
+can detect pop-in events in many material systems and experimen-
+tal circumstances. The Savitzky-Golay filter and Fourier-domain
+differentiation provide physics-based baselines. Savitzky-Golay’s
+local polynomial smoothing maintains prominent curve character-
+istics while reducing high-frequency noise [@savitzky1964smoothing]. Fourier spectral
+methods identify abrupt discontinuities with minimal parameter-
+ization [6]. Both strategies are computationally efficient, highly
+interpretable, and require only a few user-tunable parameters (win-
+dow length, polynomial order, or frequency threshold), making
+them excellent for quick initial screening.
+
+In contrast, Isolation Forest and convolutional autoencoders
+enable data-driven adaptation. Isolation Forest, an unsupervised
+ensemble-based statistical framework, can detect anomalies in mul-
+tidimensional feature spaces without labeled instances (Liu, 2008).
+This is especially useful when the pop-in magnitudes or frequen-
+cies are unknown beforehand. Convolutional autoencoders learn
+hierarchical feature representations directly from data, capturing
+subtle nonlinear patterns that classical approaches may overlook
+[@malhotra2016lstm]. However, they require more resources. These four techniques
+balance sensitivity, interpretability, and processing cost, allowing
+researchers to select and combine algorithms based on dataset size,
+noise characteristics, and analytic goals.
+
+The `merrypopins` library was developed using a tutorial-driven
+software development framework. Instead of starting with predetermined 
+architectural specs, this approach converts the scientist’s
+process into a live, executable lesson (often a Jupyter notebook).
+Developers and researchers worked iteratively, with academics
+creating function stubs in a scientific narrative framework and de-
+velopers implementing these functions based on real-world usage
+cases. This strategy ensures that scientific usability drives software
+design. This technique is consistent with Christopher Woods’ para-
+digm2 and has successfully bridged the gap between exploratory
+research code and reusable scientific software.
 
 # Code Availability
 
-The merrypopins package can be installed via:
+The `merrypopins` package can be installed via:
 
 ```
-pip install merrypopins
+pip install `merrypopins`
 ```
 
-Alternatively, the package can be found on github ([https://github.com/SerpRateAI/merrypopins](https://github.com/SerpRateAI/merrypopins)).
+Alternatively, the package can be found on github ([https://github.com/SerpRateAI/`merrypopins`](https://github.com/SerpRateAI/`merrypopins`)).
 
 Contributions can be made by forking the repository and making a pull request.
 
-The streamlit app is accessible via the streamlit website ([https://merrypopins.streamlit.app/](https://merrypopins.streamlit.app/)).
+The streamlit app is accessible via the streamlit website ([https://`merrypopins`.streamlit.app/](https://`merrypopins`.streamlit.app/)).
 
 <!-- 
 `Gala` is an Astropy-affiliated Python package for galactic dynamics. Python
