@@ -96,13 +96,13 @@ researchers to select and combine algorithms based on dataset size,
 noise characteristics, and analytic goals.
 
 The `merrypopins` library was developed using a tutorial-driven
-software development framework. Instead of starting with predetermined 
+software development framework [@tutorial]. Instead of starting with predetermined 
 architectural specs, this approach converts the scientist’s
 process into a live, executable lesson (often a Jupyter notebook).
 Developers and researchers worked iteratively, with academics
 creating function stubs in a scientific narrative framework and developers implementing these functions based on real-world usage
 cases. This strategy ensures that scientific usability drives software
-design (@tutorial). 
+design. 
 
 # Code Availability
 
