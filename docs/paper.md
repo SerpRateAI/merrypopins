@@ -57,7 +57,7 @@ and subjective, emphasizing the importance of automated, reproducible detection 
 Despite their importance, detecting pop-ins is difficult because they
 appear in subtle, intermittent, and different ways within indentation curves. Historically, professional analysts have recognized
 pop-in occurrences manually, but this approach suffers from subjectivity, labor intensity, and potential inconsistencies among multiple
-observers and big datasets.
+observers and big datasets. `merrypopins` marks the first attempt to automate pop-in detection.
 
 The primary stakeholders of `merrypopins` are students, researchers,
 and academics in the fields of materials science, geology, nano-
