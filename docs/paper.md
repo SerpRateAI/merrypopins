@@ -46,7 +46,7 @@ force. Manually recognizing these characteristics is labor-intensive
 and subjective, emphasizing the importance of automated, repro-
 ducible detection approaches. 
 
- merrypopins 
+ <!-- merrypopins 
 is an open-source Python library that implements four unsupervised
 pop-in detectors: Savitzky-Golay filtering, Fourier-domain differ-
 entiation, Isolation Forest anomaly detection, and a convolutional
@@ -72,10 +72,50 @@ sensitivity, transparency, and complexity. The merrypopins library
 provides an integrated pipeline for loading, preparing, locating,
 and visualizing nano-indentation data. It enables researchers to use,
 expand, and improve pop-in analysis, opening the way for version 2
-developments, including semi-supervised lear
+developments, including semi-supervised lear -->
 
 # Statement of need
 
+Despite their importance, detecting pop-ins is difficult because they
+appear in subtle, intermittent, and different ways within inden-
+tation curves. Historically, professional analysts have recognized
+pop-in occurrences manually, but this approach suffers from subjec-
+tivity, labor intensity, and potential inconsistencies among multiple
+observers and big datasets.
+
+The primary stakeholders of merrypopins are students, researchers,
+and academics in the fields of materials science, geology, nano-
+mechanics, and earthquake science. High-resolution indentation
+experiments are increasingly used to investigate plastic and frac-
+ture processes at the microscale. Despite the growing number of
+pop-in occurrences in load-depth curves, almost all previous re-
+search relies on manual inspection or private scripts, creating a lack
+of easily accessible, reproducible event detection software. There
+is an urgent need for adaptable, open-source solutions that can
+be used "out of the box" by non-programmers and provide exten-
+sibility for power users as nanoindentation tools grow, spanning
+both traditional materials laboratories and emerging geophysical
+applications [3, 9]. To advance the next generation of automated
+pop-in analysis, researchers can submit new detection techniques,
+parameter settings, or visualization modules through our public
+merrypopins GitHub repository[2]. We, therefore, welcome feature
+requests, bug reports, and community-contributed enhancements.
+
+# Code Availability
+
+The merrypopins package can be installed via:
+
+```
+pip install merrypopins
+```
+
+Alternatively, the package can be found on github ([https://github.com/SerpRateAI/merrypopins](https://github.com/SerpRateAI/merrypopins)).
+
+Contributions can be made by forking the repository and making a pull request.
+
+The streamlit app is accessible via the streamlit website ([https://merrypopins.streamlit.app/](https://merrypopins.streamlit.app/)).
+
+<!-- 
 `Gala` is an Astropy-affiliated Python package for galactic dynamics. Python
 enables wrapping low-level languages (e.g., C) for speed without losing
 flexibility or ease-of-use in the user-interface. The API for `Gala` was
@@ -94,7 +134,7 @@ used in graduate courses on Galactic dynamics to, e.g., provide interactive
 visualizations of textbook material [@Binney:2008]. The combination of speed,
 design, and support for Astropy functionality in `Gala` will enable exciting
 scientific explorations of forthcoming data releases from the *Gaia* mission
-[@gaia] by students and experts alike.
+[@gaia] by students and experts alike. -->
 
 # Mathematics
 
