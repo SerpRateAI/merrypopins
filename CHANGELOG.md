@@ -33,3 +33,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 ### Fixed
 - **Streamlit App**: 
    - Fixed issue with PNG export not working in the latest version of Kaleido, new major version of Kaleido now requires Chromium to be installed. So we have downgraded Kaleido to 0.2.1.
+
+## [1.0.2] – 2025-07-08 &nbsp;:dependabot: **“Dependency Update”**
+### Changed
+- **Streamlit App**:
+    - Updated `kaleido` dependency to latest version.
