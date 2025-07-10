@@ -51,7 +51,13 @@ from merrypopins.statistics import (
 # This is a workaround to ensure it works in Streamlit Cloud and other environments.
 # If you encounter issues with PNG export, ensure you have Chrome installed or use a compatible version
 # of Kaleido that does not require Chrome.
+# Set a safe path
 os.environ["CHOREOGRAPHER_BROWSER_DIR"] = "/tmp/chrome"
+
+# Ensure the directory exists
+Path(os.environ["CHOREOGRAPHER_BROWSER_DIR"]).mkdir(parents=True, exist_ok=True)
+
+# Now call the sync function
 kaleido.get_chrome_sync()
 
 # ───────────────────────────────────────────────────────────────
