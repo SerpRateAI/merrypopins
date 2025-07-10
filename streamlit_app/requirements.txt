@@ -3,5 +3,3 @@ plotly
 pandas
 merrypopins
 kaleido
-selenium
-chromedriver-py

@@ -23,6 +23,7 @@ import plotly.io as pio
 import streamlit as st
 
 # import kaleido
+from kaleido import write_fig_sync
 
 from merrypopins.load_datasets import load_txt, load_tdm
 from merrypopins.preprocess import (
@@ -91,8 +92,10 @@ pio.defaults.default_scale = 2
 
 
 def _fig_to_png(fig) -> bytes:
-    """Robust PNG export that always uses Kaleido."""
-    return pio.to_image(fig, format="png")  # dimensions come from scope defaults
+    """Export Plotly figure to PNG using Kaleido v1."""
+    buf = io.BytesIO()
+    write_fig_sync(fig, file_obj=buf, format="png", width=1000, height=600, scale=2)
+    return buf.getvalue()
 
 
 def persist_file_uploader(label: str, key: str, types: Tuple[str, ...]):
