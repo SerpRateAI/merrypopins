@@ -9,7 +9,6 @@
 
 from __future__ import annotations
 
-import os
 import io
 import json
 import tempfile
@@ -22,7 +21,8 @@ import pandas as pd
 import plotly.express as px
 import plotly.io as pio
 import streamlit as st
-import kaleido
+
+# import kaleido
 
 from merrypopins.load_datasets import load_txt, load_tdm
 from merrypopins.preprocess import (
@@ -52,13 +52,13 @@ from merrypopins.statistics import (
 # If you encounter issues with PNG export, ensure you have Chrome installed or use a compatible version
 # of Kaleido that does not require Chrome.
 # Set a safe path
-os.environ["CHOREOGRAPHER_BROWSER_DIR"] = "/tmp/chrome"
+# os.environ["CHOREOGRAPHER_BROWSER_DIR"] = "/tmp/chrome"
 
-# Ensure the directory exists
-Path(os.environ["CHOREOGRAPHER_BROWSER_DIR"]).mkdir(parents=True, exist_ok=True)
+# # Ensure the directory exists
+# Path(os.environ["CHOREOGRAPHER_BROWSER_DIR"]).mkdir(parents=True, exist_ok=True)
 
-# Now call the sync function
-kaleido.get_chrome_sync()
+# # Now call the sync function
+# kaleido.get_chrome_sync()
 
 # ───────────────────────────────────────────────────────────────
 #  1 ∙ PAGE CONFIG & APP‑LEVEL LOGGING
