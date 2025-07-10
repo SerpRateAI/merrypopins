@@ -67,10 +67,10 @@ st.sidebar.markdown(
 
 # —— upload and png helper ————————————————————————————
 # ── ensure PNG export always uses Kaleido ──────────────────────
-pio.defaults.default_format = "png"  # <-- new
-pio.defaults.default_width = 1000  # optional defaults
-pio.defaults.default_height = 600
-pio.defaults.default_scale = 2
+pio.kaleido.scope.defaults.default_format = "png"  # <-- new
+pio.kaleido.scope.defaults.default_width = 1000  # optional defaults
+pio.kaleido.scope.defaults.default_height = 600
+pio.kaleido.scope.defaults.default_scale = 2
 
 
 def _fig_to_png(fig) -> bytes:
