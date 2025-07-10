@@ -3,4 +3,4 @@ plotly
 pandas
 merrypopins
 kaleido
-playwright
+chromedriver-py
