@@ -9,6 +9,7 @@
 
 from __future__ import annotations
 
+import os
 import io
 import json
 import tempfile
@@ -21,6 +22,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.io as pio
 import streamlit as st
+import kaleido
 
 from merrypopins.load_datasets import load_txt, load_tdm
 from merrypopins.preprocess import (
@@ -42,6 +44,15 @@ from merrypopins.statistics import (
     calculate_stress_strain_statistics,
     default_statistics_stress_strain,
 )
+
+# Ensure Kaleido uses the latest version and has access to Chrome for rendering
+# This is necessary for Plotly to export figures as PNGs correctly.
+# Note: Kaleido 1.0.0+ requires a Chromium installation to work properly
+# This is a workaround to ensure it works in Streamlit Cloud and other environments.
+# If you encounter issues with PNG export, ensure you have Chrome installed or use a compatible version
+# of Kaleido that does not require Chrome.
+os.environ["CHOREOGRAPHER_BROWSER_DIR"] = "/tmp/chrome"
+kaleido.get_chrome_sync()
 
 # ───────────────────────────────────────────────────────────────
 #  1 ∙ PAGE CONFIG & APP‑LEVEL LOGGING
