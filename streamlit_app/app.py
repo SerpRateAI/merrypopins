@@ -25,7 +25,6 @@ import pandas as pd
 import plotly.express as px
 import plotly.io as pio
 import streamlit as st
-import kaleido
 
 from merrypopins.load_datasets import load_txt, load_tdm
 from merrypopins.preprocess import (
@@ -54,7 +53,7 @@ from merrypopins.statistics import (
 # This is a workaround to ensure it works in Streamlit Cloud and other environments.
 # If you encounter issues with PNG export, ensure you have Chrome installed or use a compatible version
 # of Kaleido that does not require Chrome.
-kaleido.get_chrome_sync()
+# kaleido.get_chrome_sync()
 
 # ───────────────────────────────────────────────────────────────
 #  1 ∙ PAGE CONFIG & APP‑LEVEL LOGGING
@@ -80,10 +79,10 @@ st.sidebar.markdown(
 
 # —— upload and png helper ————————————————————————————
 # ── ensure PNG export always uses Kaleido ──────────────────────
-pio.defaults.default_format = "png"  # <-- new
-pio.defaults.default_width = 1000  # optional defaults
-pio.defaults.default_height = 600
-pio.defaults.default_scale = 2
+pio.kaleido.scope.default_format = "png"  # <-- new
+pio.kaleido.scope.default_width = 1000  # optional defaults
+pio.kaleido.scope.default_height = 600
+pio.kaleido.scope.default_scale = 2
 
 
 def _fig_to_png(fig) -> bytes:
