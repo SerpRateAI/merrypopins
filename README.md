@@ -463,7 +463,7 @@ docker build -t merrypopins-app .
 # Run the app on http://localhost:8501
 docker run -p 8501:8501 merrypopins-app
 ```
-#### 🌐 Option 2: Pull and Run Pre-built Image from Docker Hub
+#### 🌐 Option 2: Pull and Run Pre-built Image from Docker Hub (Recommended)
 
 ```bash
 # Pull the latest pre-built image from Docker Hub
