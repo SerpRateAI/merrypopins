@@ -4,7 +4,7 @@ tags:
   - Python
   - geology
   - nanoindentation
-  - geophysics
+  - deformation
 authors:
   - name: Cahit Acar
     equal-contrib: true
@@ -38,10 +38,10 @@ aas-journal: Astrophysical Journal <- The name of the AAS journal.
 # Summary
 
 `merrypopins` is a Python library to streamline the workflow of nanoindentation 
-experiment data processing, automated pop-in detection and analysis. Nanoindentation is a technique for experimental deformation of materials with the aim of characterizing material behaviour and quantifying mechanical properties from load-displacement data [@oliverpharr1992indentation, @oliverpharr2004indentation]. Experiments performed with a spherical tip can also be used to construct stress-strain curves and by extension the determination of the yield point defining the transition from elastic to plastic deformation [@kalidindipathak2008stressstrain, @pathakkalidindi2015stressstrain]. Understanding the start of plasticity in materials at the microscale is crucial for various applications, including engineered materials and earthquake mechanics. A common feature during the loading part of nanoindentation experiments is the sudden increase of indentation depth at constant force, named "pop-in" events. These pop-ins are linked to dislocation in crystalline materials and are 
+experiment data processing, automated pop-in detection, and analysis. Nanoindentation is a technique for experimental deformation of materials with the aim of characterizing material behaviour and quantifying mechanical properties from load-displacement data [@oliverpharr1992indentation, @oliverpharr2004indentation]. Experiments performed with a spherical tip can also be used to construct stress-strain curves and by extension the determination of the yield point defining the transition from elastic to plastic deformation [@kalidindipathak2008stressstrain, @pathakkalidindi2015stressstrain]. Understanding the start of plasticity in materials at the microscale is crucial for various applications, including engineered materials and earthquake mechanics. A common feature during the loading part of nanoindentation experiments is the sudden increase of indentation depth at constant force, called "pop-in" events. These pop-ins are linked to dislocation in crystalline materials and are 
 considered small-scale analogues of earthquakes [@ispanovity2022dislocation, @sato2020unique]. Like real earthquakes,
 they follow statistical patterns, such as power-law distributions in size and
-time between events. Generally, the first pop-in during an indentation experiment coincides with the first plasticity. The size of the indenter tip and the degree of pre-existing plastic deformation has a significant impact on the stress at which the first pop-in occurs [@shim2008sizeeffect, @morris2011sizeeffect] and thus the yield hardness of the material. This effect is the result of a delayed plastic yielding when the volume stressed by the indenter tip does not contain any pre-existing dislocations for the initiation of plasticity from the indentation. A smaller volume is more likely to be free of dislocations, especially when the material has a lower dislocation density. In contrast, larger tips sample a bigger volume, increasing the chance of hitting existing
+time between events. Generally, the first pop-in during an indentation experiment coincides with the start of plasticity. The size of the indenter tip and the degree of pre-existing plastic deformation have a significant impact on the stress at which the first pop-in occurs [@shim2008sizeeffect, @morris2011sizeeffect] and thus the yield hardness of the material. This effect is the result of a delayed plastic yielding when the volume stressed by the indenter tip does not contain any pre-existing dislocations for the initiation of plasticity. A smaller volume is more likely to be free of dislocations, especially when the material has a lower dislocation density, so the material will behave elastically up to higher load and stress. In contrast, larger tips sample a bigger volume, increasing the chance of hitting existing
 dislocations and causing the first pop-in at lower stresses. This size effect must be overcome to obtain yield hardness values applicable across scales or to other systems. Manually recognizing these characteristics is labor-intensive and subjective, emphasizing the importance of automated, reproducible detection approaches. 
 
 # Statement of need
@@ -54,7 +54,7 @@ observers and big datasets. `merrypopins` marks the first attempt to automate po
 The primary stakeholders of `merrypopins` are students, researchers,
 and academics in the fields of material science, geology, nano-
 mechanics, and earthquake science. High-resolution indentation
-experiments are increasingly used to investigate plastic and fracture processes at the microscale. Despite the growing number of
+experiments are increasingly used to investigate plastic and fracture processes at the microscale. Despite the growing number of studies targeting
 pop-in occurrences in load-depth curves, almost all previous research relies on manual inspection or private scripts with undisclosed methods for the detection and quantification of pop-ins, creating a lack
 of easily accessible, reproducible event detection software. There
 is an urgent need for adaptable, open-source solutions that can
@@ -112,6 +112,6 @@ The streamlit app is accessible via the streamlit website ([https://`merrypopins
 
 # Acknowledgements
 
-This project has received funding from the Norwegian Research Council (SerpRateAI, grant no. 334395). 
+This project has received funding from the Norwegian Research Council (SerpRateAI, grant no. 334395) and is supported by EPOS-eNLarge funded by the Dutch Research Council (NWO) Roadmap for large-scale research infrastructure.
 
 # References
