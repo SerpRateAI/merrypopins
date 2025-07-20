@@ -15,8 +15,6 @@ authors:
   - name: Hugo W. van Schrojenstein
     corresponding: true # (This is how to denote the corresponding author)
     affiliation: 1
-  - name: Alissa J. Kotowski
-    affiliation: 1
   - name: John M. Aiken
   - affiliation: "1, 2, 3"
 affiliations:
@@ -70,6 +68,6 @@ The streamlit app is accessible via the streamlit website ([https://`merrypopins
 
 # Acknowledgements
 
-This project has received funding from the Norwegian Research Council (SerpRateAI, grant no. 334395) and is supported by EPOS-eNLarge funded by the Dutch Research Council (NWO) Roadmap for large-scale research infrastructure.
+This project has received funding from the Norwegian Research Council (SerpRateAI, grant no. 334395) and is supported by EPOS-eNLarge funded by the Dutch Research Council (NWO) Roadmap for large-scale research infrastructure. We would like to thank Alissa Kotowski for fruitful conversations.
 
 # References
