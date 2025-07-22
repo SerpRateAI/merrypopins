@@ -7,16 +7,14 @@ tags:
   - deformation
 authors:
   - name: Cahit Acar
-    equal-contrib: true
     affiliation: 1 # (Multiple affiliations must be quoted)
   - name: Anna Mercelissen
-    equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
     affiliation: 1
   - name: Hugo W. van Schrojenstein
     affiliation: 1
   - name: John M. Aiken
-  - corresponding: true
-  - affiliation: "1, 2, 3"
+    corresponding: true
+    affiliation: "1, 2, 3"
 affiliations:
  - name: Utrecht University, The Netherlands
    index: 1
