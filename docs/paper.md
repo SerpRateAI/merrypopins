@@ -13,9 +13,9 @@ authors:
     equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
     affiliation: 1
   - name: Hugo W. van Schrojenstein
-    corresponding: true # (This is how to denote the corresponding author)
     affiliation: 1
   - name: John M. Aiken
+  - corresponding: true
   - affiliation: "1, 2, 3"
 affiliations:
  - name: Utrecht University, The Netherlands
