@@ -2,4 +2,4 @@ streamlit
 plotly<6.0.0
 pandas
 merrypopins
-kaleido<1.0.0
+kaleido<2.0.0
