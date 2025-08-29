@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "merrypopins"
-version = "1.0.3"
+version = "1.0.4"
 description = "Merrypopins: Automated pop-in detection for nano-indentation experiments tooling: load_datasets, preprocess, locate, statistics & make_dataset"
 readme = "README.md"
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.10,<3.14"
 license = { text = "MIT" }
 authors = [
   { name = "Cahit Acar", email = "c.acar.business@gmail.com" },
@@ -21,6 +21,7 @@ classifiers = [
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Operating System :: OS Independent",
   "Topic :: Scientific/Engineering :: Physics"
 ]
