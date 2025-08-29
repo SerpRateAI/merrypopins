@@ -44,3 +44,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 - **Streamlit Cloud App**:
     - Fixed issue with PNG export not working in the latest version of Kaleido, new major version of Kaleido now requires Chromium to be installed. So we have downgraded Kaleido to 0.2.1. We have tried to call `kaleido.get_chrome_sync()` to ensure it works in Streamlit Cloud and other environments, but it is not
     possible to call it in the Streamlit Cloud environment, the Streamlit Cloud environment does not allow changing system environment variables like `KALEIDO_CACHE_DIR` or calling `kaleido.get_chrome_sync()`. So we have removed the call to `kaleido.get_chrome_sync()` and set the default format, width, height, and scale for PNG export using `pio.kaleido.scope`. For this we also had to update the `plotly` dependency to `<6.0.0` to ensure compatibility with the `0.2.1` version of `kaleido`.
+
+### Changed
+- **Python Compatibility**:
+    - As the latest TensorFlow is now compatible with Python 3.13, updated Python compatibility in `pyproject.toml` and classifiers to include Python 3.13.
