@@ -128,7 +128,7 @@ def load_txt(filepath: Path) -> pd.DataFrame:
     return df
 
 
-def load_tdm(filepath: Path):
+def load_tdm(filepath: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
     """
     Load a .tdm metadata file into two DataFrames.
     Args:

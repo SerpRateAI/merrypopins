@@ -11,5 +11,7 @@ dependencies:
   - matplotlib>=3.7
   - pip
   - pip:
+      # tensorflow enables the CNN detector; drop this line and use
+      # merrypopins instead of merrypopins[cnn] for a lighter environment
       - tensorflow>=2.10
-      - merrypopins
+      - merrypopins[cnn]
