@@ -13,6 +13,15 @@ To ensure relevance, all detection methods operate only on the indentation curve
 This is because pop-in events occur during the loading phase of indentation. After reaching peak load, material unloading
 or post-penetration artifacts may dominate, which are irrelevant for pop-in analysis.
 
+None of the methods use pre-trained models. The IsolationForest and the convolutional
+autoencoder are both fitted, unsupervised, on the curve being analysed at call time,
+so no labelled training data and no shipped weights are required.
+
+The CNN method needs TensorFlow, which is **not** installed with the base package
+because it is a large dependency used by only one of the four methods. Install it with::
+
+    pip install 'merrypopins[cnn]'
+
 Provides:
 - compute_stiffness
 - compute_features
@@ -23,14 +32,19 @@ Provides:
 - default_locate (combines all methods)
 """
 
+from __future__ import annotations
+
+import logging
+from types import SimpleNamespace
+from typing import TYPE_CHECKING
+
 import numpy as np
 import pandas as pd
-import logging
-from sklearn.ensemble import IsolationForest
 from scipy.signal import savgol_filter
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Input, Conv1D, MaxPooling1D, UpSampling1D
-from tensorflow.keras.callbacks import EarlyStopping
+from sklearn.ensemble import IsolationForest
+
+if TYPE_CHECKING:  # pragma: no cover - import only for type checkers
+    from tensorflow.keras.models import Model
 
 logger = logging.getLogger(__name__)
 if not logger.handlers:
@@ -39,8 +53,50 @@ if not logger.handlers:
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
 
+TENSORFLOW_INSTALL_HINT = (
+    "The CNN pop-in detector requires TensorFlow, which merrypopins does not "
+    "install by default because it is a large dependency used by only one of the "
+    "four detection methods. Install it with: pip install 'merrypopins[cnn]'"
+)
 
-def compute_stiffness(df, depth_col="Depth (nm)", load_col="Load (µN)", window=5):
+
+def _import_keras() -> SimpleNamespace:
+    """
+    Import the Keras symbols used by the CNN detector.
+
+    TensorFlow is an optional dependency (the ``cnn`` extra), so it is imported
+    lazily here rather than at module import time. This keeps the other three
+    detection methods, and every other merrypopins module, usable without it.
+
+    Returns:
+        SimpleNamespace: Namespace holding the Keras classes used below.
+
+    Raises:
+        ImportError: If TensorFlow is not installed, with the install command.
+    """
+    try:
+        from tensorflow.keras.callbacks import EarlyStopping
+        from tensorflow.keras.layers import Conv1D, Input, MaxPooling1D, UpSampling1D
+        from tensorflow.keras.models import Model
+    except ImportError as exc:
+        raise ImportError(TENSORFLOW_INSTALL_HINT) from exc
+
+    return SimpleNamespace(
+        Model=Model,
+        Input=Input,
+        Conv1D=Conv1D,
+        MaxPooling1D=MaxPooling1D,
+        UpSampling1D=UpSampling1D,
+        EarlyStopping=EarlyStopping,
+    )
+
+
+def compute_stiffness(
+    df: pd.DataFrame,
+    depth_col: str = "Depth (nm)",
+    load_col: str = "Load (µN)",
+    window: int = 5,
+) -> pd.Series:
     """
     Compute local stiffness (dLoad/dDepth) using sliding-window linear regression.
 
@@ -84,8 +140,12 @@ def compute_stiffness(df, depth_col="Depth (nm)", load_col="Load (µN)", window=
 
 
 def compute_features(
-    df, depth_col="Depth (nm)", load_col="Load (µN)", window=5, return_derivatives=True
-):
+    df: pd.DataFrame,
+    depth_col: str = "Depth (nm)",
+    load_col: str = "Load (µN)",
+    window: int = 5,
+    return_derivatives: bool = True,
+) -> pd.DataFrame:
     """
     Compute derived indentation features for anomaly detection.
 
@@ -115,7 +175,7 @@ def compute_features(
     return df2 if return_derivatives else df
 
 
-def find_max_load_index(df, load_col="Load (µN)"):
+def find_max_load_index(df: pd.DataFrame, load_col: str = "Load (µN)") -> int:
     """
     Find the index of the maximum load point in the indentation curve.
 
@@ -129,7 +189,7 @@ def find_max_load_index(df, load_col="Load (µN)"):
     return df[load_col].idxmax()
 
 
-def trim_edges(series, margin):
+def trim_edges(series: pd.Series | np.ndarray, margin: int) -> pd.Series | np.ndarray:
     """
     Trim the first `margin` elements of a pandas Series.
     This is useful for removing edge effects in time-series data where
@@ -145,17 +205,60 @@ def trim_edges(series, margin):
     return trimmed
 
 
+def _apply_trims(
+    flags: np.ndarray,
+    df: pd.DataFrame,
+    load_col: str,
+    trim_edges_enabled: bool,
+    trim_margin: int | None,
+    default_margin: int,
+    max_load_trim_enabled: bool,
+) -> np.ndarray:
+    """
+    Apply the two masks every detection method shares.
+
+    Each detector produces raw candidate flags and then discards those that fall in
+    the unreliable leading edge of the curve or after the maximum load point. That
+    tail is identical across methods and lives here so the four detectors differ only
+    in how they find candidates.
+
+    Args:
+        flags (ndarray): Boolean candidate flags, one per data point.
+        df (DataFrame): The indentation data the flags were computed from.
+        load_col (str): Column name for load data.
+        trim_edges_enabled (bool): If True, blank out the leading `trim_margin` points.
+        trim_margin (int or None): Number of leading elements to blank. If None,
+            `default_margin` is used instead.
+        default_margin (int): Margin used when `trim_margin` is None. Methods choose
+            this to match their own window size.
+        max_load_trim_enabled (bool): If True, blank out everything after max load.
+
+    Returns:
+        ndarray: The masked flags.
+    """
+    if trim_edges_enabled:
+        margin = trim_margin if trim_margin is not None else default_margin
+        flags = trim_edges(flags, margin=margin)
+
+    if max_load_trim_enabled:
+        # Mask out anything *after* max load
+        max_idx = find_max_load_index(df, load_col)
+        flags[max_idx + 1 :] = False
+
+    return flags
+
+
 def detect_popins_iforest(
-    df,
-    contamination=0.001,
-    random_state=None,
-    depth_col="Depth (nm)",
-    load_col="Load (µN)",
-    window=5,
-    trim_edges_enabled=True,
-    trim_margin=None,
-    max_load_trim_enabled=True,
-):
+    df: pd.DataFrame,
+    contamination: float = 0.001,
+    random_state: int | None = None,
+    depth_col: str = "Depth (nm)",
+    load_col: str = "Load (µN)",
+    window: int = 5,
+    trim_edges_enabled: bool = True,
+    trim_margin: int | None = None,
+    max_load_trim_enabled: bool = True,
+) -> pd.DataFrame:
     """
     Detect pop-ins using Isolation Forest based on local stiffness and curvature.
 
@@ -166,6 +269,9 @@ def detect_popins_iforest(
     It then applies the Isolation Forest algorithm from scikit-learn, which isolates
     anomalies by recursively partitioning the feature space. Points that require fewer
     partitions to isolate are more likely to be outliers.
+
+    The forest is fitted on the curve passed in; there is no pre-trained model and no
+    labelled training data is required.
 
     Args:
         df (DataFrame): Indentation dataset containing load and depth columns.
@@ -187,21 +293,23 @@ def detect_popins_iforest(
     iso = IsolationForest(contamination=contamination, random_state=random_state)
     features = df2[["stiff_diff", "curvature"]].fillna(0)
     preds = iso.fit_predict(features) == -1
-    if trim_edges_enabled:
-        margin = trim_margin if trim_margin is not None else max(10, window)
-        preds = trim_edges(preds, margin=margin)
 
-    if max_load_trim_enabled:
-        # Mask out anything *after* max load
-        max_idx = find_max_load_index(df, load_col)
-        preds[max_idx + 1 :] = False
+    preds = _apply_trims(
+        preds,
+        df,
+        load_col,
+        trim_edges_enabled,
+        trim_margin,
+        max(10, window),
+        max_load_trim_enabled,
+    )
 
     df2["popin_iforest"] = preds
     logger.info(f"IsolationForest flagged {df2['popin_iforest'].sum()} anomalies")
     return df2
 
 
-def build_cnn_autoencoder(window_size, n_features):
+def build_cnn_autoencoder(window_size: int, n_features: int) -> Model:
     """
     Build a 1D Convolutional Autoencoder for time-series anomaly detection.
 
@@ -225,34 +333,40 @@ def build_cnn_autoencoder(window_size, n_features):
 
     Returns:
         keras.Model: Keras autoencoder model (uncompiled).
+
+    Raises:
+        ImportError: If TensorFlow is not installed. Install it with
+            `pip install 'merrypopins[cnn]'`.
     """
-    inp = Input(shape=(window_size, n_features))
-    x = Conv1D(32, 3, activation="relu", padding="same")(inp)
-    x = MaxPooling1D(2, padding="same")(x)
-    x = Conv1D(16, 3, activation="relu", padding="same")(x)
-    x = MaxPooling1D(2, padding="same")(x)
-    x = Conv1D(16, 3, activation="relu", padding="same")(x)
-    x = UpSampling1D(2)(x)
-    x = Conv1D(32, 3, activation="relu", padding="same")(x)
-    x = UpSampling1D(2)(x)
-    x = Conv1D(n_features, 3, activation="linear", padding="same")(x)
-    return Model(inp, x)
+    keras = _import_keras()
+
+    inp = keras.Input(shape=(window_size, n_features))
+    x = keras.Conv1D(32, 3, activation="relu", padding="same")(inp)
+    x = keras.MaxPooling1D(2, padding="same")(x)
+    x = keras.Conv1D(16, 3, activation="relu", padding="same")(x)
+    x = keras.MaxPooling1D(2, padding="same")(x)
+    x = keras.Conv1D(16, 3, activation="relu", padding="same")(x)
+    x = keras.UpSampling1D(2)(x)
+    x = keras.Conv1D(32, 3, activation="relu", padding="same")(x)
+    x = keras.UpSampling1D(2)(x)
+    x = keras.Conv1D(n_features, 3, activation="linear", padding="same")(x)
+    return keras.Model(inp, x)
 
 
 def detect_popins_cnn(
-    df,
-    window_size=64,
-    epochs=10,
-    threshold_multiplier=5.0,
-    batch_size=32,
-    validation_split=0.0,
-    depth_col="Depth (nm)",
-    load_col="Load (µN)",
-    window=5,
-    trim_edges_enabled=True,
-    trim_margin=None,
-    max_load_trim_enabled=True,
-):
+    df: pd.DataFrame,
+    window_size: int = 64,
+    epochs: int = 10,
+    threshold_multiplier: float = 5.0,
+    batch_size: int = 32,
+    validation_split: float = 0.0,
+    depth_col: str = "Depth (nm)",
+    load_col: str = "Load (µN)",
+    window: int = 5,
+    trim_edges_enabled: bool = True,
+    trim_margin: int | None = None,
+    max_load_trim_enabled: bool = True,
+) -> pd.DataFrame:
     """
     Detect pop-ins using a Convolutional Autoencoder trained on stiffness features.
 
@@ -268,6 +382,8 @@ def detect_popins_cnn(
 
     The method uses a sliding window to extract overlapping sequences from the full curve,
     trains the model on all windows, and flags windows whose error exceeds a dynamic threshold.
+    The autoencoder is trained from scratch on the curve passed in, so no pre-trained
+    weights ship with the package and no labelled data is needed.
 
     Args:
         df (DataFrame): Input indentation data containing load and depth columns.
@@ -287,7 +403,13 @@ def detect_popins_cnn(
         DataFrame: Original DataFrame with a new boolean column:
             - "popin_cnn": True for detected anomalies, False otherwise.
                 - Only pre-max-load anomalies are returned to focus on loading-phase events. If `max_load_trim_enabled` is True which is the default.
+
+    Raises:
+        ImportError: If TensorFlow is not installed. Install it with
+            `pip install 'merrypopins[cnn]'`.
     """
+    keras = _import_keras()
+
     df2 = compute_features(df, depth_col, load_col, window)
     X = df2[["stiff_diff", "curvature"]].fillna(0).values
     W = np.array([X[i : i + window_size] for i in range(len(X) - window_size)])
@@ -302,7 +424,7 @@ def detect_popins_cnn(
         validation_split=validation_split,
         verbose=0,
         callbacks=(
-            [EarlyStopping(patience=3, restore_best_weights=True)]
+            [keras.EarlyStopping(patience=3, restore_best_weights=True)]
             if validation_split > 0
             else None
         ),
@@ -314,14 +436,16 @@ def detect_popins_cnn(
 
     flags = np.zeros(len(X), dtype=bool)
     flags[window_size // 2 : -window_size // 2] = errors > threshold
-    if trim_edges_enabled:
-        margin = trim_margin if trim_margin is not None else max(10, window)
-        flags = trim_edges(flags, margin=margin)
 
-    if max_load_trim_enabled:
-        # Mask out anything *after* max load
-        max_idx = find_max_load_index(df, load_col)
-        flags[max_idx + 1 :] = False
+    flags = _apply_trims(
+        flags,
+        df,
+        load_col,
+        trim_edges_enabled,
+        trim_margin,
+        max(10, window),
+        max_load_trim_enabled,
+    )
 
     df2["popin_cnn"] = flags
     logger.info(f"CNN flagged {df2['popin_cnn'].sum()} anomalies")
@@ -329,14 +453,14 @@ def detect_popins_cnn(
 
 
 def detect_popins_fd_fourier(
-    df,
-    threshold=3.0,
-    spacing=1.0,
-    trim_edges_enabled=True,
-    trim_margin=None,
-    load_col="Load (µN)",
-    max_load_trim_enabled=True,
-):
+    df: pd.DataFrame,
+    threshold: float = 3.0,
+    spacing: float = 1.0,
+    trim_edges_enabled: bool = True,
+    trim_margin: int | None = None,
+    load_col: str = "Load (µN)",
+    max_load_trim_enabled: bool = True,
+) -> pd.DataFrame:
     """
     Detect pop-ins by estimating the derivative of Load using a Fourier spectral method.
 
@@ -373,14 +497,16 @@ def detect_popins_fd_fourier(
     anomalies = np.abs(derivative - np.mean(derivative)) > threshold * np.std(
         derivative
     )
-    if trim_edges_enabled:
-        margin = trim_margin if trim_margin is not None else 10
-        anomalies = trim_edges(anomalies, margin=margin)
 
-    if max_load_trim_enabled:
-        # Mask out anything *after* max load
-        max_idx = find_max_load_index(df, load_col)
-        anomalies[max_idx + 1 :] = False
+    anomalies = _apply_trims(
+        anomalies,
+        df,
+        load_col,
+        trim_edges_enabled,
+        trim_margin,
+        10,
+        max_load_trim_enabled,
+    )
 
     df2 = df.copy()
     df2["popin_fd"] = anomalies
@@ -389,16 +515,16 @@ def detect_popins_fd_fourier(
 
 
 def detect_popins_savgol(
-    df,
-    window_length=11,
-    polyorder=2,
-    threshold=3.0,
-    deriv=1,
-    load_col="Load (µN)",
-    trim_edges_enabled=True,
-    trim_margin=None,
-    max_load_trim_enabled=True,
-):
+    df: pd.DataFrame,
+    window_length: int = 11,
+    polyorder: int = 2,
+    threshold: float = 3.0,
+    deriv: int = 1,
+    load_col: str = "Load (µN)",
+    trim_edges_enabled: bool = True,
+    trim_margin: int | None = None,
+    max_load_trim_enabled: bool = True,
+) -> pd.DataFrame:
     """
     Detect pop-ins using Savitzky-Golay filtered derivatives.
 
@@ -431,14 +557,16 @@ def detect_popins_savgol(
     anomalies = np.abs(derivative - np.mean(derivative)) > threshold * np.std(
         derivative
     )
-    if trim_edges_enabled:
-        margin = trim_margin if trim_margin is not None else max(10, window_length)
-        anomalies = trim_edges(anomalies, margin=margin)
 
-    if max_load_trim_enabled:
-        # Mask out anything *after* max load
-        max_idx = find_max_load_index(df, load_col)
-        anomalies[max_idx + 1 :] = False
+    anomalies = _apply_trims(
+        anomalies,
+        df,
+        load_col,
+        trim_edges_enabled,
+        trim_margin,
+        max(10, window_length),
+        max_load_trim_enabled,
+    )
 
     df2 = df.copy()
     df2["popin_savgol"] = anomalies
@@ -446,38 +574,53 @@ def detect_popins_savgol(
     return df2
 
 
-# default_locate implementation combining all methods with popin flag.
-...
-
-
 def default_locate(
-    df,
-    iforest_contamination=0.001,
-    iforest_random_state=None,
-    cnn_window_size=64,
-    cnn_epochs=10,
-    cnn_threshold_multiplier=5.0,
-    cnn_batch_size=32,
-    cnn_validation_split=0.0,
-    fd_threshold=3.0,
-    fd_spacing=1.0,
-    savgol_window_length=11,
-    savgol_polyorder=2,
-    savgol_threshold=3.0,
-    sg_deriv_order=1,
-    stiffness_window=5,
-    trim_edges_enabled=True,
-    trim_margin=None,
-    max_load_trim_enabled=True,
-    use_iforest=True,
-    use_cnn=True,
-    use_fd=True,
-    use_savgol=True,
-    depth_col="Depth (nm)",
-    load_col="Load (µN)",
-):
+    df: pd.DataFrame,
+    iforest_contamination: float = 0.001,
+    iforest_random_state: int | None = None,
+    cnn_window_size: int = 64,
+    cnn_epochs: int = 10,
+    cnn_threshold_multiplier: float = 5.0,
+    cnn_batch_size: int = 32,
+    cnn_validation_split: float = 0.0,
+    fd_threshold: float = 3.0,
+    fd_spacing: float = 1.0,
+    savgol_window_length: int = 11,
+    savgol_polyorder: int = 2,
+    savgol_threshold: float = 3.0,
+    sg_deriv_order: int = 1,
+    stiffness_window: int = 5,
+    trim_edges_enabled: bool = True,
+    trim_margin: int | None = None,
+    max_load_trim_enabled: bool = True,
+    use_iforest: bool = True,
+    use_cnn: bool = True,
+    use_fd: bool = True,
+    use_savgol: bool = True,
+    depth_col: str = "Depth (nm)",
+    load_col: str = "Load (µN)",
+) -> pd.DataFrame:
     """
     Apply all (default) or selected detection methods to identify pop-ins.
+
+    Each enabled method writes its own boolean column ("popin_iforest", "popin_cnn",
+    "popin_fd", "popin_savgol"). Those are then combined into three summary columns:
+
+      - "popin": True where *any* enabled method fired (the inclusive union).
+      - "popin_score": how many methods fired at that point, i.e. how much the
+        methods agree.
+      - "popin_confident": True where at least two methods agree, which is the
+        column to use when false positives are more costly than missed events.
+
+    The methods are complementary rather than interchangeable. Savitzky-Golay and the
+    Fourier derivative are cheap, need only a couple of parameters, and suit a first
+    pass over a large batch. The IsolationForest and CNN autoencoder are unsupervised
+    and adapt to the data, which helps on noisy curves or unfamiliar materials where a
+    fixed derivative threshold does not transfer, at a higher compute cost.
+
+    Note that `use_cnn=True` (the default) needs TensorFlow, an optional dependency.
+    Install it with `pip install 'merrypopins[cnn]'`, or pass `use_cnn=False` to run
+    the other three methods without it.
 
     Args:
         df (DataFrame): Input indentation data.
@@ -507,6 +650,10 @@ def default_locate(
 
     Returns:
         DataFrame: Data with individual method flags, combined flag, and metadata columns.
+
+    Raises:
+        ImportError: If `use_cnn` is True and TensorFlow is not installed. Install it
+            with `pip install 'merrypopins[cnn]'` or pass `use_cnn=False`.
     """
     df_combined = df.copy()
     method_flags = []

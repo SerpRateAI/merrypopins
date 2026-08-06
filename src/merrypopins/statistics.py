@@ -27,7 +27,9 @@ if not logger.handlers:
 ####### POSTPROCESSING #########
 
 
-def postprocess_popins_local_max(df, popin_flag_column="popin", window=1):
+def postprocess_popins_local_max(
+    df: pd.DataFrame, popin_flag_column: str = "popin", window: int = 1
+) -> pd.DataFrame:
     """
     Select pop-ins that have a local load maxima.
 
@@ -67,7 +69,11 @@ def postprocess_popins_local_max(df, popin_flag_column="popin", window=1):
     return df
 
 
-def extract_popin_intervals(df, popin_col="popin_selected", load_col="Load (µN)"):
+def extract_popin_intervals(
+    df: pd.DataFrame,
+    popin_col: str = "popin_selected",
+    load_col: str = "Load (µN)",
+) -> pd.DataFrame:
     """
     Extract start and end indices for each pop-in event.
 
@@ -106,8 +112,14 @@ def extract_popin_intervals(df, popin_col="popin_selected", load_col="Load (µN)
 
 
 def _compute_temporal_stats(
-    start_time, end_time, interval_rows, i, df, time_col, start_col
-):
+    start_time: float,
+    end_time: float,
+    interval_rows: pd.DataFrame,
+    i: int,
+    df: pd.DataFrame,
+    time_col: str,
+    start_col: str,
+) -> dict:
     """
     Compute temporal statistics for each pop-in event.
 
@@ -142,7 +154,9 @@ def _compute_temporal_stats(
     }
 
 
-def _compute_precursor_stats(before, time_col, load_col):
+def _compute_precursor_stats(
+    before: pd.DataFrame, time_col: str, load_col: str
+) -> dict:
     """
     Compute the precursor statistics before the pop-in event.
 
@@ -168,7 +182,14 @@ def _compute_precursor_stats(before, time_col, load_col):
     }
 
 
-def _compute_shape_stats(df, start_idx, end_idx, during, time_col, depth_col):
+def _compute_shape_stats(
+    df: pd.DataFrame,
+    start_idx: int,
+    end_idx: int,
+    during: pd.DataFrame,
+    time_col: str,
+    depth_col: str,
+) -> dict:
     """
     Compute shape statistics during the pop-in event.
 
@@ -210,18 +231,18 @@ def _compute_shape_stats(df, start_idx, end_idx, during, time_col, depth_col):
 
 
 def calculate_popin_statistics(
-    df,
-    precursor_stats=True,
-    temporal_stats=True,
-    popin_shape_stats=True,
-    time_col="Time (s)",
-    load_col="Load (µN)",
-    depth_col="Depth (nm)",
-    start_col="start_idx",
-    end_col="end_idx",
-    before_window=0.5,
-    after_window=0.5,
-):
+    df: pd.DataFrame,
+    precursor_stats: bool = True,
+    temporal_stats: bool = True,
+    popin_shape_stats: bool = True,
+    time_col: str = "Time (s)",
+    load_col: str = "Load (µN)",
+    depth_col: str = "Depth (nm)",
+    start_col: str = "start_idx",
+    end_col: str = "end_idx",
+    before_window: float = 0.5,
+    after_window: float = 0.5,
+) -> pd.DataFrame:
     """
     Compute descriptive statistics for each detected pop-in.
 
@@ -290,8 +311,11 @@ def calculate_popin_statistics(
 
 
 def calculate_curve_summary(
-    df, start_col="start_idx", end_col="end_idx", time_col="Time (s)"
-):
+    df: pd.DataFrame,
+    start_col: str = "start_idx",
+    end_col: str = "end_idx",
+    time_col: str = "Time (s)",
+) -> pd.Series:
     """
     Compute curve-level summary statistics about pop-in activity.
 
@@ -338,8 +362,11 @@ def calculate_curve_summary(
 
 
 def default_statistics(
-    df_locate, popin_flag_column="popin", before_window=0.5, after_window=0.5
-):
+    df_locate: pd.DataFrame,
+    popin_flag_column: str = "popin",
+    before_window: float = 0.5,
+    after_window: float = 0.5,
+) -> pd.DataFrame:
     """
     Pipeline to compute pop-in statistics from raw located popins.
 
@@ -379,16 +406,16 @@ def default_statistics(
 
 
 def calculate_stress_strain(
-    df,
-    depth_col="Depth (nm)",
-    load_col="Load (µN)",
-    Reff_um=5.323,
-    min_load_uN=2000,
-    smooth_stress=True,
-    smooth_window=11,
-    smooth_polyorder=2,
-    copy_popin_cols=True,
-):
+    df: pd.DataFrame,
+    depth_col: str = "Depth (nm)",
+    load_col: str = "Load (µN)",
+    Reff_um: float = 5.323,
+    min_load_uN: float = 2000,
+    smooth_stress: bool = True,
+    smooth_window: int = 11,
+    smooth_polyorder: int = 2,
+    copy_popin_cols: bool = True,
+) -> pd.DataFrame:
     """
     Convert load–depth data to stress–strain using Kalidindi & Pathak (2008) formulas.
 
@@ -461,7 +488,9 @@ def calculate_stress_strain(
 ### Helper Functions stress-strain ####
 
 
-def _compute_stress_strain_jump_stats(df, start_idx, end_idx, stress_col, strain_col):
+def _compute_stress_strain_jump_stats(
+    df: pd.DataFrame, start_idx: int, end_idx: int, stress_col: str, strain_col: str
+) -> dict:
     """
     Compute the jump in stress and strain during a pop-in event.
 
@@ -481,7 +510,9 @@ def _compute_stress_strain_jump_stats(df, start_idx, end_idx, stress_col, strain
     }
 
 
-def _compute_stress_strain_shape_stats(during, time_col, stress_col, strain_col):
+def _compute_stress_strain_shape_stats(
+    during: pd.DataFrame, time_col: str, stress_col: str, strain_col: str
+) -> dict:
     """
     Compute shape-based statistics such as stress slope, strain slope, and average stress/strain during the pop-in.
 
@@ -517,7 +548,9 @@ def _compute_stress_strain_shape_stats(during, time_col, stress_col, strain_col)
     }
 
 
-def _compute_stress_strain_precursor_stats(before, time_col, stress_col, strain_col):
+def _compute_stress_strain_precursor_stats(
+    before: pd.DataFrame, time_col: str, stress_col: str, strain_col: str
+) -> dict:
     """
     Compute precursor statistics like the average change in stress and strain before the pop-in.
 
@@ -554,17 +587,17 @@ def _compute_stress_strain_precursor_stats(before, time_col, stress_col, strain_
 
 
 def calculate_stress_strain_statistics(
-    df,
-    start_col="start_idx",
-    end_col="end_idx",
-    time_col="Time (s)",
-    stress_col="stress",
-    strain_col="strain",
-    before_window=0.5,
-    precursor_stats=True,
-    temporal_stats=True,
-    shape_stats=True,
-):
+    df: pd.DataFrame,
+    start_col: str = "start_idx",
+    end_col: str = "end_idx",
+    time_col: str = "Time (s)",
+    stress_col: str = "stress",
+    strain_col: str = "strain",
+    before_window: float = 0.5,
+    precursor_stats: bool = True,
+    temporal_stats: bool = True,
+    shape_stats: bool = True,
+) -> pd.DataFrame:
     """
     Compute statistics for each pop-in in stress–strain space.
 
@@ -643,17 +676,17 @@ def calculate_stress_strain_statistics(
 
 
 def default_statistics_stress_strain(
-    df_locate,
-    popin_flag_column="popin",
-    before_window=0.5,
-    after_window=0.5,
-    Reff_um=5.323,
-    min_load_uN=2000,
-    smooth_stress=True,
-    stress_col="stress",
-    strain_col="strain",
-    time_col="Time (s)",
-):
+    df_locate: pd.DataFrame,
+    popin_flag_column: str = "popin",
+    before_window: float = 0.5,
+    after_window: float = 0.5,
+    Reff_um: float = 5.323,
+    min_load_uN: float = 2000,
+    smooth_stress: bool = True,
+    stress_col: str = "stress",
+    strain_col: str = "strain",
+    time_col: str = "Time (s)",
+) -> pd.DataFrame:
     """
     Full pipeline: from raw data to stress–strain statistics.
 

@@ -3,13 +3,16 @@
 Install from PyPI (once published):
 
 ```bash
-# From PyPI
+# Full install, including the CNN pop-in detector (recommended)
+pip install 'merrypopins[cnn]'
+
+# Slim install, without TensorFlow
 pip install merrypopins
 
 # For development
 git clone https://github.com/SerpRateAI/merrypopins.git
 cd merrypopins
-pip install -e .
+pip install -e '.[cnn]'
 ```
 
 merrypopins supports Python 3.10+ and depends on:
@@ -19,11 +22,39 @@ merrypopins supports Python 3.10+ and depends on:
 - `pandas`
 - `scipy`
 - `scikit-learn`
-- `tensorflow`
 
 These are installed automatically via `pip`.
 
-All core and development dependencies are tested with Python 3.10 through 3.12.
+All core and development dependencies are tested with Python 3.10 through 3.13.
+
+## Optional: TensorFlow for the CNN detector
+
+`merrypopins.locate` offers four pop-in detection methods. Three of them
+(Savitzky-Golay, Fourier derivative, Isolation Forest) need only the core
+dependencies above. The fourth, the convolutional autoencoder, needs
+[TensorFlow](https://www.tensorflow.org/), which is several hundred megabytes.
+
+Rather than make everyone pay that cost for one of four methods, TensorFlow is
+packaged as an optional extra:
+
+```bash
+pip install 'merrypopins[cnn]'
+```
+
+Without it, `merrypopins` imports and runs normally, and you can use the other three
+detectors:
+
+```python
+from merrypopins.locate import default_locate
+
+# Works on a slim install
+df = default_locate(df, use_cnn=False)
+```
+
+`default_locate` enables the CNN by default (`use_cnn=True`). On a slim install it
+raises an `ImportError` telling you to install the extra, rather than quietly
+returning results from three methods when you asked for four. If you want the
+default four-method pipeline, install the `cnn` extra.
 
 # Development & Testing
 
@@ -91,7 +122,7 @@ Notes:
    pytest --cov=merrypopins --cov-report=term-missing
    ```
    This command runs all tests in the `tests/` directory and generates a coverage report showing which lines of code were executed during the tests.
-   Tests and linting are automatically run on each pull request via GitHub Actions. The CI uses Python 3.10–3.12 and runs pre-commit, pytest, and coverage checks.
+   Tests and linting are automatically run on each pull request via GitHub Actions. The CI uses Python 3.10–3.13 and runs pre-commit, pytest, and coverage checks.
 
 3. Generate HTML coverage report:
    ```bash

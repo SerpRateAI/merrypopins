@@ -1,7 +1,10 @@
+import builtins
+
 import numpy as np
 import pandas as pd
 import pytest
 
+from merrypopins import locate
 from merrypopins.locate import (
     compute_stiffness,
     compute_features,
@@ -124,6 +127,64 @@ def test_detect_popins_cnn_basic(curve_with_jump):
     assert flags > 0
     idxs = np.where(df_cnn["popin_cnn"])[0]
     assert idxs.min() >= 10 and idxs.max() <= len(curve_with_jump) - 10
+
+
+# ----------------------------------------------------------------------
+# TensorFlow is an optional dependency (the "cnn" extra). Everything except the
+# CNN detector must work without it, and the CNN entry points must say how to
+# install it rather than raising a bare ModuleNotFoundError.
+# ----------------------------------------------------------------------
+@pytest.fixture
+def no_tensorflow(monkeypatch):
+    """Make any `import tensorflow...` inside merrypopins fail."""
+    real_import = builtins.__import__
+
+    def fake_import(name, *args, **kwargs):
+        if name.startswith("tensorflow"):
+            raise ImportError(f"No module named '{name}'")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+
+
+def test_import_keras_without_tensorflow_explains_install(no_tensorflow):
+    with pytest.raises(ImportError, match=r"merrypopins\[cnn\]"):
+        locate._import_keras()
+
+
+def test_detect_popins_cnn_without_tensorflow_explains_install(
+    curve_with_jump, no_tensorflow
+):
+    with pytest.raises(ImportError, match=r"merrypopins\[cnn\]"):
+        detect_popins_cnn(curve_with_jump, window_size=20, epochs=1)
+
+
+def test_build_cnn_autoencoder_without_tensorflow_explains_install(no_tensorflow):
+    with pytest.raises(ImportError, match=r"merrypopins\[cnn\]"):
+        locate.build_cnn_autoencoder(20, 2)
+
+
+def test_other_methods_work_without_tensorflow(curve_with_jump, no_tensorflow):
+    """The three non-CNN detectors must not need TensorFlow."""
+    df = default_locate(
+        curve_with_jump,
+        use_cnn=False,
+        iforest_contamination=0.01,
+        iforest_random_state=42,
+        savgol_threshold=1.0,
+    )
+    for col in ("popin_iforest", "popin_fd", "popin_savgol", "popin"):
+        assert col in df.columns
+    assert "popin_cnn" not in df.columns
+    assert df["popin"].sum() > 0
+
+
+def test_default_locate_without_tensorflow_explains_install(
+    curve_with_jump, no_tensorflow
+):
+    """use_cnn defaults to True, so it must fail loudly rather than silently skip."""
+    with pytest.raises(ImportError, match=r"merrypopins\[cnn\]"):
+        default_locate(curve_with_jump, cnn_window_size=20, cnn_epochs=1)
 
 
 # ----------------------------------------------------------------------
