@@ -205,6 +205,36 @@ def trim_edges(series: pd.Series | np.ndarray, margin: int) -> pd.Series | np.nd
     return trimmed
 
 
+def _flag_outliers(signal: np.ndarray, threshold: float) -> np.ndarray:
+    """
+    Flag points where a signal departs from its own mean by more than `threshold` sigma.
+
+    Both derivative-based detectors score candidates this way, so the rule lives here.
+
+    A constant signal needs care. If the curve is perfectly smooth its derivative is
+    constant, and the standard deviation that would set the scale is floating-point
+    noise around zero rather than a real spread. Comparing against it flags arbitrary
+    points. A perfectly smooth curve contains no pop-ins, so nothing is flagged when
+    the spread is negligible relative to the signal itself.
+
+    Args:
+        signal (ndarray): The derivative (or other score) to threshold.
+        threshold (float): Number of standard deviations that counts as an anomaly.
+
+    Returns:
+        ndarray: Boolean flags, one per point.
+    """
+    signal = np.asarray(signal, dtype=float)
+    spread = np.std(signal)
+    scale = np.max(np.abs(signal)) if signal.size else 0.0
+
+    if not np.isfinite(spread) or spread <= 1e-12 * max(scale, 1.0):
+        logger.debug("Signal is effectively constant; no anomalies flagged.")
+        return np.zeros(signal.shape, dtype=bool)
+
+    return np.abs(signal - np.mean(signal)) > threshold * spread
+
+
 def _apply_trims(
     flags: np.ndarray,
     df: pd.DataFrame,
@@ -474,7 +504,8 @@ def detect_popins_fd_fourier(
     IFFT takes frequency-domain data and reconstructs the original time-domain (or spatial) signal.
 
     Anomalies are flagged where the resulting derivative deviates from the mean by more than a
-    given number of standard deviations.
+    given number of standard deviations. A perfectly smooth curve has a constant derivative
+    and no pop-ins, so nothing is flagged when that spread is negligible.
 
     Args:
         df (DataFrame): Input indentation data.
@@ -494,9 +525,7 @@ def detect_popins_fd_fourier(
     fft_load = np.fft.fft(load)
     freqs = np.fft.fftfreq(len(load), d=spacing)
     derivative = np.real(np.fft.ifft(1j * 2 * np.pi * freqs * fft_load))
-    anomalies = np.abs(derivative - np.mean(derivative)) > threshold * np.std(
-        derivative
-    )
+    anomalies = _flag_outliers(derivative, threshold)
 
     anomalies = _apply_trims(
         anomalies,
@@ -534,6 +563,8 @@ def detect_popins_savgol(
     The steps are:
       1. Apply Savitzky-Golay filter to compute the derivative (e.g., velocity or acceleration)
       2. Flag points where |derivative - mean| > threshold * std deviation
+         (nothing is flagged if the derivative is constant, i.e. the curve is
+         perfectly smooth and therefore contains no pop-ins)
 
     The Savitzky-Golay filter works by fitting successive subsets of adjacent data points
     with a low-degree polynomial using linear least squares.
@@ -554,9 +585,7 @@ def detect_popins_savgol(
                 - Only pre-max-load anomalies are returned to focus on loading-phase events. If `max_load_trim_enabled` is True which is the default.
     """
     derivative = savgol_filter(df[load_col], window_length, polyorder, deriv=deriv)
-    anomalies = np.abs(derivative - np.mean(derivative)) > threshold * np.std(
-        derivative
-    )
+    anomalies = _flag_outliers(derivative, threshold)
 
     anomalies = _apply_trims(
         anomalies,

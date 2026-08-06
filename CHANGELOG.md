@@ -74,6 +74,16 @@ and to [#72](https://github.com/SerpRateAI/merrypopins/issues/72).
   the edge and post-maximum-load masks they all applied separately. No change in
   behaviour or public API.
 
+### Fixed
+- `detect_popins_savgol` and `detect_popins_fd_fourier` no longer flag arbitrary
+  points on a perfectly smooth curve. Both score candidates as a departure from the
+  mean in units of the derivative's standard deviation. When the curve is smooth the
+  derivative is constant, that standard deviation is floating-point noise around zero
+  rather than a real scale, and the comparison flagged points essentially at random.
+  The shared `_flag_outliers` helper now flags nothing when the spread is negligible
+  relative to the signal, which is correct: a perfectly smooth curve has no pop-ins.
+  This surfaced as a test failure under newer SciPy and NumPy releases.
+
 ### Added
 - A pipeline diagram and a detection-method comparison table in the README and docs,
   plus guidance on `popin`, `popin_score` and `popin_confident`.
