@@ -40,7 +40,7 @@ Primary users of `merrypopins` are students, researchers, and academics in the f
 
 # State of the field
 
-Software for instrumented indentation falls into three groups, and none of them covers automated pop-in localisation together with the statistics that pop-in studies report.
+Software for instrumented indentation falls into three groups.
 
 Vendor software shipped with commercial indenters, such as the suite supplied with the Bruker Hysitron platform [@bruker], acquires curves and computes hardness and modulus. It is closed source, tied to one instrument, and exposes no pop-in event extraction, so analyses built on it cannot be reproduced or extended outside the vendor's environment.
 
