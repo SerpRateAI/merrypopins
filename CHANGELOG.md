@@ -49,3 +49,46 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 
 ### Changed
 - **Python Compatibility**:
     - As the latest TensorFlow is now compatible with Python 3.13, updated Python compatibility in `pyproject.toml` and classifiers to include Python 3.13.
+## [1.1.0] - 2026-08-07 &nbsp;:package: **"Optional TensorFlow"**
+
+Revisions made in response to the JOSS peer review
+([openjournals/joss-reviews#9933](https://github.com/openjournals/joss-reviews/issues/9933))
+and to [#72](https://github.com/SerpRateAI/merrypopins/issues/72).
+
+### Changed
+- **TensorFlow is now an optional dependency.** It is only needed by the CNN
+  autoencoder detector, one of four methods in `locate`, and it is a
+  several-hundred-megabyte install. Install it with `pip install 'merrypopins[cnn]'`.
+  The base install is now considerably smaller, and `merrypopins` imports and runs
+  without it.
+  - `locate.py` imports Keras lazily inside `build_cnn_autoencoder` and
+    `detect_popins_cnn`, and raises an `ImportError` naming the install command
+    rather than a bare `ModuleNotFoundError`.
+  - `default_locate` still enables the CNN by default (`use_cnn=True`), so on a slim
+    install it raises rather than quietly returning results from three methods when
+    four were requested. Pass `use_cnn=False` for the three-method pipeline.
+  - Conda, Docker, dev and Streamlit environments continue to install TensorFlow, so
+    the tutorials and the hosted app are unaffected.
+- **Type hints** added to the public API of all five modules.
+- The four `detect_popins_*` functions now share a single `_apply_trims` helper for
+  the edge and post-maximum-load masks they all applied separately. No change in
+  behaviour or public API.
+
+### Fixed
+- `detect_popins_savgol` and `detect_popins_fd_fourier` no longer flag arbitrary
+  points on a perfectly smooth curve. Both score candidates as a departure from the
+  mean in units of the derivative's standard deviation. When the curve is smooth the
+  derivative is constant, that standard deviation is floating-point noise around zero
+  rather than a real scale, and the comparison flagged points essentially at random.
+  The shared `_flag_outliers` helper now flags nothing when the spread is negligible
+  relative to the signal, which is correct: a perfectly smooth curve has no pop-ins.
+  This surfaced as a test failure under newer SciPy and NumPy releases.
+
+### Added
+- A pipeline diagram and a detection-method comparison table in the README and docs,
+  plus guidance on `popin`, `popin_score` and `popin_confident`.
+- Documentation of the optional-extra install path in the README and installation guide.
+- A `slim-install` CI job that installs the base package, asserts TensorFlow is absent,
+  and runs the tests that do not need it.
+- Tests covering the missing-TensorFlow path for `_import_keras`,
+  `build_cnn_autoencoder`, `detect_popins_cnn` and `default_locate`.

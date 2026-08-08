@@ -33,7 +33,7 @@ if not logger.handlers:
     logger.setLevel(logging.INFO)
 
 
-def remove_pre_min_load(df: pd.DataFrame, load_col="Load (µN)") -> pd.DataFrame:
+def remove_pre_min_load(df: pd.DataFrame, load_col: str = "Load (µN)") -> pd.DataFrame:
     """
     Remove all points up to and including the minimum Load point.
 
@@ -61,12 +61,12 @@ def remove_pre_min_load(df: pd.DataFrame, load_col="Load (µN)") -> pd.DataFrame
 
 def rescale_data(
     df: pd.DataFrame,
-    depth_col="Depth (nm)",
-    load_col="Load (µN)",
-    N_baseline=50,
-    k=5,
-    window_length=11,
-    polyorder=2,
+    depth_col: str = "Depth (nm)",
+    load_col: str = "Load (µN)",
+    N_baseline: int = 50,
+    k: float = 5,
+    window_length: int = 11,
+    polyorder: int = 2,
 ) -> pd.DataFrame:
     """
     Automatically detect contact point by noise threshold and rescale Depth so contact = 0.

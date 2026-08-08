@@ -87,3 +87,59 @@ These images highlight the complex deformation behavior analyzed by the `merrypo
 For a quick overview, see the [Quickstart](quickstart.md).
 
 Merrypopins is developed by [Cahit Acar](mailto:c.acar.business@gmail.com), [Anna Marcelissen](mailto:anna.marcelissen@live.nl), [Hugo van Schrojenstein Lantman](mailto:h.w.vanschrojensteinlantman@uu.nl), and [John M. Aiken](mailto:johnm.aiken@gmail.com).
+
+---
+
+## 🔄 Workflow
+
+The five modules form a pipeline. Each stage takes the DataFrame the previous stage
+produced, so you can stop anywhere, inspect the result, or swap in your own step.
+
+```mermaid
+flowchart LR
+    RAW[".txt curve<br/>.tdm/.tdx metadata"] --> LOAD["<b>load_datasets</b><br/>parse to DataFrame"]
+    LOAD --> PRE["<b>preprocess</b><br/>trim, find contact,<br/>zero the depth axis"]
+    PRE --> LOC["<b>locate</b><br/>four detectors +<br/>agreement score"]
+    LOC --> STAT["<b>statistics</b><br/>stress-strain, yield point,<br/>precursor & temporal stats"]
+    STAT --> OUT["annotated tables,<br/>summary stats, plots"]
+
+    subgraph WRAP["make_dataset.merrypopins_pipeline (convenience wrapper)"]
+        LOAD
+        PRE
+        LOC
+    end
+```
+
+`make_dataset.merrypopins_pipeline` runs the first three stages end to end on a single
+file and writes an overlay plot, which is the quickest way to check a curve.
+
+---
+
+## 🔎 Choosing a detection method
+
+`locate` offers four detectors. They are complementary rather than interchangeable:
+the two derivative methods are cheap and predictable, and the two unsupervised
+learning methods adapt to data whose pop-in sizes you do not know in advance.
+
+| Method | Function | How it flags a pop-in | Main parameters | TensorFlow | Cost | Suits |
+|---|---|---|---|---|---|---|
+| Savitzky-Golay | `detect_popins_savgol` | Polynomial-smoothed derivative of load, thresholded in standard deviations | `window_length`, `polyorder`, `threshold` | no | very low | A first pass over a large batch; smooth, low-noise curves |
+| Fourier derivative | `detect_popins_fd_fourier` | Derivative taken in the frequency domain, thresholded in standard deviations | `threshold`, `spacing` | no | very low | Sharp discontinuities, with almost nothing to tune |
+| Isolation Forest | `detect_popins_iforest` | Unsupervised outlier detection over (stiffness difference, curvature) | `contamination`, `window` | no | low | Curves where pop-in size and frequency are not known beforehand |
+| CNN autoencoder | `detect_popins_cnn` | Reconstruction error over sliding windows of the same two features | `window_size`, `epochs`, `threshold_multiplier` | **yes** | high | Noisy curves and subtle nonlinear signatures a fixed threshold misses |
+
+Neither learning method uses pre-trained weights. Both are fitted, unsupervised, on the
+curve you pass in, so no labelled training data is needed and results depend only on
+that curve and your parameters.
+
+`default_locate` runs the enabled methods and combines them into three columns:
+
+| Column | Meaning |
+|---|---|
+| `popin` | Any enabled method fired here (the inclusive union). Highest recall. |
+| `popin_score` | How many methods fired here, i.e. how strongly they agree. |
+| `popin_confident` | At least two methods agree. Use this when a false positive costs more than a missed event. |
+
+Comparing `popin_score` across methods is also a cheap self-consistency check: events
+that only one detector sees are worth inspecting on the overlay plot before you trust them.
+

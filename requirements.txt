@@ -4,4 +4,7 @@ numpy>=1.23
 pandas>=2.2
 scipy>=1.10
 scikit-learn>=1.2
+
+# Optional: only needed by the CNN autoencoder detector (merrypopins[cnn]).
+# The other three detection methods work without it.
 tensorflow>=2.10
