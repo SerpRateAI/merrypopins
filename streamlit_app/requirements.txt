@@ -1,5 +1,5 @@
 streamlit
 plotly<6.0.0
 pandas
-merrypopins
+merrypopins[cnn]
 kaleido<1.0.0

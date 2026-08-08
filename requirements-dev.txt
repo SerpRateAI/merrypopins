@@ -5,3 +5,6 @@ pre-commit>=3.0
 pytest>=7.0
 pytest-cov>=4.0
 ruff>=0.8.0
+
+# Needed to exercise the CNN detector in the test suite
+tensorflow>=2.10

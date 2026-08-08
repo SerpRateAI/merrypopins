@@ -43,6 +43,62 @@ Merrypopins is developed by [Cahit Acar](mailto:c.acar.business@gmail.com), [Ann
 
 ---
 
+## 🔄 Workflow
+
+The five modules form a pipeline. Each stage takes the DataFrame the previous stage
+produced, so you can stop anywhere, inspect the result, or swap in your own step.
+
+```mermaid
+flowchart LR
+    RAW[".txt curve<br/>.tdm/.tdx metadata"] --> LOAD["<b>load_datasets</b><br/>parse to DataFrame"]
+    LOAD --> PRE["<b>preprocess</b><br/>trim, find contact,<br/>zero the depth axis"]
+    PRE --> LOC["<b>locate</b><br/>four detectors +<br/>agreement score"]
+    LOC --> STAT["<b>statistics</b><br/>stress-strain, yield point,<br/>precursor & temporal stats"]
+    STAT --> OUT["annotated tables,<br/>summary stats, plots"]
+
+    subgraph WRAP["make_dataset.merrypopins_pipeline (convenience wrapper)"]
+        LOAD
+        PRE
+        LOC
+    end
+```
+
+`make_dataset.merrypopins_pipeline` runs the first three stages end to end on a single
+file and writes an overlay plot, which is the quickest way to check a curve.
+
+---
+
+## 🔎 Choosing a detection method
+
+`locate` offers four detectors. They are complementary rather than interchangeable:
+the two derivative methods are cheap and predictable, and the two unsupervised
+learning methods adapt to data whose pop-in sizes you do not know in advance.
+
+| Method | Function | How it flags a pop-in | Main parameters | TensorFlow | Cost | Suits |
+|---|---|---|---|---|---|---|
+| Savitzky-Golay | `detect_popins_savgol` | Polynomial-smoothed derivative of load, thresholded in standard deviations | `window_length`, `polyorder`, `threshold` | no | very low | A first pass over a large batch; smooth, low-noise curves |
+| Fourier derivative | `detect_popins_fd_fourier` | Derivative taken in the frequency domain, thresholded in standard deviations | `threshold`, `spacing` | no | very low | Sharp discontinuities, with almost nothing to tune |
+| Isolation Forest | `detect_popins_iforest` | Unsupervised outlier detection over (stiffness difference, curvature) | `contamination`, `window` | no | low | Curves where pop-in size and frequency are not known beforehand |
+| CNN autoencoder | `detect_popins_cnn` | Reconstruction error over sliding windows of the same two features | `window_size`, `epochs`, `threshold_multiplier` | **yes** | high | Noisy curves and subtle nonlinear signatures a fixed threshold misses |
+
+Neither learning method uses pre-trained weights. Both are fitted, unsupervised, on the
+curve you pass in, so no labelled training data is needed and results depend only on
+that curve and your parameters.
+
+`default_locate` runs the enabled methods and combines them into three columns:
+
+| Column | Meaning |
+|---|---|
+| `popin` | Any enabled method fired here (the inclusive union). Highest recall. |
+| `popin_score` | How many methods fired here, i.e. how strongly they agree. |
+| `popin_confident` | At least two methods agree. Use this when a false positive costs more than a missed event. |
+
+Comparing `popin_score` across methods is also a cheap self-consistency check: events
+that only one detector sees are worth inspecting on the overlay plot before you trust them.
+
+
+---
+
 ## 🌐 Try Merrypopins Library Online
 
 🚀 **Live demo**: explore Merrypopins in your browser! [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://merrypopins.streamlit.app)
@@ -89,13 +145,16 @@ These images highlight the complex deformation behavior analyzed by the `merrypo
 ## Installation
 
 ```bash
-# From PyPI
+# Full install, including the CNN pop-in detector (recommended)
+pip install 'merrypopins[cnn]'
+
+# Slim install, without TensorFlow
 pip install merrypopins
 
 # For development
 git clone https://github.com/SerpRateAI/merrypopins.git
 cd merrypopins
-pip install -e .
+pip install -e '.[cnn]'
 ```
 
 merrypopins supports Python 3.10+ and depends on:
@@ -105,9 +164,16 @@ merrypopins supports Python 3.10+ and depends on:
 - `pandas`
 - `scipy`
 - `scikit-learn`
-- `tensorflow`
 
 These are installed automatically via `pip`.
+
+**TensorFlow is optional.** It is only needed by the CNN autoencoder detector, one of
+the four methods in `locate`, and it is a several-hundred-megabyte download. Install
+it with the `cnn` extra shown above. Without it, `merrypopins` imports and runs
+normally and you can use the other three detectors via
+`default_locate(df, use_cnn=False)`; calling the CNN detector raises an `ImportError`
+telling you how to install the extra. See
+[Installation](https://serprateai.github.io/merrypopins/installation/) for details.
 
 All core and development dependencies are tested with Python 3.10 through 3.13.
 ---

@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y \
 
 # Install Python dependencies
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -e . \
+    && pip install --no-cache-dir -e '.[cnn]' \
     && pip install --no-cache-dir streamlit "plotly<6.0.0" matplotlib "kaleido<1.0.0"
 
 # Set the Streamlit port
