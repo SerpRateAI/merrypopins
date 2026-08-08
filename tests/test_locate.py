@@ -1,7 +1,10 @@
+import builtins
+
 import numpy as np
 import pandas as pd
 import pytest
 
+from merrypopins import locate
 from merrypopins.locate import (
     compute_stiffness,
     compute_features,
@@ -69,6 +72,13 @@ def test_stiffness_too_few_points():
 # detect_popins_fd_fourier
 # ----------------------------------------------------------------------
 def test_detect_popins_fd_fourier_no_jump(simple_curve):
+    """A straight curve should yield at most the FFT wrap-around artifact.
+
+    Unlike the Savitzky-Golay case, the spectral derivative of a non-periodic ramp
+    is not constant: treating the curve as periodic introduces a large step at the
+    wrap-around, so the endpoints carry a genuine spike. The leading edge is trimmed;
+    the final point can survive.
+    """
     df0 = detect_popins_fd_fourier(simple_curve, threshold=3.0)
     n0 = df0["popin_fd"].sum()
     assert n0 <= 3
@@ -84,10 +94,16 @@ def test_detect_popins_fd_fourier_with_jump(curve_with_jump):
 # detect_popins_savgol
 # ----------------------------------------------------------------------
 def test_detect_popins_savgol_no_jump(simple_curve):
+    """A perfectly straight curve has no pop-ins, so nothing should be flagged.
+
+    Without the constant-signal guard in _flag_outliers, the derivative's standard
+    deviation here is float noise around zero and the threshold comparison flags
+    arbitrary points near the filter edges.
+    """
     df0 = detect_popins_savgol(
         simple_curve, window_length=11, polyorder=2, threshold=3.0
     )
-    assert df0["popin_savgol"].sum() <= 3
+    assert df0["popin_savgol"].sum() == 0
 
 
 def test_detect_popins_savgol_with_jump(curve_with_jump):
@@ -96,6 +112,30 @@ def test_detect_popins_savgol_with_jump(curve_with_jump):
     )
     assert df1["popin_savgol"].sum() > 0
     assert df1["popin_savgol"].iloc[48:53].any()
+
+
+# ----------------------------------------------------------------------
+# _flag_outliers: the shared thresholding rule
+# ----------------------------------------------------------------------
+def test_flag_outliers_finds_the_spike():
+    signal = np.zeros(100)
+    signal[42] = 50.0
+    flags = locate._flag_outliers(signal, threshold=3.0)
+    assert flags[42]
+    assert flags.sum() == 1
+
+
+@pytest.mark.parametrize(
+    "signal",
+    [
+        np.zeros(50),  # all zero
+        np.full(50, 7.5),  # non-zero constant
+        np.full(50, 2.0) + np.linspace(0, 1e-15, 50),  # constant to float precision
+    ],
+)
+def test_flag_outliers_ignores_constant_signals(signal):
+    """A constant signal has no real spread, so its 'sigma' is float noise."""
+    assert not locate._flag_outliers(signal, threshold=3.0).any()
 
 
 # ----------------------------------------------------------------------
@@ -124,6 +164,64 @@ def test_detect_popins_cnn_basic(curve_with_jump):
     assert flags > 0
     idxs = np.where(df_cnn["popin_cnn"])[0]
     assert idxs.min() >= 10 and idxs.max() <= len(curve_with_jump) - 10
+
+
+# ----------------------------------------------------------------------
+# TensorFlow is an optional dependency (the "cnn" extra). Everything except the
+# CNN detector must work without it, and the CNN entry points must say how to
+# install it rather than raising a bare ModuleNotFoundError.
+# ----------------------------------------------------------------------
+@pytest.fixture
+def no_tensorflow(monkeypatch):
+    """Make any `import tensorflow...` inside merrypopins fail."""
+    real_import = builtins.__import__
+
+    def fake_import(name, *args, **kwargs):
+        if name.startswith("tensorflow"):
+            raise ImportError(f"No module named '{name}'")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", fake_import)
+
+
+def test_import_keras_without_tensorflow_explains_install(no_tensorflow):
+    with pytest.raises(ImportError, match=r"merrypopins\[cnn\]"):
+        locate._import_keras()
+
+
+def test_detect_popins_cnn_without_tensorflow_explains_install(
+    curve_with_jump, no_tensorflow
+):
+    with pytest.raises(ImportError, match=r"merrypopins\[cnn\]"):
+        detect_popins_cnn(curve_with_jump, window_size=20, epochs=1)
+
+
+def test_build_cnn_autoencoder_without_tensorflow_explains_install(no_tensorflow):
+    with pytest.raises(ImportError, match=r"merrypopins\[cnn\]"):
+        locate.build_cnn_autoencoder(20, 2)
+
+
+def test_other_methods_work_without_tensorflow(curve_with_jump, no_tensorflow):
+    """The three non-CNN detectors must not need TensorFlow."""
+    df = default_locate(
+        curve_with_jump,
+        use_cnn=False,
+        iforest_contamination=0.01,
+        iforest_random_state=42,
+        savgol_threshold=1.0,
+    )
+    for col in ("popin_iforest", "popin_fd", "popin_savgol", "popin"):
+        assert col in df.columns
+    assert "popin_cnn" not in df.columns
+    assert df["popin"].sum() > 0
+
+
+def test_default_locate_without_tensorflow_explains_install(
+    curve_with_jump, no_tensorflow
+):
+    """use_cnn defaults to True, so it must fail loudly rather than silently skip."""
+    with pytest.raises(ImportError, match=r"merrypopins\[cnn\]"):
+        default_locate(curve_with_jump, cnn_window_size=20, cnn_epochs=1)
 
 
 # ----------------------------------------------------------------------

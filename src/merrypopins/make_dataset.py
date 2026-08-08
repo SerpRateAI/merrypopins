@@ -13,40 +13,43 @@ Provides:
 - Returns a DataFrame with all annotations.
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 import matplotlib.pyplot as plt
+import pandas as pd
 from merrypopins.load_datasets import load_txt
 from merrypopins.preprocess import default_preprocess
 from merrypopins.locate import default_locate
 
 
 def merrypopins_pipeline(
-    txt_path,
-    iforest_contamination=0.001,
-    iforest_random_state=None,
-    cnn_window_size=64,
-    cnn_epochs=10,
-    cnn_threshold_multiplier=5.0,
-    cnn_batch_size=32,
-    cnn_validation_split=0.0,
-    fd_threshold=3.0,
-    fd_spacing=1.0,
-    savgol_window_length=11,
-    savgol_polyorder=2,
-    savgol_threshold=3.0,
-    sg_deriv_order=1,
-    stiffness_window=5,
-    trim_edges_enabled=True,
-    trim_margin=None,
-    max_load_trim_enabled=True,
-    use_iforest=True,
-    use_cnn=True,
-    use_fd=True,
-    use_savgol=True,
-    depth_col="Depth (nm)",
-    load_col="Load (µN)",
-    save_plot_dir=Path("visualisations"),
-):
+    txt_path: Path,
+    iforest_contamination: float = 0.001,
+    iforest_random_state: int | None = None,
+    cnn_window_size: int = 64,
+    cnn_epochs: int = 10,
+    cnn_threshold_multiplier: float = 5.0,
+    cnn_batch_size: int = 32,
+    cnn_validation_split: float = 0.0,
+    fd_threshold: float = 3.0,
+    fd_spacing: float = 1.0,
+    savgol_window_length: int = 11,
+    savgol_polyorder: int = 2,
+    savgol_threshold: float = 3.0,
+    sg_deriv_order: int = 1,
+    stiffness_window: int = 5,
+    trim_edges_enabled: bool = True,
+    trim_margin: int | None = None,
+    max_load_trim_enabled: bool = True,
+    use_iforest: bool = True,
+    use_cnn: bool = True,
+    use_fd: bool = True,
+    use_savgol: bool = True,
+    depth_col: str = "Depth (nm)",
+    load_col: str = "Load (µN)",
+    save_plot_dir: Path = Path("visualisations"),
+) -> pd.DataFrame:
     """
     Executes the full Merrypopins pipeline: load -> preprocess -> locate -> visualize.
 
