@@ -1,0 +1,33 @@
+{
+  "upload_type": "software",
+  "title": "merrypopins: A Python package for nanoindentation data science",
+  "description": "merrypopins is a Python library to streamline the workflow of nanoindentation experiment data processing, automated pop-in detection, and statistical analysis of collections of pop-in events. It provides five modules: load_datasets, preprocess, locate, statistics, and make_dataset, along with a no-code Streamlit interface.",
+  "license": "MIT",
+  "access_right": "open",
+  "creators": [
+    {
+      "name": "Acar, Cahit",
+      "affiliation": "Utrecht University, The Netherlands"
+    },
+    {
+      "name": "Marcelissen, Anna",
+      "affiliation": "Utrecht University, The Netherlands"
+    },
+    {
+      "name": "van Schrojenstein Lantman, Hugo",
+      "affiliation": "Utrecht University, The Netherlands"
+    },
+    {
+      "name": "Aiken, John M.",
+      "affiliation": "Utrecht University, The Netherlands"
+    }
+  ],
+  "keywords": [
+    "Python",
+    "geology",
+    "nanoindentation",
+    "deformation",
+    "pop-in detection",
+    "materials science"
+  ]
+}
