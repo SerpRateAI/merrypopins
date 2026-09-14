@@ -92,3 +92,15 @@ and to [#72](https://github.com/SerpRateAI/merrypopins/issues/72).
   and runs the tests that do not need it.
 - Tests covering the missing-TensorFlow path for `_import_keras`,
   `build_cnn_autoencoder`, `detect_popins_cnn` and `default_locate`.
+
+---
+
+## [1.1.1] - 2026-08-11 &nbsp;:card_index_dividers: **"Archival Metadata"**
+
+### Added
+- `.zenodo.json` so the Zenodo archive of each release carries the same title,
+  author list, affiliations and MIT license as the JOSS paper, rather than the
+  repository name and description GitHub supplies by default.
+
+No changes to the library itself. `merrypopins` 1.1.1 is functionally identical
+to 1.1.0.
