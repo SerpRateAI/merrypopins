@@ -104,3 +104,15 @@ and to [#72](https://github.com/SerpRateAI/merrypopins/issues/72).
 
 No changes to the library itself. `merrypopins` 1.1.1 is functionally identical
 to 1.1.0.
+
+---
+
+## [1.1.2] - 2026-10-07 &nbsp;:memo: **"JOSS paper published 🚀"**
+
+### Added
+- `CITATION.cff`, a JOSS DOI badge and a citation section in the README for the
+  published paper ([10.21105/joss.09933](https://doi.org/10.21105/joss.09933)).
+
+No changes to the library itself. `merrypopins` 1.1.2 is functionally identical
+to 1.1.1. The full test suite passes against the latest releases of all
+dependencies, and `pip-audit` reports no known vulnerabilities.

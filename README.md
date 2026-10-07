@@ -22,6 +22,7 @@
 [![Release](https://img.shields.io/github/release-date/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/releases)
 [![Contributors](https://img.shields.io/github/contributors/SerpRateAI/merrypopins.svg)](https://github.com/SerpRateAI/merrypopins/graphs/contributors)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.09933/status.svg)](https://doi.org/10.21105/joss.09933)
 
 **merrypopins** is a Python library to streamline the workflow of nano‑indentation experiment data processing, automated pop-in detection and analysis. It provides five core modules:
 
@@ -39,7 +40,7 @@
   - Pop-in shape statistics like depth jump, average velocity, and curvature
 - **`make_dataset`**: Construct enriched datasets by running the full merrypopins pipeline and exporting annotated results and visualizations. 
 
-Merrypopins is developed by [Cahit Acar](mailto:c.acar.business@gmail.com), [Anna Marcelissen](mailto:anna.marcelissen@live.nl), [Hugo van Schrojenstein Lantman](mailto:h.w.vanschrojensteinlantman@uu.nl), and [John M. Aiken](mailto:johnm.aiken@gmail.com).
+Merrypopins is developed by [Cihat Acar](mailto:c.acar.business@gmail.com), [Anna Marcelissen](mailto:anna.marcelissen@live.nl), [Hugo van Schrojenstein Lantman](mailto:h.w.vanschrojensteinlantman@uu.nl), and [John M. Aiken](mailto:johnm.aiken@gmail.com).
 
 ---
 
@@ -636,6 +637,30 @@ dev ← 🛠 active development (default Pull Request target)
 7. Address any review comments & keep your feature branch updated with the latest `dev` if needed.  
 
 > **Note:** Once your PR is merged into `dev`, the maintainers will handle promoting `dev` to `main` when preparing a new release—please don’t open PRs directly against `main`.
+
+---
+
+## Citation
+
+If you use merrypopins in your research, please cite our paper in the Journal of Open Source Software:
+
+> Acar, C., Marcelissen, A., van Schrojenstein Lantman, H., & Aiken, J. M. (2026). merrypopins: A Python package for nanoindentation data science. *Journal of Open Source Software*, 11(126), 9933. https://doi.org/10.21105/joss.09933
+
+```bibtex
+@article{Acar2026,
+  author  = {Acar, Cihat and Marcelissen, Anna and van Schrojenstein Lantman, Hugo and Aiken, John M.},
+  title   = {merrypopins: A Python package for nanoindentation data science},
+  journal = {Journal of Open Source Software},
+  year    = {2026},
+  volume  = {11},
+  number  = {126},
+  pages   = {9933},
+  doi     = {10.21105/joss.09933},
+  url     = {https://doi.org/10.21105/joss.09933}
+}
+```
+
+GitHub's "Cite this repository" button in the sidebar uses [CITATION.cff](CITATION.cff) and gives the same reference.
 
 ---
 
