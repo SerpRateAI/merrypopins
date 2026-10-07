@@ -40,7 +40,7 @@
   - Pop-in shape statistics like depth jump, average velocity, and curvature
 - **`make_dataset`**: Construct enriched datasets by running the full merrypopins pipeline and exporting annotated results and visualizations. 
 
-Merrypopins is developed by [Cahit Acar](mailto:c.acar.business@gmail.com), [Anna Marcelissen](mailto:anna.marcelissen@live.nl), [Hugo van Schrojenstein Lantman](mailto:h.w.vanschrojensteinlantman@uu.nl), and [John M. Aiken](mailto:johnm.aiken@gmail.com).
+Merrypopins is developed by [Cihat Acar](mailto:c.acar.business@gmail.com), [Anna Marcelissen](mailto:anna.marcelissen@live.nl), [Hugo van Schrojenstein Lantman](mailto:h.w.vanschrojensteinlantman@uu.nl), and [John M. Aiken](mailto:johnm.aiken@gmail.com).
 
 ---
 
@@ -648,7 +648,7 @@ If you use merrypopins in your research, please cite our paper in the Journal of
 
 ```bibtex
 @article{Acar2026,
-  author  = {Acar, Cahit and Marcelissen, Anna and van Schrojenstein Lantman, Hugo and Aiken, John M.},
+  author  = {Acar, Cihat and Marcelissen, Anna and van Schrojenstein Lantman, Hugo and Aiken, John M.},
   title   = {merrypopins: A Python package for nanoindentation data science},
   journal = {Journal of Open Source Software},
   year    = {2026},

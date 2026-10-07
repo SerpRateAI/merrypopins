@@ -1,7 +1,7 @@
 cff-version: "1.2.0"
 authors:
 - family-names: Acar
-  given-names: Cahit
+  given-names: Cihat
 - family-names: Marcelissen
   given-names: Anna
 - family-names: Schrojenstein Lantman
@@ -18,7 +18,7 @@ message: If you use this software, please cite our article in the
 preferred-citation:
   authors:
   - family-names: Acar
-    given-names: Cahit
+    given-names: Cihat
   - family-names: Marcelissen
     given-names: Anna
   - family-names: Schrojenstein Lantman
