@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10,<3.14"
 license = { text = "MIT" }
 authors = [
-  { name = "Cahit Acar", email = "c.acar.business@gmail.com" },
+  { name = "Cihat Acar", email = "c.acar.business@gmail.com" },
   { name = "Anna Marcelissen", email = "anna.marcelissen@live.nl" },
   { name = "Hugo van Schrojenstein Lantman", email = "h.w.vanschrojensteinlantman@uu.nl" },
   { name = "John M. Aiken", email = "johnm.aiken@gmail.com" }
