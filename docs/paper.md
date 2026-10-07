@@ -6,7 +6,7 @@ tags:
   - nanoindentation
   - deformation
 authors:
-  - name: Cahit Acar
+  - name: Cihat Acar
     affiliation: 1 # (Multiple affiliations must be quoted)
   - name: Anna Marcelissen
     affiliation: 1
